@@ -24,6 +24,13 @@ web-build/
 *.aac
 *.ogg
 
+# Local test images and artifacts
+ai/vision/tests/*.jpg
+ai/vision/tests/*.jpeg
+ai/vision/tests/*.png
+ai/vision/tests/*.webp
+demo_result.json
+
 # Build artifacts
 build/
 coverage/
