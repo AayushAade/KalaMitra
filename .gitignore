@@ -1,0 +1,43 @@
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Node / React Native / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+
+# Audio / media
+*.wav
+*.mp3
+*.m4a
+*.aac
+*.ogg
+
+# Build artifacts
+build/
+coverage/
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
