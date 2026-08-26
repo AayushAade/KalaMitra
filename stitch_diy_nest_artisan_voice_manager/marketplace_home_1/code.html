@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DIY-Nest - Marketplace Home</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#31302f",
+                        "error": "#ba1a1a",
+                        "surface": "#fcf9f6",
+                        "inverse-on-surface": "#f3f0ed",
+                        "secondary-fixed": "#d2e4ff",
+                        "surface-container": "#f0edea",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fcf9f6",
+                        "outline-variant": "#dbc1ba",
+                        "secondary": "#4e6078",
+                        "on-primary-fixed": "#3b0900",
+                        "on-secondary-container": "#52647c",
+                        "surface-container-low": "#f6f3f0",
+                        "surface-variant": "#e5e2df",
+                        "primary-fixed-dim": "#ffb5a1",
+                        "on-primary-container": "#fffcff",
+                        "secondary-container": "#cee1fe",
+                        "primary": "#94442e",
+                        "surface-dim": "#dcdad7",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#88726d",
+                        "on-tertiary-fixed": "#001d32",
+                        "background": "#fcf9f6",
+                        "secondary-fixed-dim": "#b5c8e4",
+                        "on-surface": "#1b1c1a",
+                        "primary-container": "#b35c44",
+                        "inverse-primary": "#ffb5a1",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#eae8e5",
+                        "tertiary-container": "#167bb8",
+                        "on-secondary-fixed": "#081c32",
+                        "tertiary": "#006195",
+                        "on-primary-fixed-variant": "#79301b",
+                        "surface-tint": "#974730",
+                        "on-primary": "#ffffff",
+                        "on-background": "#1b1c1a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#004b74",
+                        "tertiary-fixed-dim": "#94ccff",
+                        "on-surface-variant": "#55433e",
+                        "on-secondary-fixed-variant": "#36485f",
+                        "tertiary-fixed": "#cde5ff",
+                        "primary-fixed": "#ffdbd1",
+                        "surface-container-highest": "#e5e2df",
+                        "on-tertiary-container": "#fefdff",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "stack-md": "16px",
+                        "touch-target-min": "48px",
+                        "stack-lg": "32px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "voice-assist": ["Be Vietnam Pro"],
+                        "headline-lg": ["Be Vietnam Pro"],
+                        "label-lg": ["Be Vietnam Pro"],
+                        "display-lg": ["Be Vietnam Pro"],
+                        "title-md": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "400" }],
+                        "voice-assist": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24 md:pb-0 pt-20">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface dark:bg-inverse-surface shadow-sm docked full-width top-0">
+<button aria-label="Menu" class="w-touch-target-min h-touch-target-min flex items-center justify-center text-primary dark:text-inverse-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors duration-200 rounded-full">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="text-title-md font-title-md font-bold text-primary dark:text-inverse-primary text-headline-lg-mobile font-headline-lg-mobile text-label-lg font-label-lg">
+            DIY-Nest
+        </div>
+<button aria-label="Profile" class="w-touch-target-min h-touch-target-min flex items-center justify-center text-primary dark:text-inverse-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest transition-colors duration-200 rounded-full overflow-hidden">
+<img alt="Artisan profile photo" class="w-8 h-8 rounded-full object-cover" data-alt="A small circular profile picture of an artisan, showing a smiling face in a well-lit pottery studio setting. Warm lighting, modern tactile aesthetic. High resolution." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1g_zzkfHECUSkVp0HByww2_Po00cnoNA19T9aB_Xrs9ygh5QJvM7N85auS7pGOecM67C71kT6xONWoEQ_xon7YjREx6v9AgDYMbv0CkPY-VE3lhVFFU6FcAPb4qKT_dvd9eXhhT1DAtjI9m9YUjSUJ7nYbdpuZdnyxtYG0_WyAxfcxr-aQ62mgq2hvDvIudr26LXQ1Gu23wu7r3eCGS3b-fnZjnEI-Bng4RrmGH5JWY_4vPcpCcMY"/>
+</button>
+</header>
+<main class="px-margin-mobile max-w-7xl mx-auto space-y-stack-lg">
+<!-- Search Section -->
+<section class="mt-stack-md">
+<div class="relative flex items-center w-full">
+<span class="material-symbols-outlined absolute left-4 text-outline">search</span>
+<input class="w-full h-14 pl-12 pr-4 bg-surface-container-lowest border border-outline-variant rounded-xl text-body-lg font-body-lg focus:outline-none focus:border-tertiary focus:ring-1 focus:ring-tertiary transition-shadow" placeholder="Search handcrafted goods..." type="text"/>
+<button class="absolute right-2 w-10 h-10 flex items-center justify-center bg-secondary-container text-on-secondary-container rounded-lg hover:bg-secondary-fixed transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">tune</span>
+</button>
+</div>
+</section>
+<!-- Category Chips -->
+<section>
+<div class="flex overflow-x-auto no-scrollbar space-x-unit py-2">
+<button class="px-6 py-3 rounded-full bg-secondary-container text-on-secondary-container text-label-lg font-label-lg whitespace-nowrap shadow-sm">Textiles</button>
+<button class="px-6 py-3 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-variant text-label-lg font-label-lg whitespace-nowrap transition-colors">Pottery</button>
+<button class="px-6 py-3 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-variant text-label-lg font-label-lg whitespace-nowrap transition-colors">Woodwork</button>
+<button class="px-6 py-3 rounded-full bg-surface-container-high text-on-surface-variant hover:bg-surface-variant text-label-lg font-label-lg whitespace-nowrap transition-colors">Jewelry</button>
+</div>
+</section>
+<!-- Featured Artisans -->
+<section>
+<h2 class="text-title-md font-title-md text-on-background mb-stack-md">Featured Artisans</h2>
+<div class="flex overflow-x-auto no-scrollbar space-x-stack-md pb-4">
+<!-- Artisan Card 1 -->
+<div class="min-w-[280px] bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-surface-variant flex flex-col items-center text-center">
+<img class="w-24 h-24 rounded-full object-cover mb-4 border-2 border-surface-container-low shadow-sm" data-alt="A portrait of an Indian artisan weaving intricate textiles on a traditional loom. Natural sunlight streams through a nearby window, highlighting the colorful threads and textured fabrics. Warm, modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMaOg5X6R3bChExWzmR4iXEuHyf_cnSJ8JyF6Y2g7V-Dj33F17nbT5MYfqq25RkqeXJnczddOWzcuJnBKnjzOQZ0vq7Wgbv0V6N33oBMdrYNTj0N9NgAmtAM_pCdmEspcLerZpoJdr4V6Gqz2_zDMnXkHq_bQ2pQMUxA7jOwTefbdYBl1EWWMKYvb3V24OEp-dGldwzk_HSPFO9dE3skDOT2-Sr74PHch4iJ4c-Ei0dQXI9tKjYV0H"/>
+<h3 class="text-body-lg font-body-lg font-semibold text-on-surface mb-1">Ravi Patel</h3>
+<p class="text-label-lg font-label-lg text-secondary mb-3">Master Weaver • Jaipur</p>
+<button class="mt-auto px-4 py-2 border border-outline rounded-full text-label-lg font-label-lg text-primary hover:bg-primary-fixed hover:border-transparent transition-colors">View Shop</button>
+</div>
+<!-- Artisan Card 2 -->
+<div class="min-w-[280px] bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-surface-variant flex flex-col items-center text-center">
+<img class="w-24 h-24 rounded-full object-cover mb-4 border-2 border-surface-container-low shadow-sm" data-alt="A potter's hands skillfully shaping a terracotta bowl on a spinning wheel. Clay splatters, earthy tones, warm workshop lighting. Modern tactile aesthetic with focus on craftsmanship." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0Fk3U3ajuQr0c6mDjLoiMl6_S8oQV_KilVGT9maWtPj09m3D-cXJSIo7sW-VUZLR3yzthnm4484FxKmhUdG4xiqnOVLe7knQeCvMwulV1G8RnPyV5XNqNflzxLiWNLYspjppiEOyU7OG18m6nqxNErdLv0o1dqemNL_a1-UARRUDUjn4NTVWMXdqkV5KccwDXBv1eDMS_OKUOGD6a5iinYAhcUWBdrsOtTSIdT9Cl5dcd2Ng0HWky"/>
+<h3 class="text-body-lg font-body-lg font-semibold text-on-surface mb-1">Ananya Sharma</h3>
+<p class="text-label-lg font-label-lg text-secondary mb-3">Ceramics • Delhi</p>
+<button class="mt-auto px-4 py-2 border border-outline rounded-full text-label-lg font-label-lg text-primary hover:bg-primary-fixed hover:border-transparent transition-colors">View Shop</button>
+</div>
+<!-- Artisan Card 3 -->
+<div class="min-w-[280px] bg-surface-container-lowest rounded-xl p-4 shadow-sm border border-surface-variant flex flex-col items-center text-center">
+<img class="w-24 h-24 rounded-full object-cover mb-4 border-2 border-surface-container-low shadow-sm" data-alt="A skilled woodworker carefully carving intricate floral patterns into a dark rosewood panel. Sawdust visible, warm amber lighting reflecting off polished tools. Modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfKdUjKZ4hioyZ3l78hUIsyTvgScajuLO4LNdlNKKc9H7YJJYzWWWcQpowM1T4lZ6Ogt2VtPu1FFN0SaDoMU1MfJkhFwgylZGyHaD_nCdAPouVgBcBbP2zJ1L70Ek-4dYf6ssXBanrdEoMfg7bb3Df2KrLYwqG_iJ1iCpwycCOEtz_fuyp2tVJNsNQU6PjUPu5Cn7KMSSHPG4_d8a5HYP7UIiV94NbdO9SReAKJzuOA6ze3j0nNh1O"/>
+<h3 class="text-body-lg font-body-lg font-semibold text-on-surface mb-1">Vikram Singh</h3>
+<p class="text-label-lg font-label-lg text-secondary mb-3">Woodcraft • Saharanpur</p>
+<button class="mt-auto px-4 py-2 border border-outline rounded-full text-label-lg font-label-lg text-primary hover:bg-primary-fixed hover:border-transparent transition-colors">View Shop</button>
+</div>
+</div>
+</section>
+<!-- Product Grid -->
+<section>
+<h2 class="text-title-md font-title-md text-on-background mb-stack-md">Explore Beautiful Products</h2>
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-gutter">
+<!-- Product Card 1 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A close-up shot of a hand-woven indigo dyed scarf draped elegantly over a wooden chair. Soft natural lighting, deep blues and natural textures. Warm, modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtmjePJrN9WZcartCzBeN3TKLU7DEWveX5ovutJ5CwJWCOcTi6MMBphSjtW2tvQtyYoV5wuqKbfV9UepKSWMeRrxqsp3h1Ehs_kIUt7rn7B5ABGV7aQ3XIZJJXxbMMuyD6dTsRsRKHO4mAkJMYUFh5Qc8ZfeQvz8q0dDee7nINa-H_bwjVQFkPhkM9wCZaZZuk_QGV0fctcNcHQ9JL6PEzEbfBiPF6iR57ZwyPEBwpBhlStrbkcZZJ"/>
+<button class="absolute top-2 right-2 w-8 h-8 bg-surface-container-lowest/80 backdrop-blur rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h4 class="text-body-md font-body-md font-medium text-on-surface truncate">Indigo Handloom Scarf</h4>
+<p class="text-label-lg font-label-lg text-secondary mt-1">By Ravi Patel</p>
+<div class="mt-auto pt-2 flex items-center justify-between">
+<span class="text-body-lg font-body-lg font-bold text-primary">₹1,200</span>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A beautifully crafted terracotta vase with geometric patterns carved into its surface. Placed on a rustic wooden table against a clean cream background. Warm lighting highlighting the clay texture. Modern tactile style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC87NWi2SUCJpQiy2jVKJZltTRsli_WW5r25lRjTn1Tol1J9K7wHXBWIg841tW_SYvJVxDvHy9NrWvpIiAITNfvma1ZoPdqFahqq6D7TkszE-f2QsJqVo-9hQN02BoFhJpK1DWthEIcG9m3QwVuDFDujAzWwY9OWNqcSdAOKH_HqXYCGVPj4sN_eSE20vEf1kXOvEqlL97UMFSy0L9Zni-7ltZLgKG-Ob8AXtgbo6VdhLGkyLstyAbc"/>
+<button class="absolute top-2 right-2 w-8 h-8 bg-surface-container-lowest/80 backdrop-blur rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h4 class="text-body-md font-body-md font-medium text-on-surface truncate">Carved Terracotta Vase</h4>
+<p class="text-label-lg font-label-lg text-secondary mt-1">By Ananya Sharma</p>
+<div class="mt-auto pt-2 flex items-center justify-between">
+<span class="text-body-lg font-body-lg font-bold text-primary">₹850</span>
+</div>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Intricately carved wooden spice box with multiple small compartments. Polished rosewood finish, detailed brass inlay work on the lid. Warm studio lighting highlighting the wood grain. Modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKeNZvBk55qm3JWSovVgut89e1l5BTLMt4McjICsXuRcHENLbCMd2tbv_DhFA-oxDWq1aD4rdX6rcJ2Q-WZxz_gdfvnpQyo1yYIdxK1uFVILRzErBlfnvmXq3rmb4Oi4oQ3X0Ttj4bxGam0aGs5XJQBoBnV0_e1wNqF6ynt_-w0YmE7yAJVmH-as9pgpp44y3hfef6UKQv1EKKdQL2T-IkW53G2OOU75i-IKZzJd0spiwxg0FtmkDL"/>
+<button class="absolute top-2 right-2 w-8 h-8 bg-surface-container-lowest/80 backdrop-blur rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h4 class="text-body-md font-body-md font-medium text-on-surface truncate">Rosewood Spice Box</h4>
+<p class="text-label-lg font-label-lg text-secondary mt-1">By Vikram Singh</p>
+<div class="mt-auto pt-2 flex items-center justify-between">
+<span class="text-body-lg font-body-lg font-bold text-primary">₹2,400</span>
+</div>
+</div>
+</div>
+<!-- Product Card 4 -->
+<div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-shadow">
+<div class="relative w-full aspect-square">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Handcrafted silver earrings featuring delicate filigree work and small turquoise stones. Laid on a soft, natural linen cloth. Soft diffused lighting highlighting the silver details. Modern tactile." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDf8Cnd2e1vZXe6urnjLTIU5_XOArP7wNz98bP9SPvTzUtQ9faOr8vhxmLEDKNfjSbOQY4jeuyFikGrAZpvQzzlabyTUBJjGelqjDwKh0Ktn39S6AkdpZHO2uOeoYEEhGAv5n4wctgvWxh6Tw_RUnHDe_wazr9r4jONP680Dzd8N2VQj-_04NkjH5CYIqjcPC5299jeT5yhLSEngnB6P9zeIv5TLR99O_u0CXXk3j2rAhTo_i6Cy_7W"/>
+<button class="absolute top-2 right-2 w-8 h-8 bg-surface-container-lowest/80 backdrop-blur rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-sm">favorite</span>
+</button>
+</div>
+<div class="p-3 flex flex-col flex-grow">
+<h4 class="text-body-md font-body-md font-medium text-on-surface truncate">Turquoise Filigree Earrings</h4>
+<p class="text-label-lg font-label-lg text-secondary mt-1">By Meera Devi</p>
+<div class="mt-auto pt-2 flex items-center justify-between">
+<span class="text-body-lg font-body-lg font-bold text-primary">₹1,800</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile py-unit bg-surface-container-low dark:bg-inverse-surface shadow-lg docked full-width bottom-0 rounded-t-xl text-primary dark:text-inverse-primary text-label-lg font-label-lg">
+<button aria-current="page" class="flex flex-col items-center justify-center text-primary dark:text-inverse-primary bg-primary-fixed dark:bg-primary-container rounded-xl px-4 py-2 hover:bg-surface-container-high transition-transform duration-150 scale-95">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="mt-1">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-2 hover:bg-surface-container-high transition-colors duration-150">
+<span class="material-symbols-outlined">add_circle</span>
+<span class="mt-1">Add</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-2 hover:bg-surface-container-high transition-colors duration-150">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="mt-1">Products</span>
+</button>
+</nav>
+</body></html>

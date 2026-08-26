@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>DIY-Nest - Product Details</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#31302f",
+                        "error": "#ba1a1a",
+                        "surface": "#fcf9f6",
+                        "inverse-on-surface": "#f3f0ed",
+                        "secondary-fixed": "#d2e4ff",
+                        "surface-container": "#f0edea",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fcf9f6",
+                        "outline-variant": "#dbc1ba",
+                        "secondary": "#4e6078",
+                        "on-primary-fixed": "#3b0900",
+                        "on-secondary-container": "#52647c",
+                        "surface-container-low": "#f6f3f0",
+                        "surface-variant": "#e5e2df",
+                        "primary-fixed-dim": "#ffb5a1",
+                        "on-primary-container": "#fffcff",
+                        "secondary-container": "#cee1fe",
+                        "primary": "#94442e",
+                        "surface-dim": "#dcdad7",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#88726d",
+                        "on-tertiary-fixed": "#001d32",
+                        "background": "#fcf9f6",
+                        "secondary-fixed-dim": "#b5c8e4",
+                        "on-surface": "#1b1c1a",
+                        "primary-container": "#b35c44",
+                        "inverse-primary": "#ffb5a1",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#eae8e5",
+                        "tertiary-container": "#167bb8",
+                        "on-secondary-fixed": "#081c32",
+                        "tertiary": "#006195",
+                        "on-primary-fixed-variant": "#79301b",
+                        "surface-tint": "#974730",
+                        "on-primary": "#ffffff",
+                        "on-background": "#1b1c1a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#004b74",
+                        "tertiary-fixed-dim": "#94ccff",
+                        "on-surface-variant": "#55433e",
+                        "on-secondary-fixed-variant": "#36485f",
+                        "tertiary-fixed": "#cde5ff",
+                        "primary-fixed": "#ffdbd1",
+                        "surface-container-highest": "#e5e2df",
+                        "on-tertiary-container": "#fefdff",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "stack-md": "16px",
+                        "touch-target-min": "48px",
+                        "stack-lg": "32px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "voice-assist": ["Be Vietnam Pro"],
+                        "headline-lg": ["Be Vietnam Pro"],
+                        "label-lg": ["Be Vietnam Pro"],
+                        "display-lg": ["Be Vietnam Pro"],
+                        "title-md": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "400" }],
+                        "voice-assist": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #dcdad7;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased pb-24 md:pb-0 pt-touch-target-min">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface dark:bg-inverse-surface shadow-sm transition-colors duration-200">
+<button aria-label="Menu" class="w-12 h-12 flex items-center justify-center text-primary dark:text-inverse-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-full transition-colors duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+</button>
+<div class="text-title-md font-title-md font-bold text-primary dark:text-inverse-primary">DIY-Nest</div>
+<button aria-label="Profile" class="w-12 h-12 flex items-center justify-center text-primary dark:text-inverse-primary hover:bg-surface-container-high dark:hover:bg-surface-container-highest rounded-full transition-colors duration-200">
+<img alt="Artisan profile photo" class="w-8 h-8 rounded-full object-cover shadow-sm" data-alt="A close up portrait of an Indian artisan smiling warmly. The artisan is wearing traditional clothing in earthy tones, set against a softly blurred background of a pottery studio. The lighting is warm and natural, emphasizing a feeling of trust and craftsmanship in a light-mode friendly environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzAsJNznlahZI2YQ_SR4RlPSdog1buCTgEeYeXqUlb19whpuPPmMB9WVfl8X5JXkLtuhldkSTILqmFEJTA7rvXtC_Rlix3JtmRVeWVutrb4Ad0SY0yel_dCKmahqkoqPRs7boTf6NmnYh-_ugAXO3eSomNlt31qhaS35Iag1FQ9HuhbuSNIdRthz1lBttLo784T0giDcklwOLKv--KqLPwRnel3iD76znD-TWw1OOV1FZfnp05hIgY"/>
+</button>
+</header>
+<main class="max-w-4xl mx-auto md:pt-8 md:px-margin-mobile">
+<!-- Image Gallery -->
+<section class="w-full md:rounded-2xl overflow-hidden mb-stack-md md:mb-stack-lg relative bg-surface-container">
+<div class="relative w-full aspect-[4/3] md:aspect-[16/9]">
+<img alt="Main Product Image" class="w-full h-full object-cover" data-alt="A high-quality, professional photograph of a beautifully handcrafted terracotta clay vase. The vase has intricate, traditional Indian patterns carved into its surface. It sits on a clean, light wood table against a plain warm cream background. The lighting is soft and studio-quality, highlighting the texture of the clay and casting a gentle ambient shadow, fitting the modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqsSwfO_3F71uO2KCam5fUAa98dsox_GvAAP6AQ3vVM4UolLd822RBeXpsabTUuwn6BH42P1isqNrp2wt4wPoiKD218iTpJGw7_E46_7A87yDdwHRKTw_pTpC0QN8QWTQjgZc1evVk1GsYOeoOByvY72ielZgdZX49ZSpQJt3hRt_Hjrnpbg6Cd-kbcLulViArHoeTMIvs23ANGveiRbnrdRQ4a6LNwg0F9zUsHeLeFo53hC4zhR1M"/>
+<!-- Made to order badge -->
+<div class="absolute top-4 left-4 bg-surface/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-lg" style="font-variation-settings: 'FILL' 1;">schedule</span>
+<span class="text-label-lg font-label-lg text-tertiary">Made to Order</span>
+</div>
+</div>
+<!-- Thumbnails -->
+<div class="flex gap-unit p-unit overflow-x-auto custom-scrollbar bg-surface md:rounded-b-2xl">
+<button class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-primary">
+<img alt="Product detail 1" class="w-full h-full object-cover" data-alt="A detail shot of the handcrafted terracotta clay vase, focusing tightly on the intricate, traditional Indian carved patterns. The soft studio lighting emphasizes the raw texture of the baked clay against a warm, light background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUj0trU3eNnnH8_sMjSyayXWLhYV0VP-6QCHchXYY5-2raJ1XE6QEJY3scBN6GOh41uiGXPKqkelqEy-gnQid7hzD0SgBuZp4MJpb7l7vCntICnj7Fl866YbYbrlx2whDcsiI0f5da6-PEaTQA4FSDn9YTq64WUsbMS_5Fdf8EcITm71_w0WXZxQNTwZU_h58YpbHkpodKO6eYWwmPqCRSbR4p3IjJVpw2JuMVvaqZufmEWz-zLmWg"/>
+</button>
+<button class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-transparent hover:border-outline opacity-70 hover:opacity-100 transition-all">
+<img alt="Product detail 2" class="w-full h-full object-cover" data-alt="A lifestyle shot showing the handcrafted terracotta clay vase holding a small bunch of dried native Indian grass. It sits on a textured linen cloth in a sunlit room with warm, bright light-mode aesthetics." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3rJdHLfD71d6PPzVo8OGI4sUOhEkENMMk9Po7OTDXWUzIZ5jJQXa-UcO4vpsziumRfDuFBkX6h9_YTC-FJVzpJm-LS8KoIuUJEZf-NcCIsz9oxPP2asQcTyzYDlEuH9EG0yDVaoxzkd69xeHmfz33frVCae7TGz9VsIBaEoJ_9xixxuC-WWOprnl6l9bireb-Y1MnqVfWkauq3eXBWG68gHSTFCGLYOQK2FuFrX3Q3R8hIQBlacHB"/>
+</button>
+<button class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 border-transparent hover:border-outline opacity-70 hover:opacity-100 transition-all">
+<img alt="Product detail 3" class="w-full h-full object-cover" data-alt="Another angle of the terracotta vase, showing its profile and elegant, slightly asymmetrical handmade shape. Set against a clean, warm cream surface with soft ambient shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLHc3c8pd0Ja290yLUFUuB2ndOq0bibbe-HHpb4oesDuFXpcO93R5Z69vVqIVHf0gnnfhkhbAIQpTih433w0rwnWY4YNGNoUYq4Gwyke-DCCamO8eX0XhV2YL8WTe9uixp2tN0Zfi2HFPxkBvRKIPby83PCi-1DgU1KKTaMBq2suUmIRPHqCj6CTHd4ygMydMVdNIb6-0V_2KO0IpD136w4UnokjqgWTr_z4c-B5hcWJNXI4BfFFBd"/>
+</button>
+</div>
+</section>
+<!-- Product Info & Actions -->
+<div class="px-margin-mobile md:px-0 grid grid-cols-1 md:grid-cols-12 gap-stack-lg">
+<!-- Left Column: Details -->
+<div class="md:col-span-8 flex flex-col gap-stack-md">
+<!-- Title & Price -->
+<div>
+<div class="flex justify-between items-start gap-4 mb-2">
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile md:text-headline-lg md:font-headline-lg text-on-surface">Hand-Carved Terracotta Heritage Vase</h1>
+<button class="w-12 h-12 flex-shrink-0 flex items-center justify-center text-outline hover:text-primary hover:bg-primary-container/10 rounded-full transition-colors">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 0;">favorite</span>
+</button>
+</div>
+<p class="text-display-lg font-display-lg text-primary">₹3,450</p>
+</div>
+<!-- Chips/Tags -->
+<div class="flex flex-wrap gap-2 mb-2">
+<span class="inline-flex items-center gap-1 bg-secondary-container text-on-secondary-container px-4 py-2 rounded-full text-label-lg font-label-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">category</span>
+                        Pottery
+                    </span>
+<span class="inline-flex items-center gap-1 bg-secondary-container text-on-secondary-container px-4 py-2 rounded-full text-label-lg font-label-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">handyman</span>
+                        Wheel Thrown
+                    </span>
+<span class="inline-flex items-center gap-1 bg-surface-variant text-on-surface-variant px-4 py-2 rounded-full text-label-lg font-label-lg">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0;">texture</span>
+                        Natural Clay
+                    </span>
+</div>
+<!-- Description -->
+<div class="bg-surface-container-lowest p-stack-md rounded-2xl shadow-sm border border-surface-variant">
+<h2 class="text-title-md font-title-md mb-4 text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 0;">description</span>
+                        Professional Catalog
+                    </h2>
+<div class="space-y-4">
+<div>
+<h3 class="text-label-lg font-label-lg text-secondary mb-1">English</h3>
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed">
+                                This exquisite terracotta vase is a testament to generations of traditional Indian craftsmanship. Wheel-thrown by master artisans, it features deep, hand-carved geometric motifs inspired by heritage architecture. The unglazed finish retains the natural, warm earthy tones of the locally sourced clay, making each piece entirely unique. Perfect as a standalone statement piece or for displaying dried botanicals.
+                            </p>
+</div>
+<div class="pt-4 border-t border-surface-variant">
+<h3 class="text-label-lg font-label-lg text-secondary mb-1">हिंदी</h3>
+<p class="text-body-md font-body-md text-on-surface-variant leading-relaxed font-sans">
+                                यह उत्तम टेराकोटा फूलदान पारंपरिक भारतीय शिल्प कौशल की पीढ़ियों का प्रमाण है। मास्टर कारीगरों द्वारा चाक पर बनाया गया, इसमें विरासत वास्तुकला से प्रेरित गहरे, हाथ से उकेरे गए ज्यामितीय रूपांकनों की विशेषता है। बिना चमक वाला फिनिश स्थानीय रूप से प्राप्त मिट्टी के प्राकृतिक, गर्म मिट्टी के स्वरों को बरकरार रखता है, जिससे प्रत्येक टुकड़ा पूरी तरह से अद्वितीय हो जाता है। एक स्टैंडअलोन स्टेटमेंट पीस के रूप में या सूखे वनस्पति प्रदर्शित करने के लिए बिल्कुल सही।
+                            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Artisan & Action -->
+<div class="md:col-span-4 flex flex-col gap-stack-md">
+<!-- Action Card (Sticky on desktop) -->
+<div class="bg-surface-container-lowest p-stack-md rounded-2xl shadow-sm border border-surface-variant md:sticky md:top-24">
+<h3 class="text-title-md font-title-md mb-2 text-on-surface">Order Details</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mb-6 flex items-start gap-2">
+<span class="material-symbols-outlined text-tertiary text-xl mt-0.5" style="font-variation-settings: 'FILL' 0;">info</span>
+                        This item is made to order. Expected crafting time is 7-10 days before shipping.
+                    </p>
+<button class="w-full bg-primary text-on-primary h-14 rounded-2xl text-title-md font-title-md font-bold shadow-md hover:bg-primary-container transition-colors flex items-center justify-center gap-2 mb-4">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">send</span>
+                        Send Inquiry
+                    </button>
+<button class="w-full bg-surface-container-high text-on-surface h-12 rounded-xl text-label-lg font-label-lg font-semibold hover:bg-surface-variant transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">chat</span>
+                        Chat with Artisan
+                    </button>
+</div>
+<!-- Artisan Info -->
+<div class="bg-surface-bright p-stack-md rounded-2xl shadow-sm border border-surface-variant">
+<h2 class="text-label-lg font-label-lg mb-4 text-secondary uppercase tracking-wider">Artisan Info</h2>
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Asha Devi Profile" class="w-16 h-16 rounded-full object-cover border-2 border-primary-container" data-alt="A warm, professional portrait of a senior Indian pottery artisan named Asha Devi. She is smiling gently, wearing a simple cotton sari in earthy red tones. The background is a soft-focus workshop filled with clay pots. Light-mode aesthetic, emphasizing approachability and skill." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXCJOM6ML_DODPImOygcncDcJ39g44UwbYuXKQm5qlyxxyu7XxP8t3q-mr09EgKI4ava_QfVx-YJVpNE4vkU1Ntr0N2sr_yMAkwznZcYciEd3yTuO_HrbMJs97Re2X-rbXhFSsn-n9N1ZjAAPowFBZ5ybK9aYERvzVWn9Tm29sUfOHxWojA-6vuJMD0ITkzM7Fn5ofqePbIoWwOmNRo2C0MIpp2AgXh86q6PaCQDVfudXmI2caI9Tr"/>
+<div class="absolute -bottom-1 -right-1 bg-surface rounded-full p-0.5">
+<span class="material-symbols-outlined text-tertiary text-sm" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex-1">
+<h3 class="text-title-md font-title-md text-on-surface">Asha Devi</h3>
+<p class="text-body-md font-body-md text-on-surface-variant">Master Potter</p>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-label-lg font-label-lg text-on-surface">4.9</span>
+<span class="text-body-md font-body-md text-outline ml-1">(124 reviews)</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="h-8"></div> <!-- Bottom spacing -->
+</main>
+<!-- BottomNavBar (Hidden on md) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile py-unit bg-surface-container-low dark:bg-inverse-surface shadow-lg rounded-t-xl md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-2 hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">home</span>
+<span class="text-label-lg font-label-lg mt-1">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-2 hover:bg-surface-container-high transition-colors duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">add_circle</span>
+<span class="text-label-lg font-label-lg mt-1">Add</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-inverse-primary bg-primary-fixed dark:bg-primary-container rounded-xl px-4 py-2 scale-95 transition-transform duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="text-label-lg font-label-lg mt-1">Products</span>
+</a>
+</nav>
+</body></html>
