@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Asha Devi - Master Potter | DIY-Nest</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-surface": "#31302f",
+                      "error": "#ba1a1a",
+                      "surface": "#fcf9f6",
+                      "inverse-on-surface": "#f3f0ed",
+                      "secondary-fixed": "#d2e4ff",
+                      "surface-container": "#f0edea",
+                      "on-error": "#ffffff",
+                      "surface-bright": "#fcf9f6",
+                      "outline-variant": "#dbc1ba",
+                      "secondary": "#4e6078",
+                      "on-primary-fixed": "#3b0900",
+                      "on-secondary-container": "#52647c",
+                      "surface-container-low": "#f6f3f0",
+                      "surface-variant": "#e5e2df",
+                      "primary-fixed-dim": "#ffb5a1",
+                      "on-primary-container": "#fffcff",
+                      "secondary-container": "#cee1fe",
+                      "primary": "#94442e",
+                      "surface-dim": "#dcdad7",
+                      "surface-container-lowest": "#ffffff",
+                      "outline": "#88726d",
+                      "on-tertiary-fixed": "#001d32",
+                      "background": "#fcf9f6",
+                      "secondary-fixed-dim": "#b5c8e4",
+                      "on-surface": "#1b1c1a",
+                      "primary-container": "#b35c44",
+                      "inverse-primary": "#ffb5a1",
+                      "error-container": "#ffdad6",
+                      "surface-container-high": "#eae8e5",
+                      "tertiary-container": "#167bb8",
+                      "on-secondary-fixed": "#081c32",
+                      "tertiary": "#006195",
+                      "on-primary-fixed-variant": "#79301b",
+                      "surface-tint": "#974730",
+                      "on-primary": "#ffffff",
+                      "on-background": "#1b1c1a",
+                      "on-error-container": "#93000a",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed-variant": "#004b74",
+                      "tertiary-fixed-dim": "#94ccff",
+                      "on-surface-variant": "#55433e",
+                      "on-secondary-fixed-variant": "#36485f",
+                      "tertiary-fixed": "#cde5ff",
+                      "primary-fixed": "#ffdbd1",
+                      "surface-container-highest": "#e5e2df",
+                      "on-tertiary-container": "#fefdff",
+                      "on-secondary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "8px",
+                      "stack-md": "16px",
+                      "touch-target-min": "48px",
+                      "stack-lg": "32px",
+                      "margin-mobile": "20px",
+                      "gutter": "16px",
+                      "stack-sm": "8px"
+              },
+              "fontFamily": {
+                      "headline-lg-mobile": [
+                              "Be Vietnam Pro"
+                      ],
+                      "body-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "voice-assist": [
+                              "Be Vietnam Pro"
+                      ],
+                      "headline-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "label-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "display-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "title-md": [
+                              "Be Vietnam Pro"
+                      ],
+                      "body-md": [
+                              "Be Vietnam Pro"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "voice-assist": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "label-lg": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "title-md": [
+                              "22px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body { background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        /* Subtle glow for AI/Voice features if added later */
+        .glow-voice { box-shadow: 0 0 15px theme('colors.tertiary-container'); }
+        /* Ambient shadows for tactile feel */
+        .tactile-shadow { box-shadow: 0 4px 20px -2px rgba(148, 68, 46, 0.08); }
+    </style>
+</head>
+<body class="antialiased min-h-screen pb-24 md:pb-0 pt-touch-target-min">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile h-touch-target-min bg-surface shadow-sm transition-colors duration-200">
+<button class="flex items-center justify-center w-touch-target-min h-touch-target-min text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="text-title-md font-title-md font-bold text-primary">DIY-Nest</h1>
+<button class="flex items-center justify-center w-touch-target-min h-touch-target-min text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+</header>
+<main class="max-w-5xl mx-auto px-margin-mobile md:px-stack-lg py-stack-md">
+<!-- Artisan Header Section -->
+<section class="flex flex-col md:flex-row items-center md:items-start gap-stack-lg bg-surface-container-lowest rounded-xl p-stack-lg tactile-shadow mb-stack-lg relative overflow-hidden">
+<!-- Decorative background element for warmth -->
+<div class="absolute -top-20 -right-20 w-64 h-64 bg-primary-fixed-dim rounded-full opacity-20 blur-3xl pointer-events-none"></div>
+<div class="relative w-32 h-32 md:w-48 md:h-48 shrink-0">
+<img class="w-full h-full object-cover rounded-full border-4 border-surface-bright shadow-sm" data-alt="Portrait photograph of an Indian female artisan, Asha Devi, Master Potter, in her brightly lit workshop. She is wearing traditional clothing with earthy tones, smiling warmly at the camera. The background is slightly blurred showing unfinished clay pots. The lighting is soft and natural, emphasizing a trustworthy and welcoming mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2bz-_9PoHSIjwiprdYHplfpvQxqlLIc85Hl_DHxszJBhPurnIDT81l9bblvnJHPass5K_jthcrPWCKmZ6BFJSh2rVLJfMiIzsqHvsCs78Ch8_p1JMLmmH24UrzPiZGAgbsAsiQjAKk5_K7d9AH3-mg0NcAzNkvBDmi-JOO-idMQ-z1jeqBdOrtup8kz4qYqHYLRrtSDPYWh2boor81DcVzI9bKICfxYIoFFQoLaBlRI-1Z1EHFKNZ"/>
+<!-- Verified Badge -->
+<div class="absolute bottom-2 right-2 bg-tertiary text-on-tertiary p-1.5 rounded-full shadow-md flex items-center justify-center" title="Verified Artisan">
+<span class="material-symbols-outlined text-[16px]" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="flex-1 flex flex-col items-center md:items-start text-center md:text-left z-10">
+<div class="flex flex-wrap justify-center md:justify-start gap-2 mb-2">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-label-lg font-label-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="palette">palette</span>
+                        Pottery
+                    </span>
+<span class="bg-surface-container text-on-surface-variant px-3 py-1 rounded-full text-label-lg font-label-lg flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="location_on">location_on</span>
+                        Jaipur, India
+                    </span>
+</div>
+<h2 class="text-headline-lg-mobile md:text-headline-lg font-headline-lg-mobile md:font-headline-lg text-on-surface mb-1">Asha Devi</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant mb-4 max-w-2xl">Master Potter with over 20 years of experience crafting traditional blue pottery. Every piece is thrown on a manual wheel and hand-painted with natural dyes, bringing the heritage of Rajasthan to your home.</p>
+<!-- Stats -->
+<div class="flex gap-stack-lg mb-stack-md">
+<div class="flex flex-col items-center md:items-start">
+<span class="text-title-md font-title-md text-primary">142</span>
+<span class="text-label-lg font-label-lg text-on-surface-variant">Products</span>
+</div>
+<div class="w-px bg-outline-variant h-auto"></div>
+<div class="flex flex-col items-center md:items-start">
+<div class="flex items-center gap-1 text-title-md font-title-md text-primary">
+<span>4.9</span>
+<span class="material-symbols-outlined text-primary text-[20px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-label-lg font-label-lg text-on-surface-variant">2k+ Ratings</span>
+</div>
+<div class="w-px bg-outline-variant h-auto"></div>
+<div class="flex flex-col items-center md:items-start">
+<span class="text-title-md font-title-md text-primary">8 yrs</span>
+<span class="text-label-lg font-label-lg text-on-surface-variant">on DIY-Nest</span>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex flex-wrap justify-center md:justify-start gap-4 w-full">
+<button class="bg-primary text-on-primary h-[56px] px-8 rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-primary-container transition-colors shadow-sm flex-1 md:flex-none min-w-[140px]">
+<span class="material-symbols-outlined" data-icon="favorite">favorite</span>
+                        Follow
+                    </button>
+<button class="bg-surface-container-high text-on-surface h-[56px] px-8 rounded-xl font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors border border-outline-variant flex-1 md:flex-none min-w-[140px]">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+                        Message
+                    </button>
+</div>
+</div>
+</section>
+<!-- Product Gallery Grid -->
+<section>
+<div class="flex justify-between items-end mb-stack-md">
+<h3 class="text-title-md font-title-md text-on-surface">Artisan Collection</h3>
+<button class="text-primary text-label-lg font-label-lg hover:underline flex items-center gap-1">
+                    Filter <span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+</button>
+</div>
+<!-- Bento Grid Layout for Products -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-gutter auto-rows-[200px]">
+<!-- Product Card 1 (Large - spans 2 cols/2 rows) -->
+<div class="col-span-2 row-span-2 group relative rounded-xl overflow-hidden cursor-pointer tactile-shadow bg-surface-container-lowest">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A large, beautifully hand-painted blue pottery vase from Jaipur, sitting on a rustic wooden table. The vase features intricate floral motifs in deep indigo and turquoise on a white background. Natural sunlight highlights the glossy glaze of the pottery. Warm, modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBebbBUGMjwimdWl2nfLVHROVgi4mq1IosMso9XaJ8DPzVfkw-2oGHFiVAiIfsXAkhkHpQoPhwGUuetIwdvaWhNhhcaFyHrbixdOVpzHgTN6_rbaR4zwBaN3Vc8URv0MfAgZWCWJr6VpM3MipJoZ2hEtrRAHRahvJSyglQpIXFqEkLLCaK3NRfw5BMoubx3uwdArJDM-zLm00DmdYXYpmGXJVggoD3dAFerLQp4AEEWQdScaMuw1l4f"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<button class="absolute top-4 right-4 w-10 h-10 bg-surface/80 backdrop-blur rounded-full flex items-center justify-center text-on-surface hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="favorite_border">favorite_border</span>
+</button>
+<div class="absolute bottom-0 left-0 w-full p-4 text-on-primary">
+<h4 class="text-title-md font-title-md mb-1">Royal Blue Floral Vase</h4>
+<div class="flex justify-between items-center">
+<span class="text-body-lg font-body-lg opacity-90">₹2,450</span>
+<span class="bg-primary text-on-primary text-xs px-2 py-1 rounded-lg">Best Seller</span>
+</div>
+</div>
+</div>
+<!-- Product Card 2 -->
+<div class="col-span-1 row-span-1 group relative rounded-xl overflow-hidden cursor-pointer tactile-shadow bg-surface-container-lowest">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A set of two small, hand-painted ceramic bowls featuring geometric patterns in mustard yellow and deep blue. They are placed on a textured linen cloth. Warm lighting, tactile feel, emphasizing craftsmanship." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLtzdAMA8AXxfrXtvKY31AQ1kRi713UXTt2M9YCA8OOMhZLx4EOWal5kBbXonMYgNT4RRCjKjmSeDK32qSrGLcbVzeYl4MJWDyQRtuqmypj5RYSIe_W9MQrc4MEBMpz5iA0_TJoQbye6VF4GWZ0QewBimOhw-N9D6Pg1ihBGCtEYqdb7c3chrd5SnZrXftT4cvY78gRb3g6gspwh4OxJEArRz8iRzSVZtYKeaMz0Wg-egXaSDlv2cb"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 w-full p-3 text-on-primary">
+<h4 class="text-label-lg font-label-lg truncate">Geometric Bowls (Set of 2)</h4>
+<span class="text-body-md font-body-md opacity-90">₹850</span>
+</div>
+</div>
+<!-- Product Card 3 -->
+<div class="col-span-1 row-span-1 group relative rounded-xl overflow-hidden cursor-pointer tactile-shadow bg-surface-container-lowest">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A handmade terracotta decorative wall hanging featuring a traditional sun face. Hung against a stark white wall in soft natural light. Earthy, rustic, and culturally rich aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfwXIWrbmF2ALDuJ0JvP3WeQvWyP5AlaVz7DAYSWIyOu04AqwHVlb1iRjr1NFBXqbCORC2T5YnairlxfuPOJooLPCLqEG19uI0_dk36L3L0nAhw2kIr1Vhamdz99-77dEHgz5Il4rRsEAJcsQDY4puoCf2GWlyxJWhvEGEGer5P62pJryJcBoSNOVZC-jccOUB8vM45GBcL57ivMTrkhhBCauqIyW0AZLDJbiicHGCq7i_laZVBcnn"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 w-full p-3 text-on-primary">
+<h4 class="text-label-lg font-label-lg truncate">Surya Terracotta Plaque</h4>
+<span class="text-body-md font-body-md opacity-90">₹600</span>
+</div>
+</div>
+<!-- Product Card 4 (Spans 2 cols horizontal) -->
+<div class="col-span-2 row-span-1 group relative rounded-xl overflow-hidden cursor-pointer tactile-shadow bg-surface-container-lowest flex">
+<div class="w-1/2 h-full relative">
+<img class="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A large, wide serving platter with intricate hand-painted mandala designs in shades of terracotta, ochre, and slate grey. Sitting on a craftsman's workbench with tools blurred in the background. Modern, organic, tactile feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiRRndvZ5oQzhUMO-aRvSYtsor0y9K9SUj9tEoXZJQ6gWJcn7pyWql-COhDc9yKNnC6EsjLN0KZ1wBqTmEG9tQ1QwEB55OH9JqQ_OP8PGeLvfN2RbM83iQw_EfqtJquD0f3n-RbiZgAiG_FgfuL64mlTdcG2-EZZ4LBeoODwz7EYgV92jtQ8lQy50TCJZH41JGyjsFyTmQVsktCduqKtY88n7siluOaK8jhOnWTRdHeLdh7z63yUEj"/>
+</div>
+<div class="w-1/2 p-4 flex flex-col justify-center bg-surface-container-lowest">
+<h4 class="text-title-md font-title-md text-on-surface mb-2">Mandala Serving Platter</h4>
+<p class="text-body-md font-body-md text-on-surface-variant line-clamp-2 mb-3">Perfect for festive gatherings. Hand-thrown and glazed with food-safe colors.</p>
+<div class="flex justify-between items-center mt-auto">
+<span class="text-body-lg font-body-lg text-primary font-medium">₹1,200</span>
+<button class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary-fixed transition-colors">
+<span class="material-symbols-outlined" data-icon="add_shopping_cart">add_shopping_cart</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only, Suppressed as per instructions for Profile destination, but keeping structure as requested by prompt to show 'Products' tab active if we consider this a main ecosystem tab. Actually, Profile/Store is a destination, but the JSON provided has "Home, Add, Products". If user is browsing products, we highlight Products.) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile py-unit bg-surface-container-low shadow-lg rounded-t-xl transition-colors duration-200">
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:bg-surface-container-high rounded-xl transition-colors">
+<span class="material-symbols-outlined mb-1" data-icon="home">home</span>
+<span class="text-label-lg font-label-lg">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-2 hover:bg-surface-container-high rounded-xl transition-colors">
+<span class="material-symbols-outlined mb-1" data-icon="add_circle">add_circle</span>
+<span class="text-label-lg font-label-lg">Add</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary bg-primary-fixed rounded-xl px-4 py-2 scale-95 transition-transform duration-150">
+<span class="material-symbols-outlined mb-1" data-icon="inventory_2" data-weight="fill">inventory_2</span>
+<span class="text-label-lg font-label-lg">Products</span>
+</button>
+</nav>
+</body></html>

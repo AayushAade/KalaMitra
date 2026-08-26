@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Voice Description Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "inverse-primary": "#ffb5a1",
+                      "inverse-surface": "#31302f",
+                      "surface-container-lowest": "#ffffff",
+                      "inverse-on-surface": "#f3f0ed",
+                      "secondary": "#4e6078",
+                      "surface-bright": "#fcf9f6",
+                      "primary": "#94442e",
+                      "on-tertiary-container": "#fefdff",
+                      "on-primary-fixed": "#3b0900",
+                      "on-surface-variant": "#55433e",
+                      "surface-dim": "#dcdad7",
+                      "primary-container": "#b35c44",
+                      "surface-container-highest": "#e5e2df",
+                      "secondary-container": "#cee1fe",
+                      "on-tertiary-fixed": "#001d32",
+                      "on-primary": "#ffffff",
+                      "on-primary-container": "#fffcff",
+                      "on-secondary-fixed-variant": "#36485f",
+                      "on-error-container": "#93000a",
+                      "secondary-fixed-dim": "#b5c8e4",
+                      "tertiary": "#006195",
+                      "on-secondary-container": "#52647c",
+                      "surface-container-low": "#f6f3f0",
+                      "on-secondary": "#ffffff",
+                      "surface-container-high": "#eae8e5",
+                      "tertiary-fixed": "#cde5ff",
+                      "on-error": "#ffffff",
+                      "primary-fixed": "#ffdbd1",
+                      "error": "#ba1a1a",
+                      "surface": "#fcf9f6",
+                      "error-container": "#ffdad6",
+                      "on-primary-fixed-variant": "#79301b",
+                      "outline-variant": "#dbc1ba",
+                      "surface-variant": "#e5e2df",
+                      "surface-tint": "#974730",
+                      "primary-fixed-dim": "#ffb5a1",
+                      "tertiary-fixed-dim": "#94ccff",
+                      "on-background": "#1b1c1a",
+                      "tertiary-container": "#167bb8",
+                      "secondary-fixed": "#d2e4ff",
+                      "outline": "#88726d",
+                      "surface-container": "#f0edea",
+                      "on-secondary-fixed": "#081c32",
+                      "on-surface": "#1b1c1a",
+                      "on-tertiary": "#ffffff",
+                      "on-tertiary-fixed-variant": "#004b74",
+                      "background": "#fcf9f6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "touch-target-min": "48px",
+                      "stack-md": "16px",
+                      "margin-mobile": "20px",
+                      "stack-lg": "32px",
+                      "gutter": "16px",
+                      "unit": "8px",
+                      "stack-sm": "8px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Be Vietnam Pro"
+                      ],
+                      "label-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "headline-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "body-lg": [
+                              "Be Vietnam Pro"
+                      ],
+                      "voice-assist": [
+                              "Be Vietnam Pro"
+                      ],
+                      "title-md": [
+                              "Be Vietnam Pro"
+                      ],
+                      "headline-lg-mobile": [
+                              "Be Vietnam Pro"
+                      ],
+                      "display-lg": [
+                              "Be Vietnam Pro"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-lg": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "26px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "voice-assist": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "title-md": [
+                              "22px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .ripple {
+            animation: ripple-effect 2s infinite ease-out;
+        }
+        @keyframes ripple-effect {
+            0% {
+                transform: scale(1);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        .ripple-delay-1 { animation-delay: 0.6s; }
+        .ripple-delay-2 { animation-delay: 1.2s; }
+        
+        .wave {
+            animation: sound-wave 1s infinite alternate ease-in-out;
+        }
+        .wave:nth-child(1) { animation-delay: 0.1s; height: 10px; }
+        .wave:nth-child(2) { animation-delay: 0.3s; height: 20px; }
+        .wave:nth-child(3) { animation-delay: 0.5s; height: 35px; }
+        .wave:nth-child(4) { animation-delay: 0.2s; height: 15px; }
+        .wave:nth-child(5) { animation-delay: 0.4s; height: 25px; }
+
+        @keyframes sound-wave {
+            0% { transform: scaleY(0.5); }
+            100% { transform: scaleY(1.5); }
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col items-center">
+<div class="w-full max-w-md bg-surface min-h-screen relative flex flex-col shadow-sm pb-[80px]">
+<!-- Header -->
+<header class="flex items-center justify-between px-margin-mobile pt-stack-md pb-unit">
+<button aria-label="Go back" class="h-touch-target-min w-touch-target-min flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[28px]">arrow_back</span>
+</button>
+<div class="text-label-lg font-label-lg text-on-surface-variant bg-surface-container py-unit px-stack-md rounded-full shadow-sm">
+                Step 2 of 4
+            </div>
+<div class="w-touch-target-min"></div> <!-- Spacer for alignment -->
+</header>
+<!-- Progress Indicator -->
+<div class="px-margin-mobile pb-stack-md">
+<div class="h-2 w-full bg-surface-container rounded-full flex gap-1">
+<div class="h-full bg-primary rounded-full flex-1"></div>
+<div class="h-full bg-primary rounded-full flex-1"></div>
+<div class="h-full bg-surface-dim rounded-full flex-1"></div>
+<div class="h-full bg-surface-dim rounded-full flex-1"></div>
+</div>
+</div>
+<!-- Content Area -->
+<main class="flex-1 flex flex-col px-margin-mobile mt-stack-md">
+<div class="text-center mb-stack-lg">
+<h1 class="text-headline-lg-mobile font-headline-lg-mobile text-primary mb-stack-sm">
+                    Tell us about your product
+                </h1>
+<p class="text-body-md font-body-md text-on-surface-variant">
+                    Speak naturally. Describe the material, colors, and how you made it.
+                </p>
+</div>
+<!-- Voice Interaction Center -->
+<div class="flex-1 flex flex-col items-center justify-center relative my-stack-lg">
+<!-- Glowing Microphone Button -->
+<div class="relative flex items-center justify-center w-32 h-32 mb-stack-md">
+<!-- Ripple Effects -->
+<div class="absolute inset-0 bg-tertiary-fixed-dim rounded-full ripple"></div>
+<div class="absolute inset-0 bg-tertiary-fixed rounded-full ripple ripple-delay-1"></div>
+<div class="absolute inset-0 bg-secondary-fixed rounded-full ripple ripple-delay-2"></div>
+<!-- Main Button -->
+<button class="relative z-10 w-24 h-24 bg-tertiary text-on-tertiary rounded-full flex items-center justify-center shadow-lg shadow-tertiary/30 hover:scale-105 transition-transform duration-200">
+<span class="material-symbols-outlined text-[48px]" style="font-variation-settings: 'FILL' 1;">mic</span>
+</button>
+</div>
+<!-- Active Recording Animation & Timer -->
+<div class="flex flex-col items-center gap-stack-sm h-24 justify-center">
+<div class="flex items-center justify-center gap-1 h-10 w-32">
+<div class="w-1.5 bg-tertiary rounded-full wave"></div>
+<div class="w-1.5 bg-tertiary rounded-full wave"></div>
+<div class="w-1.5 bg-tertiary rounded-full wave"></div>
+<div class="w-1.5 bg-tertiary rounded-full wave"></div>
+<div class="w-1.5 bg-tertiary rounded-full wave"></div>
+</div>
+<div class="text-title-md font-title-md text-tertiary tabular-nums">
+                        00:15
+                    </div>
+</div>
+<p class="text-label-lg font-label-lg text-secondary mt-stack-md">
+                    Tap to stop
+                </p>
+</div>
+<!-- Language Section -->
+<div class="mt-auto mb-stack-md flex flex-col items-center">
+<div class="flex items-center gap-2 mb-stack-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">translate</span>
+<span class="text-body-md font-body-md">Listening in English</span>
+</div>
+<div class="flex gap-stack-sm justify-center">
+<button class="px-4 py-2 bg-secondary-fixed text-on-secondary-fixed font-label-lg text-label-lg rounded-full shadow-sm hover:bg-secondary-fixed-dim transition-colors">
+                        English
+                    </button>
+<button class="px-4 py-2 bg-surface-container border border-outline-variant text-on-surface-variant font-label-lg text-label-lg rounded-full hover:bg-surface-container-high transition-colors">
+                        हिंदी
+                    </button>
+<button class="px-4 py-2 bg-surface-container border border-outline-variant text-on-surface-variant font-label-lg text-label-lg rounded-full hover:bg-surface-container-high transition-colors">
+                        मराठी
+                    </button>
+</div>
+</div>
+</main>
+<!-- Navigation Drawer (Suppressed on this linear intent page, leaving canvas clear) -->
+<!-- BottomNavBar (Suppressed on this linear intent page) -->
+</div>
+</body></html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Communication - DIY-Nest</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-surface": "#31302f",
+                        "error": "#ba1a1a",
+                        "surface": "#fcf9f6",
+                        "inverse-on-surface": "#f3f0ed",
+                        "secondary-fixed": "#d2e4ff",
+                        "surface-container": "#f0edea",
+                        "on-error": "#ffffff",
+                        "surface-bright": "#fcf9f6",
+                        "outline-variant": "#dbc1ba",
+                        "secondary": "#4e6078",
+                        "on-primary-fixed": "#3b0900",
+                        "on-secondary-container": "#52647c",
+                        "surface-container-low": "#f6f3f0",
+                        "surface-variant": "#e5e2df",
+                        "primary-fixed-dim": "#ffb5a1",
+                        "on-primary-container": "#fffcff",
+                        "secondary-container": "#cee1fe",
+                        "primary": "#94442e",
+                        "surface-dim": "#dcdad7",
+                        "surface-container-lowest": "#ffffff",
+                        "outline": "#88726d",
+                        "on-tertiary-fixed": "#001d32",
+                        "background": "#fcf9f6",
+                        "secondary-fixed-dim": "#b5c8e4",
+                        "on-surface": "#1b1c1a",
+                        "primary-container": "#b35c44",
+                        "inverse-primary": "#ffb5a1",
+                        "error-container": "#ffdad6",
+                        "surface-container-high": "#eae8e5",
+                        "tertiary-container": "#167bb8",
+                        "on-secondary-fixed": "#081c32",
+                        "tertiary": "#006195",
+                        "on-primary-fixed-variant": "#79301b",
+                        "surface-tint": "#974730",
+                        "on-primary": "#ffffff",
+                        "on-background": "#1b1c1a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#004b74",
+                        "tertiary-fixed-dim": "#94ccff",
+                        "on-surface-variant": "#55433e",
+                        "on-secondary-fixed-variant": "#36485f",
+                        "tertiary-fixed": "#cde5ff",
+                        "primary-fixed": "#ffdbd1",
+                        "surface-container-highest": "#e5e2df",
+                        "on-tertiary-container": "#fefdff",
+                        "on-secondary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "stack-md": "16px",
+                        "touch-target-min": "48px",
+                        "stack-lg": "32px",
+                        "margin-mobile": "20px",
+                        "gutter": "16px",
+                        "stack-sm": "8px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "voice-assist": ["Be Vietnam Pro"],
+                        "headline-lg": ["Be Vietnam Pro"],
+                        "label-lg": ["Be Vietnam Pro"],
+                        "display-lg": ["Be Vietnam Pro"],
+                        "title-md": ["Be Vietnam Pro"],
+                        "body-md": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "26px", "fontWeight": "400" }],
+                        "voice-assist": ["20px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "title-md": ["22px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
+<!-- Header / Context -->
+<header class="fixed top-0 left-0 w-full z-50 bg-surface shadow-sm px-margin-mobile py-unit h-[72px] flex items-center gap-4">
+<button class="h-touch-target-min w-touch-target-min flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+</button>
+<div class="flex items-center gap-3 flex-1 min-w-0">
+<img class="w-10 h-10 rounded-full object-cover shrink-0" data-alt="A small, circular profile picture of an Indian artisan. The artisan has a warm, welcoming smile. The background is slightly blurred showing a hint of a pottery studio. The lighting is soft and natural, emphasizing a modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0FFMfIiXkuUeedCvevExxwv4hvwJlsDQUU808yvW4hKJzOvGIVQ0sfFYbW6aIGPn2d6STQTpVBf7N4faL03zfHJIB-frFvlcD_kyXQke99VEyd-WEh8n6vnuc4FlJDZhaDihuGRtfPRAEoiBJSJq0oubZCJbm6UipEZyGFazPP0hkN-sCtIzr_AMzTD1hFRJBq0oYqDor7SYWYiv-4pJFLqEs4OUbB_0iKkXPXzMhgVUaMRss228W"/>
+<div class="min-w-0">
+<h1 class="text-title-md font-title-md truncate text-primary">Asha Devi</h1>
+<p class="text-label-lg font-label-lg text-on-surface-variant truncate">Pottery Artisan • Usually responds in 1 hr</p>
+</div>
+</div>
+</header>
+<!-- Product Context Card -->
+<div class="pt-[88px] px-margin-mobile pb-unit">
+<div class="bg-surface-container-lowest rounded-xl p-3 flex gap-4 shadow-sm border border-surface-variant">
+<img class="w-20 h-20 rounded-lg object-cover shadow-sm" data-alt="A detailed, close-up photograph of a handcrafted terracotta vase resting on a textured wooden workbench. The vase features intricate geometric patterns. The lighting is warm and directional, casting soft shadows that highlight the natural texture of the clay, fitting a modern tactile design system." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYDVxXiG1dMVQO05bifmAAM_MlqVdxlRfbr0Q7nWUR4dc93terX2jKdxbmNSe-axfInjZH-ReiV2UeHBUJY_eszFGNG3U-0th9I9hWDsxr6D3jNeV-Nfq-gk1-QO0WAQ56z8r8tqZWnx1oBcGYB2gOWuqMCg2SRtl5PGzHznvmQH7hUw9pLkHoIhfPEojBMtrlOoHPOncYYLAjMmewJxDfEOtITbyH3dOIFNFE0X20UVfMrJ-Cqz9E"/>
+<div class="flex flex-col justify-center flex-1">
+<h2 class="text-body-lg font-body-lg text-secondary font-semibold">Hand-Painted Terracotta Vase</h2>
+<p class="text-title-md font-title-md text-primary mt-1">₹1,250</p>
+</div>
+</div>
+</div>
+<!-- Chat Area -->
+<main class="flex-1 overflow-y-auto px-margin-mobile py-stack-md flex flex-col gap-6" id="chat-container">
+<!-- Timestamp -->
+<div class="text-center">
+<span class="text-label-lg font-label-lg text-on-surface-variant bg-surface-container-low px-3 py-1 rounded-full">Today, 10:30 AM</span>
+</div>
+<!-- Buyer Message (Outgoing) -->
+<div class="flex flex-col items-end gap-1">
+<div class="bg-primary-container text-on-primary-container p-4 rounded-xl rounded-tr-sm max-w-[85%] shadow-sm">
+<p class="text-body-md font-body-md">Namaste Asha ji! I really love this vase. Is it possible to get it painted with custom blue motifs instead of white?</p>
+</div>
+<span class="text-[12px] text-on-surface-variant mr-1">10:30 AM</span>
+</div>
+<!-- Artisan Message (Incoming) -->
+<div class="flex flex-col items-start gap-1">
+<div class="flex items-end gap-2">
+<img class="w-6 h-6 rounded-full object-cover mb-1" data-alt="A small, circular profile picture of an Indian artisan. The artisan has a warm, welcoming smile. The background is slightly blurred showing a hint of a pottery studio. The lighting is soft and natural, emphasizing a modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzCTzrD0b4f_D-r2IMCa9fEwIBlqjM9K3PH45iSK9Bb-0eMWJGFY1l1e5heC5Y8t0sNxqi8ghtS1GmO7nU7s8Jqi9pVQQVTWjtmlUOwQXnVP00TCIkEVKgrDFxTxgI8JqXDQowJB7PTPzhFk-8VKMmlmUG1Eyhtzc_Oe6E0otIZ-2ZdIckT7g_WxdC4Bm4QwRhhraXEhvuQEY9SJgQDqt5muzjzMQucVbbBfJi64WmmmKGr_XhxAz-"/>
+<div class="bg-surface-container text-on-surface p-4 rounded-xl rounded-tl-sm max-w-[85%] shadow-sm">
+<p class="text-body-md font-body-md">Namaste! Thank you for reaching out. Yes, I can certainly use indigo blue for the motifs. It will take an extra 2 days to prepare.</p>
+</div>
+</div>
+<span class="text-[12px] text-on-surface-variant ml-8">10:45 AM</span>
+</div>
+<!-- Artisan Message (Incoming) -->
+<div class="flex flex-col items-start gap-1">
+<div class="flex items-end gap-2">
+<img class="w-6 h-6 rounded-full object-cover mb-1 opacity-0" data-alt="A small, circular profile picture of an Indian artisan. The artisan has a warm, welcoming smile. The background is slightly blurred showing a hint of a pottery studio. The lighting is soft and natural, emphasizing a modern tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWcAIqxRAA0L_ElMRFc3jqBfvgE87DOfOBDOMXidS5uBYUCIjcGKxSDzpsOF3bC7SlNEb5AYGPNL-6E-u5Pya1YiuEek9bXAdyTdd9lUuG8hpCQRnpB30L1RFTtp-8cykDEXwf_sG2glM9D7kBwagDe_TLXLffIvm6NHyENEd5zNRx_rhidxDCncQHyfQ3dF2BsZWIBwL23fwrV145VcGT0V8lXP20Ts7dxfhURKy20UP9VLWA9BuM"/>
+<div class="bg-surface-container text-on-surface p-4 rounded-xl rounded-tl-sm max-w-[85%] shadow-sm">
+<p class="text-body-md font-body-md">Would you like me to send a custom offer for the blue motif design? The price will remain the same.</p>
+</div>
+</div>
+<span class="text-[12px] text-on-surface-variant ml-8">10:46 AM</span>
+</div>
+<!-- System Action / Offer -->
+<div class="my-4 flex flex-col items-center">
+<div class="bg-secondary-container rounded-xl p-4 w-full max-w-sm border border-outline-variant text-center">
+<span class="material-symbols-outlined text-tertiary text-3xl mb-2" data-icon="handshake">handshake</span>
+<h3 class="text-title-md font-title-md text-on-secondary-container">Custom Offer Pending</h3>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">Asha Devi is preparing your custom request details.</p>
+</div>
+</div>
+</main>
+<!-- Input Area -->
+<footer class="bg-surface border-t border-surface-variant p-margin-mobile flex gap-2 items-end pb-8">
+<button class="h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-full bg-surface-container hover:bg-surface-container-high transition-colors text-primary">
+<span class="material-symbols-outlined" data-icon="add_photo_alternate">add_photo_alternate</span>
+</button>
+<div class="flex-1 bg-surface-container-low rounded-xl border border-outline-variant focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all relative">
+<textarea class="w-full bg-transparent border-none focus:ring-0 resize-none py-3 px-4 min-h-[48px] max-h-[120px] text-body-md font-body-md text-on-surface placeholder:text-on-surface-variant outline-none" placeholder="Type a message..." rows="1"></textarea>
+</div>
+<button class="h-12 w-12 flex-shrink-0 flex items-center justify-center rounded-full bg-tertiary-container hover:opacity-90 transition-opacity text-on-tertiary-container shadow-sm">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</footer>
+<script>
+        // Simple auto-resize for textarea
+        const textarea = document.querySelector('textarea');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            if (this.value === '') {
+                 this.style.height = '48px';
+            }
+        });
+        
+        // Scroll to bottom on load
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    </script>
+</body></html>

@@ -1,0 +1,232 @@
+export const initialArtisan = {
+  id: "artisan-101",
+  name: "Savita Handicrafts",
+  ownerName: "Savita Devi",
+  location: "Pune, Maharashtra",
+  craft: "Traditional Bamboo & Textile Crafts",
+  phone: "+91 98765 43210",
+  email: "savita@diynest.org",
+  language: "Hindi",
+  bio: "Master artisan with 18+ years of experience in traditional handloom weaving and eco-friendly bamboo handicraft creations.",
+  totalProducts: 5,
+  rating: 4.9,
+  reviewsCount: 38,
+  storeVerified: true,
+  avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuCy1USh0c8IntFY5avkMXenmevurHwDA1Q4m7vKQnQg7-tsxS3lFEnAJi4vD1f6cxGcUG5FZJ2ns-D3sr92PAMybljwnAn2MxCu5Uaf6YT8S6ka8PxLfy6h-pIAEq24YCUlPrxz2XSsCBMD6s8DL_QogfRv7DwZfiDJkNn0gwsSD3686yq6LYYpopHjuBhLR0kUqwIJXXi5kMSxFKxCs8iAiOolYSlSrjlEiWniaWjilD3i6IJp6Zl3"
+};
+
+export const initialProducts = [
+  {
+    id: "prod-1",
+    artisanId: "artisan-101",
+    artisanName: "Savita Handicrafts",
+    artisanLocation: "Pune, Maharashtra",
+    title: "Handwoven Red and Gold Silk Dupatta",
+    titleHindi: "हाथ से बुनी लाल और सुनहरी रेशमी दुपट्टा",
+    category: "Textiles",
+    price: 1850,
+    aiSuggestedPrice: 1850,
+    priceRange: { min: 1600, max: 2100 },
+    material: "Pure Silk & Gold Zari Thread",
+    craft: "Traditional Handloom Weaving",
+    productionTime: "5 days",
+    productionTimeDays: 5,
+    quantity: 12,
+    madeToOrder: true,
+    minBulkOrder: 10,
+    status: "Published",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD9NdqtHHuX-C3fTyPOFZyJHmhxGdmIUVFNHQnBFec-x4sM6nam9v8zGl_A50EYGmZPn11LroWhvKHY5FCPYBHMXB8smCONqVv0H_O5bW-yoFUMcCyNZrnpHOq1c5STMMu_HCBEfCqtgew-DNpDA_CpmKQ8Hqd4TNZ9Ul3u_9AuI_LdlQ_rhb5UzODrcnCCzKSeWTTtYcrI2hIt2BuU6Z06-W5UYr8AKVJJQ3n9_6C3Kg4iBz6f2QhI",
+    originalImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuCTZ9ZdYNYjwvq9BLRKmIA8lrCueU6ss5NaK7NcL4tV4_640CzTmWYawWfXIL62guK6U4_aeNsP7XEHi_XCKkdFsG-Uvz-z5jxlfa6wI8-E_xR433XGR0x6KTEbjRK_uiGbQSYAjI_VKHuDAz206-2hYYSd4fQVwHVL-kFP4xv_pWeHnOMFLjUesGEMNGw8AmVV27wnmQ61K0QrPI4Wd3z2iwGPsmqyHIZPnbctLtiY-23o1zoi5D7c",
+    descriptionEnglish: "Masterfully woven by skilled artisans in Maharashtra, this silk dupatta showcases intricate traditional handloom craft. Soft, lustrous pure silk intertwined with delicate zari highlights.",
+    descriptionHindi: "महाराष्ट्र के कुशल कारीगरों द्वारा हस्तनिर्मित, यह रेशमी दुपट्टा पारंपरिक हथकरघा कला की अनूठी मिसाल है। शुद्ध शहतूत रेशम और जरी की कारीगरी से सजा।",
+    tags: ["Silk", "Handloom", "Red & Gold", "Festive"],
+    rating: 4.9,
+    reviews: 14
+  },
+  {
+    id: "prod-2",
+    artisanId: "artisan-101",
+    artisanName: "Savita Handicrafts",
+    artisanLocation: "Pune, Maharashtra",
+    title: "Bamboo Storage Basket",
+    titleHindi: "बांस की हस्तनिर्मित टोकरी",
+    category: "Bamboo Craft",
+    price: 899,
+    aiSuggestedPrice: 899,
+    priceRange: { min: 750, max: 1000 },
+    material: "Natural Treated Bamboo Strip",
+    craft: "Hand-braided Weaving",
+    productionTime: "2 days",
+    productionTimeDays: 2,
+    quantity: 45,
+    madeToOrder: true,
+    minBulkOrder: 20,
+    status: "Published",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCXcQG2IuC0hmcLXI_X7NLHkQS6FBTajGjmTZYlqwFRaBAchUoU9qXJYnXU85awVMUWhJLn6H8iREvMMm0LOxSqbKMT3mofJ_m9uovpzG-9Knzfv04Z_EPyVum0R5IpYVXGknClHW3hb2Y-ruGkmYBiyFRQFAP6Eg0B56uJ0abfnjTmc45ApRtHGAQFhn7toeu_imQWT1-rgMhI0iK3mklaTSDTIIQHHUHyKPtXnzS7CEQMqVR4xNud",
+    descriptionEnglish: "Eco-friendly, durable bamboo basket hand-woven with precision. Perfect for household storage, hamper gifting, or home decor accent.",
+    descriptionHindi: "पर्यावरण-अनुकूल और टिकाऊ बांस की टोकरी जिसे बड़ी कुशलता से हाथ से बुना गया है।",
+    tags: ["Bamboo", "Eco-friendly", "Home Decor"],
+    rating: 4.8,
+    reviews: 22
+  },
+  {
+    id: "prod-3",
+    artisanId: "artisan-101",
+    artisanName: "Savita Handicrafts",
+    artisanLocation: "Pune, Maharashtra",
+    title: "Embroidered Cotton Bag",
+    titleHindi: "कढ़ाई वाला सूती थैला",
+    category: "Textiles",
+    price: 649,
+    aiSuggestedPrice: 650,
+    priceRange: { min: 550, max: 750 },
+    material: "Organic Cotton Fabric",
+    craft: "Kantha Hand Embroidery",
+    productionTime: "3 days",
+    productionTimeDays: 3,
+    quantity: 18,
+    madeToOrder: false,
+    minBulkOrder: 15,
+    status: "Published",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuBMJvirHrO_LapsD6fifoeQqIjd1eu_FzELgb1GaW6kzOpNzIRY9o2AWBE0OZ7LXqNkO9mLDMseP6iWr9YuNvY1SWGv09Y2iu1qni8fFE7ChqDp5H7UDBi6aZi0Asss-0fU7HK2LT9WHX5amF0wvBePKiUeXccz7DKgKj2PMPty4oRzKHZh3LIZnj-uQ3D7YhvriuMJShaarBU0Td5MowXUvj7NP5wFsFtcHzVZGS4Kub0dNvx2Qeq6",
+    descriptionEnglish: "Charming organic cotton tote featuring vibrant traditional Kantha floral embroidery.",
+    descriptionHindi: "जैविक सूती कपड़े से बना सुंदर थैला जिस पर पारंपरिक कांता कढ़ाई की गई है।",
+    tags: ["Cotton", "Embroidery", "Tote Bag"],
+    rating: 4.7,
+    reviews: 9
+  },
+  {
+    id: "prod-4",
+    artisanId: "artisan-101",
+    artisanName: "Savita Handicrafts",
+    artisanLocation: "Pune, Maharashtra",
+    title: "Terracotta Diya Set (Pack of 6)",
+    titleHindi: "मिट्टी के दीयों का सेट (6 का पैक)",
+    category: "Pottery",
+    price: 499,
+    aiSuggestedPrice: 500,
+    priceRange: { min: 400, max: 600 },
+    material: "Natural Terracotta Clay",
+    craft: "Wheel Pottery & Hand Carving",
+    productionTime: "1 day",
+    productionTimeDays: 1,
+    quantity: 50,
+    madeToOrder: true,
+    minBulkOrder: 25,
+    status: "Published",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCVlDav3DdR11_sM4m5d4N4ro_C0uhTyBmDwIL4Nkmn5Lr-BRlBcs05QV8YhYXCW8lQkbDNHQnszCFJtPn1k5BzLg4GtncDoJYRs7S4dGHrDCUH3qWShfWWf34__yX6BfpQxyNWnVrLx_dSqUBJAQrIVCGabl8T-lKmIIibbsyO_4l-OQnZcfO2IHBvzyD1bjUMzcKyNr05t2gdclzknvE1Re2_MY7CErEqFTcE4a8ha7cWnIdW9vEt",
+    descriptionEnglish: "Authentic hand-molded clay diyas designed for festive lighting. Biodegradable and crafted using ancestral terracotta techniques.",
+    descriptionHindi: "उत्सव की जगमगाहट के लिए प्रामाणिक हस्तनिर्मित मिट्टी के दीये।",
+    tags: ["Terracotta", "Pottery", "Diya", "Festive"],
+    rating: 5.0,
+    reviews: 31
+  },
+  {
+    id: "prod-5",
+    artisanId: "artisan-101",
+    artisanName: "Savita Handicrafts",
+    artisanLocation: "Pune, Maharashtra",
+    title: "Hand-painted Pottery Vase",
+    titleHindi: "हाथ से चित्रित मिट्टी का फूलदान",
+    category: "Pottery",
+    price: 1299,
+    aiSuggestedPrice: 1250,
+    priceRange: { min: 1100, max: 1450 },
+    material: "Terracotta Clay & Natural Pigments",
+    craft: "Wheel Pottery & Tribal Painting",
+    productionTime: "4 days",
+    productionTimeDays: 4,
+    quantity: 8,
+    madeToOrder: true,
+    minBulkOrder: 5,
+    status: "Published",
+    image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDYDVxXiG1dMVQO05bifmAAM_MlqVdxlRfbr0Q7nWUR4dc93terX2jKdxbmNSe-axfInjZH-ReiV2UeHBUJY_eszFGNG3U-0th9I9hWDsxr6D3jNeV-Nfq-gk1-QO0WAQ56z8r8tqZWnx1oBcGYB2gOWuqMCg2SRtl5PGzHznvmQH7hUw9pLkHoIhfPEojBMtrlOoHPOncYYLAjMmewJxDfEOtITbyH3dOIFNFE0X20UVfMrJ-Cqz9E",
+    descriptionEnglish: "Elegant earthenware vase hand-thrown on the potter's wheel and painted with indigenous geometric motifs.",
+    descriptionHindi: "कुम्हार के चाक पर ढला और लोक चित्रों से सजा खूबसूरत मिट्टी का फूलदान।",
+    tags: ["Pottery", "Vase", "Handpainted"],
+    rating: 4.8,
+    reviews: 11
+  }
+];
+
+export const initialInquiries = [
+  {
+    id: "inq-1001",
+    productId: "prod-2",
+    productTitle: "Bamboo Storage Basket",
+    productPrice: 899,
+    productImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuCXcQG2IuC0hmcLXI_X7NLHkQS6FBTajGjmTZYlqwFRaBAchUoU9qXJYnXU85awVMUWhJLn6H8iREvMMm0LOxSqbKMT3mofJ_m9uovpzG-9Knzfv04Z_EPyVum0R5IpYVXGknClHW3hb2Y-ruGkmYBiyFRQFAP6Eg0B56uJ0abfnjTmc45ApRtHGAQFhn7toeu_imQWT1-rgMhI0iK3mklaTSDTIIQHHUHyKPtXnzS7CEQMqVR4xNud",
+    buyerName: "Raj Traders",
+    buyerType: "Retail Distributor",
+    buyerLocation: "Mumbai, Maharashtra",
+    quantity: 100,
+    expectedDelivery: "2026-09-20",
+    message: "Namaste! Interested in purchasing 100 units of Bamboo Storage Basket for our retail chain in Mumbai. Please confirm bulk discount and estimated timeline.",
+    status: "New",
+    date: "Today, 10:30 AM",
+    messages: [
+      {
+        id: "msg-1",
+        sender: "Buyer",
+        text: "Namaste! Interested in purchasing 100 units of Bamboo Storage Basket for our retail chain in Mumbai. Please confirm bulk discount and estimated timeline.",
+        time: "10:30 AM"
+      }
+    ]
+  },
+  {
+    id: "inq-1002",
+    productId: "prod-1",
+    productTitle: "Handwoven Red and Gold Silk Dupatta",
+    productPrice: 1850,
+    productImage: "https://lh3.googleusercontent.com/aida-public/AB6AXuD9NdqtHHuX-C3fTyPOFZyJHmhxGdmIUVFNHQnBFec-x4sM6nam9v8zGl_A50EYGmZPn11LroWhvKHY5FCPYBHMXB8smCONqVv0H_O5bW-yoFUMcCyNZrnpHOq1c5STMMu_HCBEfCqtgew-DNpDA_CpmKQ8Hqd4TNZ9Ul3u_9AuI_LdlQ_rhb5UzODrcnCCzKSeWTTtYcrI2hIt2BuU6Z06-W5UYr8AKVJJQ3n9_6C3Kg4iBz6f2QhI",
+    buyerName: "Heritage Boutique",
+    buyerType: "Boutique Store",
+    buyerLocation: "Delhi",
+    quantity: 25,
+    expectedDelivery: "2026-09-15",
+    message: "Can we request custom blue motifs on the border for a festive order of 25 dupattas?",
+    status: "Replied",
+    date: "Yesterday, 4:15 PM",
+    messages: [
+      {
+        id: "msg-101",
+        sender: "Buyer",
+        text: "Can we request custom blue motifs on the border for a festive order of 25 dupattas?",
+        time: "Yesterday, 4:15 PM"
+      },
+      {
+        id: "msg-102",
+        sender: "Artisan",
+        text: "Namaste! Yes, we can customize the zari motifs with indigo blue dye. It will take 7 days for production.",
+        time: "Yesterday, 5:00 PM"
+      }
+    ]
+  }
+];
+
+export const initialAssistantTips = [
+  {
+    id: "tip-1",
+    title: "1 bulk inquiry received",
+    description: "Raj Traders requested 100 Bamboo Storage Baskets. Respond quickly to secure this order.",
+    actionText: "View Inquiry",
+    actionLink: "/artisan/inquiries/inq-1001",
+    type: "inquiry"
+  },
+  {
+    id: "tip-2",
+    title: "Pricing recommendation update",
+    description: "Your Bamboo basket price (₹899) is competitive. High market demand detected in urban retail.",
+    actionText: "View Pricing",
+    actionLink: "/artisan/pricing",
+    type: "pricing"
+  },
+  {
+    id: "tip-3",
+    title: "Photo enhancement suggestion",
+    description: "Adding 2 more studio lighting photos to your Silk Dupatta product increases buyer trust by 40%.",
+    actionText: "Add Product Photo",
+    actionLink: "/artisan/products/new",
+    type: "photo"
+  }
+];
