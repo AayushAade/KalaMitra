@@ -11,20 +11,39 @@ export default function RegisterScreen() {
   const [storeName, setStoreName] = useState('Savita Handicrafts');
   const [ownerName, setOwnerName] = useState('Savita Devi');
   const [phone, setPhone] = useState('+91 98765 43210');
+  const [email, setEmail] = useState('savita@diynest.org');
+  const [password, setPassword] = useState('pass1234');
   const [craft, setCraft] = useState('Bamboo & Textile Crafts');
   const [location, setLocation] = useState('Pune, Maharashtra');
   const [selectedLanguage, setSelectedLanguage] = useState<'Hindi' | 'Marathi' | 'English'>('Hindi');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [infoMessage, setInfoMessage] = useState<string | null>(null);
 
   const handleRegister = async () => {
-    await authService.registerStore({
-      name: storeName,
-      ownerName,
-      phone,
-      craft,
-      location,
-      language: selectedLanguage
-    });
-    router.replace('/(artisan)/dashboard' as any);
+    setErrorMessage(null);
+    setInfoMessage(null);
+    try {
+      const result = await authService.registerStore(
+        {
+          name: storeName,
+          ownerName,
+          phone,
+          craft,
+          location,
+          language: selectedLanguage
+        },
+        email,
+        password
+      );
+
+      if (result.emailConfirmationRequired) {
+        setInfoMessage('Account created! Please check your email to confirm your account before logging in.');
+      } else {
+        router.replace('/(artisan)/dashboard' as any);
+      }
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Registration failed. Please check your details.');
+    }
   };
 
   return (
@@ -94,6 +113,32 @@ export default function RegisterScreen() {
               </View>
 
               <View style={styles.inputContainer}>
+                <Text style={styles.label}>Email Address</Text>
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="e.g. savita@diynest.org"
+                  placeholderTextColor={Colors.textMuted}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
+                <Text style={styles.label}>Password</Text>
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Create a password"
+                  placeholderTextColor={Colors.textMuted}
+                  secureTextEntry
+                  autoCapitalize="none"
+                />
+              </View>
+
+              <View style={styles.inputContainer}>
                 <Text style={styles.label}>Craft Specialization</Text>
                 <TextInput
                   style={styles.input}
@@ -114,6 +159,18 @@ export default function RegisterScreen() {
                   placeholderTextColor={Colors.textMuted}
                 />
               </View>
+
+              {errorMessage && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>⚠️ {errorMessage}</Text>
+                </View>
+              )}
+
+              {infoMessage && (
+                <View style={styles.infoContainer}>
+                  <Text style={styles.infoText}>✉️ {infoMessage}</Text>
+                </View>
+              )}
 
               <Button
                 title="Create Account"
@@ -210,5 +267,33 @@ const styles = StyleSheet.create({
   submitButton: {
     width: '100%',
     marginTop: Spacing.sm,
+  },
+  errorContainer: {
+    backgroundColor: '#FDF2F2',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: '#F8B4B4',
+    marginBottom: Spacing.md,
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#9B1C1C',
+    fontWeight: '600',
+    lineHeight: 18,
+  },
+  infoContainer: {
+    backgroundColor: 'rgba(0,97,149,0.06)',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: 'rgba(0,97,149,0.2)',
+    marginBottom: Spacing.md,
+  },
+  infoText: {
+    fontSize: 13,
+    color: Colors.secondary,
+    fontWeight: '600',
+    lineHeight: 18,
   },
 });

@@ -9,17 +9,23 @@ import { authService } from '../../services/authService';
 
 export default function LoginScreen() {
   const [role, setRole] = useState<'artisan' | 'buyer'>('artisan');
-  const [identifier, setIdentifier] = useState('+91 98765 43210');
+  const [identifier, setIdentifier] = useState('savita@diynest.org'); // Set default dev email
   const [password, setPassword] = useState('pass1234');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleLogin = async () => {
-    const success = await authService.login(identifier, role);
-    if (success) {
-      if (role === 'artisan') {
-        router.replace('/(artisan)/dashboard' as any);
-      } else {
-        router.replace('/(buyer)/marketplace' as any);
+    setErrorMessage(null);
+    try {
+      const success = await authService.login(identifier, password, role);
+      if (success) {
+        if (role === 'artisan') {
+          router.replace('/(artisan)/dashboard' as any);
+        } else {
+          router.replace('/(buyer)/marketplace' as any);
+        }
       }
+    } catch (error: any) {
+      setErrorMessage(error.message || 'Authentication failed. Please verify credentials.');
     }
   };
 
@@ -91,9 +97,15 @@ export default function LoginScreen() {
                 />
               </View>
 
+              {errorMessage && (
+                <View style={styles.errorContainer}>
+                  <Text style={styles.errorText}>⚠️ {errorMessage}</Text>
+                </View>
+              )}
+
               <View style={styles.warningContainer}>
                 <Text style={styles.warningText}>
-                  ℹ️ Developer test mode: Enter any details to log in.
+                  ℹ️ Dev mode: Sign in using your registered Supabase email credentials.
                 </Text>
               </View>
 
@@ -202,6 +214,20 @@ const styles = StyleSheet.create({
   warningText: {
     fontSize: 13,
     color: Colors.secondary,
+    lineHeight: 18,
+  },
+  errorContainer: {
+    backgroundColor: '#FDF2F2',
+    padding: Spacing.md,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: '#F8B4B4',
+    marginBottom: Spacing.md,
+  },
+  errorText: {
+    fontSize: 13,
+    color: '#9B1C1C',
+    fontWeight: '600',
     lineHeight: 18,
   },
   submitButton: {
