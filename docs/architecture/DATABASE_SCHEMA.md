@@ -150,3 +150,22 @@ We will utilize Supabase Storage (or Cloudinary integration via webhook) for med
 * **`product-images` bucket**:
   * Public read access to bucket assets.
   * Write policy: Artisan can upload to the bucket under a structured path `/products/artisan-uuid/image-uuid.jpg`.
+
+---
+
+## 4. Database Role Access Privileges (Least Privilege)
+
+To restrict direct Data API queries in Supabase (which has "Automatically expose new tables" disabled), all default public schema privileges on all tables are explicitly revoked from `anon` and `authenticated` roles. Custom least-privilege operations are then explicitly granted:
+
+### anon (Anonymous Guest)
+* **SELECT**: `artisan_profiles`, `buyer_profiles`, `products`, `product_images`, `product_translations`, `product_tags`
+* **INSERT/UPDATE/DELETE**: None (disabled)
+
+### authenticated (Registered App Users)
+* **SELECT / UPDATE**: `users`, `artisan_profiles`, `buyer_profiles` (R/W updates restricted to owner profiles)
+* **SELECT / INSERT / UPDATE / DELETE**: `products`, `product_images`, `product_translations`, `product_tags` (R/W updates restricted to owning artisan)
+* **SELECT / INSERT**: `inquiries` (R/W updates limited to `status` and `expected_delivery` fields only; reassigning `buyer_id` and `product_id` is blocked)
+* **SELECT / INSERT**: `messages`
+
+### service_role (Trusted Server APIs)
+* **ALL**: Complete administrative grants on all public tables (bypassing RLS policies for server operations)

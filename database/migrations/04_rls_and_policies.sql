@@ -99,3 +99,41 @@ CREATE POLICY "Participants can send messages in conversation" ON public.message
             AND (inquiries.buyer_id = auth.uid() OR EXISTS (SELECT 1 FROM public.products WHERE products.id = inquiries.product_id AND products.artisan_id = auth.uid()))
         )
     );
+
+-- ===================================================
+-- EXPLICIT POSTGRESQL DATA API ROLE GRANTS
+-- ===================================================
+
+-- Revoke default public schema privileges to start from a clean slate
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM anon;
+REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM authenticated;
+
+-- 1. Grant Select permissions to anon (anonymous public users)
+GRANT SELECT ON public.artisan_profiles TO anon;
+GRANT SELECT ON public.buyer_profiles TO anon;
+GRANT SELECT ON public.products TO anon;
+GRANT SELECT ON public.product_images TO anon;
+GRANT SELECT ON public.product_translations TO anon;
+GRANT SELECT ON public.product_tags TO anon;
+
+-- 2. Grant CRUD permissions to authenticated users (least-privilege)
+GRANT SELECT, UPDATE ON public.users TO authenticated;
+GRANT SELECT, UPDATE ON public.artisan_profiles TO authenticated;
+GRANT SELECT, UPDATE ON public.buyer_profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.products TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.product_images TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.product_translations TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.product_tags TO authenticated;
+GRANT SELECT, INSERT ON public.inquiries TO authenticated;
+GRANT SELECT, INSERT ON public.messages TO authenticated;
+
+-- 3. Grant full admin access to service_role (trusted backend API)
+GRANT ALL ON public.users TO service_role;
+GRANT ALL ON public.artisan_profiles TO service_role;
+GRANT ALL ON public.buyer_profiles TO service_role;
+GRANT ALL ON public.products TO service_role;
+GRANT ALL ON public.product_images TO service_role;
+GRANT ALL ON public.product_translations TO service_role;
+GRANT ALL ON public.product_tags TO service_role;
+GRANT ALL ON public.inquiries TO service_role;
+GRANT ALL ON public.messages TO service_role;
