@@ -74,6 +74,12 @@ CREATE POLICY "Inquiry participants can edit statuses" ON public.inquiries
     FOR UPDATE TO authenticated
     USING (buyer_id = auth.uid() OR EXISTS (SELECT 1 FROM public.products WHERE products.id = inquiries.product_id AND products.artisan_id = auth.uid()));
 
+-- Enforce column-level immutability for buyer_id and product_id on UPDATE
+-- Authenticated roles can only update status and expected_delivery columns
+ALTER TABLE public.inquiries OWNER TO postgres;
+REVOKE UPDATE ON public.inquiries FROM authenticated;
+GRANT UPDATE (status, expected_delivery) ON public.inquiries TO authenticated;
+
 -- 9. Chat Messages Table Policies
 CREATE POLICY "Participants can read messages in conversation" ON public.messages
     FOR SELECT TO authenticated

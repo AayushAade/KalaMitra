@@ -2,12 +2,12 @@
 CREATE TABLE public.products (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
     artisan_id uuid REFERENCES public.artisan_profiles(id) ON DELETE CASCADE NOT NULL,
-    price numeric(10,2) NOT NULL,
+    price numeric(10,2) NOT NULL CHECK (price >= 0),
     material text,
     production_time text,
     craft text,
-    stock integer DEFAULT 1 NOT NULL,
-    min_order_quantity integer DEFAULT 1 NOT NULL,
+    stock integer DEFAULT 1 NOT NULL CHECK (stock >= 0),
+    min_order_quantity integer DEFAULT 1 NOT NULL CHECK (min_order_quantity > 0),
     created_at timestamptz DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

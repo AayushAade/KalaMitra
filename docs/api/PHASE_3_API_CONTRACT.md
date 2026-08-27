@@ -237,6 +237,28 @@ This document details the API endpoints mapping `/api/v1/` routes to the mobile 
   ```
 * **Auth Requirement**: Authenticated (Artisan).
 
+#### `POST /api/v1/pricing/recommend`
+* **Purpose**: Calculate recommended retail price, minimum price, maximum price, and margin justification based on cost variables.
+* **Headers**: `Authorization: Bearer <token>`
+* **Request**:
+  ```json
+  {
+    "material_cost": 600.0,
+    "labor_cost": 400.0,
+    "other_cost": 150.0
+  }
+  ```
+* **Response (200 OK)**:
+  ```json
+  {
+    "recommended_price": 1553,
+    "minimum_price": 1398,
+    "maximum_price": 1786,
+    "explanation": "Based on traditional handicrafts and current Pune boutique rates, a 35% margin reflects a fair compensation wage."
+  }
+  ```
+* **Auth Requirement**: Authenticated (Artisan).
+
 ---
 
 ## 2. Mobile Service Signature Compatibility

@@ -51,7 +51,7 @@ erDiagram
   * `avatar_url` `text`
   * `store_verified` `boolean` DEFAULT false NOT NULL
   * `created_at` `timestamp with time zone` DEFAULT `timezone('utc'::text, now())` NOT NULL
-* **RLS**: Public read, write restricted to owner artisan.
+* **RLS**: Public read, write updates restricted to owner artisan. Profile creation is strictly server-controlled via FastAPI backend using Supabase service-role context (no client-side INSERT allowed).
 
 ### buyer_profiles
 * **Purpose**: Custom profile details for wholesale buyers.
@@ -61,7 +61,7 @@ erDiagram
   * `business_type` `text`
   * `location` `text`
   * `created_at` `timestamp with time zone` DEFAULT `timezone('utc'::text, now())` NOT NULL
-* **RLS**: Public read, write restricted to owner buyer.
+* **RLS**: Public read, write updates restricted to owner buyer. Profile creation is strictly server-controlled via FastAPI backend using Supabase service-role context (no client-side INSERT allowed).
 
 ### products
 * **Purpose**: Catalog listings.
@@ -97,7 +97,7 @@ erDiagram
 * **Foreign Keys**:
   * `product_id` `uuid` references `products(id)` ON DELETE CASCADE NOT NULL.
 * **Columns**:
-  * `language` `varchar(10)` NOT NULL (e.g. 'en', 'hi', 'mr')
+  * `language` `varchar(10)` NOT NULL (Intentionally general to support any Indian languages, e.g. 'en', 'hi', 'mr')
   * `name` `text` NOT NULL
   * `description` `text`
   * `voice_transcript` `text`
@@ -119,8 +119,8 @@ erDiagram
 * **Purpose**: Wholesale inquiry proposals.
 * **Primary Key**: `id` `uuid` DEFAULT `gen_random_uuid()` NOT NULL.
 * **Foreign Keys**:
-  * `buyer_id` `uuid` references `buyer_profiles(id)` ON DELETE SET NULL NOT NULL.
-  * `product_id` `uuid` references `products(id)` ON DELETE CASCADE NOT NULL.
+  * `buyer_id` `uuid` references `buyer_profiles(id)` ON DELETE SET NULL (nullable).
+  * `product_id` `uuid` references `products(id)` ON DELETE SET NULL (nullable).
 * **Columns**:
   * `quantity` `integer` NOT NULL
   * `expected_delivery` `text`
@@ -133,13 +133,13 @@ erDiagram
 * **Primary Key**: `id` `uuid` DEFAULT `gen_random_uuid()` NOT NULL.
 * **Foreign Keys**:
   * `inquiry_id` `uuid` references `inquiries(id)` ON DELETE CASCADE NOT NULL.
-  * `sender_id` `uuid` references `users(id)` ON DELETE SET NULL NOT NULL.
+  * `sender_id` `uuid` references `users(id)` ON DELETE SET NULL (nullable).
 * **Columns**:
   * `sender_role` `varchar(20)` NOT NULL CHECK (`sender_role` IN ('Buyer', 'Artisan'))
   * `text` `text` NOT NULL
   * `created_at` `timestamp with time zone` DEFAULT `timezone('utc'::text, now())` NOT NULL
 * **RLS**: Restricted to participants (the initiating buyer or the listing artisan).
-* **Indexes**: Index on `inquiry_id` for fast chronological logs loading.
+* **Indexes**: Composite index on `(inquiry_id, created_at)` for fast chronological logs loading.
 
 ---
 
