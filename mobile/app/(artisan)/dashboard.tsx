@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -9,8 +9,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { artisanService } from '../../services/artisanService';
 
 export default function ArtisanDashboard() {
-  const artisan = artisanService.getCurrentArtisan();
+  const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
   const tips = artisanService.getDashboardRecommendations();
+
+  useEffect(() => {
+    const unsubscribe = artisanService.subscribe((updatedArtisan) => {
+      setArtisan(updatedArtisan);
+    });
+    // Ensure we capture any status changes that happened during transit
+    setArtisan(artisanService.getCurrentArtisan());
+    return unsubscribe;
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -22,7 +31,7 @@ export default function ArtisanDashboard() {
           style={({ pressed }) => [styles.welcomeCard, pressed && styles.pressedCard]}
         >
           <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>S</Text>
+            <Text style={styles.avatarText}>{(artisan.ownerName || 'S').charAt(0).toUpperCase()}</Text>
           </View>
           <View style={styles.welcomeTextContainer}>
             <Text style={styles.welcomeName}>{artisan.name}</Text>

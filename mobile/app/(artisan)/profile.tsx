@@ -1,20 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { artisanService } from '../../services/artisanService';
+import { authService } from '../../services/authService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ArtisanProfileScreen() {
-  const current = artisanService.getCurrentArtisan();
+  const [current, setCurrent] = useState(artisanService.getCurrentArtisan());
 
   const [shopName, setShopName] = useState(current.name);
   const [artisanName, setArtisanName] = useState(current.ownerName);
   const [location, setLocation] = useState(current.location);
   const [bio, setBio] = useState(current.bio || '');
   const [phone, setPhone] = useState(current.phone || '');
+
+  useEffect(() => {
+    const unsubscribe = artisanService.subscribe((updated) => {
+      setCurrent(updated);
+      setShopName(updated.name);
+      setArtisanName(updated.ownerName);
+      setLocation(updated.location);
+      setBio(updated.bio || '');
+      setPhone(updated.phone || '');
+    });
+    const fresh = artisanService.getCurrentArtisan();
+    setCurrent(fresh);
+    setShopName(fresh.name);
+    setArtisanName(fresh.ownerName);
+    setLocation(fresh.location);
+    setBio(fresh.bio || '');
+    setPhone(fresh.phone || '');
+    return unsubscribe;
+  }, []);
 
   const handleSave = () => {
     artisanService.updateProfile({
@@ -27,6 +47,15 @@ export default function ArtisanProfileScreen() {
 
     alert('Artisan profile updated successfully!');
     router.back();
+  };
+
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      router.replace('/(auth)/login' as any);
+    } catch (e: any) {
+      alert('Logout failed: ' + e.message);
+    }
   };
 
   return (
@@ -109,6 +138,13 @@ export default function ArtisanProfileScreen() {
               variant="secondary"
               style={styles.previewBtn}
             />
+
+            <Button
+              title="Logout"
+              onPress={handleLogout}
+              variant="secondary"
+              style={styles.logoutBtn}
+            />
           </View>
         </View>
       </ScrollView>
@@ -179,5 +215,11 @@ const styles = StyleSheet.create({
   },
   previewBtn: {
     width: '100%',
+  },
+  logoutBtn: {
+    width: '100%',
+    marginTop: Spacing.md,
+    borderColor: '#F8B4B4',
+    borderWidth: 1,
   },
 });

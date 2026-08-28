@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
@@ -8,8 +8,16 @@ import { artisanService } from '../../services/artisanService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PublicStoreScreen() {
-  const artisan = artisanService.getCurrentArtisan();
+  const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
   const { products } = useProductCatalog();
+
+  useEffect(() => {
+    const unsubscribe = artisanService.subscribe((updated) => {
+      setArtisan(updated);
+    });
+    setArtisan(artisanService.getCurrentArtisan());
+    return unsubscribe;
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>

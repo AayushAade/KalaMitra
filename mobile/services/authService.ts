@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { Artisan } from '../types';
+import { artisanService } from './artisanService';
 
 export interface AuthResult {
   user: any;
@@ -53,6 +54,11 @@ export const authService = {
       throw new Error(`Account role mismatch. This account is registered as a ${userMeta.role}.`);
     }
 
+    artisanService.setAuthenticatedUser({
+      id: data.user.id,
+      email: data.user.email || ''
+    });
+
     return true;
   },
 
@@ -100,6 +106,11 @@ export const authService = {
       if (metaError) {
         console.error(`[AuthService] Failed to insert public.users metadata:`, metaError.message);
       }
+
+      artisanService.setAuthenticatedUser({
+        id: data.user.id,
+        email: data.user.email || ''
+      });
     } else {
       console.log(`[AuthService] Email confirmation required. Session is not active yet.`);
     }
@@ -135,6 +146,7 @@ export const authService = {
    */
   logout: async (): Promise<void> => {
     console.log(`[AuthService] Signing out active session...`);
+    artisanService.setAuthenticatedUser(null);
     const { error } = await supabase.auth.signOut();
     if (error) {
       throw new Error(error.message);

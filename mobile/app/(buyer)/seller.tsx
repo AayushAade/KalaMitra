@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
@@ -9,8 +9,16 @@ import { artisanService } from '../../services/artisanService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BuyerSellerProfileScreen() {
-  const artisan = artisanService.getCurrentArtisan();
+  const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
   const { products } = useProductCatalog();
+
+  useEffect(() => {
+    const unsubscribe = artisanService.subscribe((updated) => {
+      setArtisan(updated);
+    });
+    setArtisan(artisanService.getCurrentArtisan());
+    return unsubscribe;
+  }, []);
 
   const handleProductPress = (id: string) => {
     router.push({

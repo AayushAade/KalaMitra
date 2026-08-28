@@ -115,6 +115,16 @@ export default function LoginScreen() {
                 variant="primary"
                 style={styles.submitButton}
               />
+
+              <Pressable
+                onPress={() => router.push('/(auth)/register' as any)}
+                style={styles.registerLink}
+              >
+                <Text style={styles.registerLinkText}>
+                  {"Don't have an account? "}
+                  <Text style={styles.registerLinkHighlight}>Register</Text>
+                </Text>
+              </Pressable>
             </View>
           </View>
         </ScrollView>
@@ -232,5 +242,19 @@ const styles = StyleSheet.create({
   },
   submitButton: {
     width: '100%',
+  },
+  registerLink: {
+    marginTop: Spacing.md,
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  registerLinkText: {
+    fontSize: 14,
+    color: Colors.textMuted,
+    fontWeight: '600',
+  },
+  registerLinkHighlight: {
+    color: Colors.primary,
+    fontWeight: '700',
   },
 });

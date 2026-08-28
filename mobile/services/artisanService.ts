@@ -1,9 +1,72 @@
 import { Artisan } from '../types';
 import { mockArtisans } from '../data/mockArtisans';
 
+let authenticatedUser: { id: string; email: string } | null = null;
 let currentArtisanState: Artisan = { ...mockArtisans[0] };
 
+type Listener = (artisan: Artisan) => void;
+const listeners = new Set<Listener>();
+
 export const artisanService = {
+  /**
+   * Subscribe to profile state updates reactively.
+   */
+  subscribe: (listener: Listener) => {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  },
+
+  /**
+   * Notify all registered listeners.
+   */
+  notify: () => {
+    listeners.forEach(listener => {
+      try {
+        listener(currentArtisanState);
+      } catch (err) {
+        console.error(`[ArtisanService] Error notifying profile subscriber:`, err);
+      }
+    });
+  },
+
+  /**
+   * Binds the authenticated user identity to the service context.
+   */
+  setAuthenticatedUser: (user: { id: string; email: string } | null) => {
+    authenticatedUser = user;
+    if (user) {
+      console.log(`[ArtisanService] Active user context loaded: ${user.email}`);
+      const namePrefix = user.email.split('@')[0];
+      currentArtisanState = {
+        ...currentArtisanState,
+        id: user.id,
+        email: user.email,
+        ownerName: namePrefix,
+        name: `${namePrefix}'s Store`,
+        // Keep demo business details
+        totalProducts: 5,
+        rating: 4.9,
+        reviewsCount: 12
+      };
+    } else {
+      console.log(`[ArtisanService] Cleared user context.`);
+      // Reset back to initial demo profile defaults to avoid caching private user names
+      currentArtisanState = {
+        ...mockArtisans[0]
+      };
+    }
+    artisanService.notify();
+  },
+
+  /**
+   * Returns the current authenticated Supabase user metadata.
+   */
+  getAuthenticatedUser: (): { id: string; email: string } | null => {
+    return authenticatedUser;
+  },
+
   getCurrentArtisan: (): Artisan => {
     return currentArtisanState;
   },
@@ -14,6 +77,7 @@ export const artisanService = {
       ...currentArtisanState,
       ...profile
     };
+    artisanService.notify();
     return currentArtisanState;
   },
 

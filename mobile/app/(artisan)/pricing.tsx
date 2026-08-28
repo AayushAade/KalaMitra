@@ -7,6 +7,7 @@ import Button from '../../components/Button';
 import { useProductCreation } from '../../context/ProductCreationContext';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 import { pricingService } from '../../services/pricingService';
+import { artisanService } from '../../services/artisanService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PricingScreen() {
@@ -46,7 +47,7 @@ export default function PricingScreen() {
       imageUrl: productData.enhancedImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuCXcQG2IuC0hmcLXI_X7NLHkQS6FBTajGjmTZYlqwFRaBAchUoU9qXJYnXU85awVMUWhJLn6H8iREvMMm0LOxSqbKMT3mofJ_m9uovpzG-9Knzfv04Z_EPyVum0R5IpYVXGknClHW3hb2Y-ruGkmYBiyFRQFAP6Eg0B56uJ0abfnjTmc45ApRtHGAQFhn7toeu_imQWT1-rgMhI0iK3mklaTSDTIIQHHUHyKPtXnzS7CEQMqVR4xNud',
       material: productData.material || 'Natural Materials',
       price: finalPriceVal,
-      artisanName: 'Savita Handicrafts'
+      artisanName: artisanService.getCurrentArtisan().name
     };
 
     // Save listing into runtime state
