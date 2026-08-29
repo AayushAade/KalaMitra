@@ -41,18 +41,9 @@ class PersistenceBridge:
         original_public_id: Optional[str] = None,
         cutout_public_id: Optional[str] = None,
         tags: Optional[List[str]] = None,
+        allow_fallback: bool = False,
     ) -> PersistenceBridgeResult:
-        """Execute Cloudinary -> Picsart -> Cloudinary persistence bridge.
-
-        Args:
-            image_input: Raw image input (file path, raw bytes, or stream).
-            original_public_id: Optional custom identifier for original asset.
-            cutout_public_id: Optional custom identifier for cutout asset.
-            tags: Optional metadata tags.
-
-        Returns:
-            PersistenceBridgeResult with original and cutout ImageAsset details.
-        """
+        """Execute Cloudinary -> Picsart -> Cloudinary persistence bridge."""
         start_time = time.time()
 
         # 1. Normalize image input into memory-safe byte buffer for multi-consumer dispatch
@@ -114,73 +105,100 @@ class PersistenceBridge:
 
         original_asset = orig_upload_res.asset
 
-        # 3. Call Picsart Remove Background API using isolated provider
+        # 3. Call Picsart Remove Background API with seamless local Rembg fallback
+        cutout_bytes = None
+        picsart_metadata = {}
+        provider_name = "picsart"
+
         picsart_res = self.picsart.remove_background(
             image_input=image_bytes,
             output_format="PNG",
         )
 
-        if not picsart_res.success or not picsart_res.output_url:
-            # Preserve original asset; do not delete from Cloudinary
-            return PersistenceBridgeResult(
-                success=False,
-                provider="picsart",
-                operation="remove_background",
-                original=original_asset,
-                cutout=None,
-                error=f"Picsart background removal failed: {picsart_res.error}",
-                error_code=picsart_res.error_code or "PICSART_PROCESSING_FAILED",
-                metadata={
-                    "picsart_metadata": picsart_res.metadata,
-                    "execution_time_ms": round((time.time() - start_time) * 1000, 2),
-                },
-            )
-
-        # 4. Download and validate cutout PNG from temporary Picsart CDN URL
-        cutout_url = picsart_res.output_url
-        try:
-            req = urllib.request.Request(
-                url=cutout_url,
-                headers={"User-Agent": "KalaMitra-PersistenceBridge/1.0"},
-            )
-            with urllib.request.urlopen(req, timeout=30) as cdn_response:
-                if cdn_response.status != 200:
+        if picsart_res.success and picsart_res.output_url:
+            try:
+                req = urllib.request.Request(
+                    url=picsart_res.output_url,
+                    headers={"User-Agent": "KalaMitra-PersistenceBridge/1.0"},
+                )
+                with urllib.request.urlopen(req, timeout=30) as cdn_response:
+                    if cdn_response.status == 200:
+                        dl_bytes = cdn_response.read()
+                        if len(dl_bytes) >= 8 and dl_bytes[:8] == self.PNG_SIGNATURE:
+                            cutout_bytes = dl_bytes
+                            picsart_metadata = picsart_res.metadata or {}
+                        else:
+                            if not allow_fallback:
+                                return PersistenceBridgeResult(
+                                    success=False,
+                                    provider="picsart",
+                                    operation="remove_background",
+                                    original=original_asset,
+                                    cutout=None,
+                                    error="Downloaded cutout payload is not a valid PNG image format",
+                                    error_code="INVALID_CUTOUT_FORMAT",
+                                    metadata={"execution_time_ms": round((time.time() - start_time) * 1000, 2)},
+                                )
+                    else:
+                        if not allow_fallback:
+                            return PersistenceBridgeResult(
+                                success=False,
+                                provider="picsart",
+                                operation="remove_background",
+                                original=original_asset,
+                                cutout=None,
+                                error=f"Failed to fetch cutout from CDN (HTTP {cdn_response.status})",
+                                error_code="CUTOUT_DOWNLOAD_FAILED",
+                                metadata={"execution_time_ms": round((time.time() - start_time) * 1000, 2)},
+                            )
+            except Exception as exc:
+                if not allow_fallback:
                     return PersistenceBridgeResult(
                         success=False,
                         provider="picsart",
                         operation="remove_background",
                         original=original_asset,
                         cutout=None,
-                        error=f"Failed to fetch cutout from CDN (HTTP {cdn_response.status})",
+                        error=f"Failed to download cutout from CDN: {str(exc)}",
                         error_code="CUTOUT_DOWNLOAD_FAILED",
                         metadata={"execution_time_ms": round((time.time() - start_time) * 1000, 2)},
                     )
-                cutout_bytes = cdn_response.read()
+        else:
+            if not allow_fallback:
+                return PersistenceBridgeResult(
+                    success=False,
+                    provider="picsart",
+                    operation="remove_background",
+                    original=original_asset,
+                    cutout=None,
+                    error=picsart_res.error or "Picsart background removal failed",
+                    error_code=picsart_res.error_code or "PICSART_PROCESSING_FAILED",
+                    metadata={
+                        "picsart_metadata": picsart_res.metadata,
+                        "execution_time_ms": round((time.time() - start_time) * 1000, 2),
+                    },
+                )
 
-        except Exception as exc:
-            return PersistenceBridgeResult(
-                success=False,
-                provider="picsart",
-                operation="remove_background",
-                original=original_asset,
-                cutout=None,
-                error=f"Failed to download cutout from Picsart CDN: {str(exc)}",
-                error_code="CUTOUT_DOWNLOAD_FAILED",
-                metadata={"execution_time_ms": round((time.time() - start_time) * 1000, 2)},
-            )
+        # Fallback to local AI background removal (rembg)
+        if cutout_bytes is None:
+            try:
+                from ai.vision.providers.rembg_provider import RembgProvider
+                rembg_prov = RembgProvider()
+                cutout_bytes = rembg_prov.extract_cutout_bytes(image_bytes)
+                provider_name = "rembg"
+            except Exception as rembg_err:
+                return PersistenceBridgeResult(
+                    success=False,
+                    provider="rembg",
+                    operation="remove_background",
+                    original=original_asset,
+                    cutout=None,
+                    error=f"Background removal failed across all providers: {str(rembg_err)}",
+                    error_code="BACKGROUND_REMOVAL_FAILED",
+                    metadata={"execution_time_ms": round((time.time() - start_time) * 1000, 2)},
+                )
 
-        # Validate PNG magic header bytes
-        if len(cutout_bytes) < 8 or cutout_bytes[:8] != self.PNG_SIGNATURE:
-            return PersistenceBridgeResult(
-                success=False,
-                provider="picsart",
-                operation="remove_background",
-                original=original_asset,
-                cutout=None,
-                error="Downloaded cutout payload is not a valid PNG image format",
-                error_code="INVALID_CUTOUT_FORMAT",
-                metadata={"execution_time_ms": round((time.time() - start_time) * 1000, 2)},
-            )
+
 
         # 5. Upload persistent cutout PNG to Cloudinary (artisan-ai/cutouts/)
         cutout_tags = list(tags) if tags else []
@@ -195,7 +213,7 @@ class PersistenceBridge:
         if not cutout_upload_res.success or not cutout_upload_res.asset:
             return PersistenceBridgeResult(
                 success=False,
-                provider="picsart",
+                provider=provider_name,
                 operation="remove_background",
                 original=original_asset,
                 cutout=None,
@@ -209,18 +227,20 @@ class PersistenceBridge:
 
         return PersistenceBridgeResult(
             success=True,
-            provider="picsart",
+            provider=provider_name,
             operation="remove_background",
             original=original_asset,
             cutout=cutout_asset,
             metadata={
                 "execution_time_ms": elapsed_ms,
-                "picsart_metadata": picsart_res.metadata,
+                "provider_used": provider_name,
+                "picsart_metadata": picsart_metadata,
                 "cutout_bytes": len(cutout_bytes),
                 "original_public_id": original_asset.public_id,
                 "cutout_public_id": cutout_asset.public_id,
             },
         )
+
 
 
 def process_original_to_cutout(

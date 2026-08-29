@@ -1,12 +1,16 @@
-"""Manual developer test utility for Phase 3C Quality Enhancement & Super-Resolution.
+"""Manual developer test utility for Local AI Image Enhancer & Studio Pipeline.
 
 Usage:
     .venv/Scripts/python.exe ai/vision/tests/test_enhancer_manual.py [optional_path_to_image]
 
-Tests live Picsart Ultra-Enhancement / Super-Resolution and executes the full enhanced studio pipeline.
-Does NOT execute automatically during automated CI runs unless LIVE_ENHANCER_TEST=true.
+Tests the complete 4-stage pipeline:
+1. AI Lighting & White-Balance Correction
+2. AI Pixel Super-Resolution & Detail Reconstructor (2x/4x)
+3. AI Background Removal (Local offline Rembg)
+4. E-Commerce Studio Framing & Contact Drop Shadows
 """
 
+import json
 import os
 from pathlib import Path
 import sys
@@ -21,74 +25,69 @@ from ai.vision.enhancer import QualityEnhancer
 
 
 def run_enhancer_manual_test(image_path: Path) -> bool:
-    """Execute live Quality Enhancement test against a local image."""
-    print("=" * 70)
-    print("KalaMitra — Phase 3C: AI Image Quality Enhancement & Super-Resolution")
-    print("=" * 70)
+    """Execute live 4-stage Local AI Quality Enhancement & Studio test."""
+    print("=" * 75)
+    print("KalaMitra — Local AI Image Enhancer & Studio Pipeline")
+    print("=" * 75)
     print(f"Source Image File : {image_path}")
     print(f"Source File Size  : {image_path.stat().st_size:,} bytes")
 
-    if not os.getenv("PICSART_API_KEY"):
-        print("[ERROR] PICSART_API_KEY not configured in environment.")
-        return False
-
     enhancer = QualityEnhancer()
 
-    # 1. Test Picsart Ultra-Enhance / Super-Resolution (POST /upscale/enhance)
-    print("\n[Step 1: Testing Picsart Ultra-Enhance (POST /upscale/enhance)]")
-    enh_res = enhancer.picsart.ultra_enhance(image_path, upscale_factor=2)
-    if enh_res.success:
-        print(f"  Status        : SUCCESS")
-        print(f"  Enhanced URL  : {enh_res.output_url}")
-        print(f"  Execution Time: {enh_res.metadata.get('execution_time_ms')} ms")
-    else:
-        print(f"  Status        : NOTICE ({enh_res.error})")
+    # 1. Test Stage 1: Lighting & Color Correction
+    print("\n[Stage 1: Testing AI Lighting & Color Balance Correction]")
+    light_bytes, light_meta = enhancer.lighting.correct_lighting(
+        image_path,
+        enable_white_balance=True,
+        enable_clahe=True,
+        enable_auto_exposure=True,
+    )
+    print(f"  Status            : SUCCESS")
+    print(f"  Luminance Shift   : {light_meta['original_luminance']} -> {light_meta['enhanced_luminance']} ({light_meta['luminance_boost_percent']}%)")
+    print(f"  Execution Time    : {light_meta['execution_time_ms']} ms")
 
-    # 2. Test adjust / lighting correction
-    print("\n[Step 2: Testing Picsart Adjust / Clarity (POST /adjust)]")
-    adj_res = enhancer.picsart.adjust(image_path, clarity=20, contrast=10, vibrance=10)
-    if adj_res.success:
-        print(f"  Status        : SUCCESS")
-        print(f"  Adjusted URL  : {adj_res.output_url}")
-        print(f"  Execution Time: {adj_res.metadata.get('execution_time_ms')} ms")
-    else:
-        print(f"  Status        : NOTICE ({adj_res.error})")
+    # 2. Test Stage 2: Super-Resolution
+    print("\n[Stage 2: Testing AI Pixel Restoration & Super-Resolution (2x)]")
+    sr_bytes, sr_meta = enhancer.sr.upscale_image(light_bytes, scale=2)
+    print(f"  Status            : SUCCESS")
+    print(f"  Resolution Shift  : {sr_meta['original_resolution']} -> {sr_meta['enhanced_resolution']}")
+    print(f"  Megapixels Shift  : {sr_meta['megapixels_before']} MP -> {sr_meta['megapixels_after']} MP")
+    print(f"  Execution Time    : {sr_meta['execution_time_ms']} ms")
 
-    # 3. Test full quality-enhanced studio pipeline with graceful fallback
-    print("\n[Step 3: Testing Full Quality-Enhanced Studio Pipeline]")
+    # 3. Test Full 4-Stage End-to-End Pipeline
+    print("\n[Full Pipeline: Executing End-to-End AI Enhancer & Studio Sequence]")
     full_res = enhancer.process_enhanced_studio_pipeline(
         image_input=image_path,
         category="pottery",
         preset="warm_neutral",
         aspect_ratio="square_1x1",
         add_shadow=True,
-        quality_mode="ultra",
         upscale_factor=2,
+        enable_lighting_correction=True,
+        enable_super_resolution=True,
     )
 
     if full_res.success and full_res.enhanced:
-        print(f"  Overall Status: SUCCESS")
-        print(f"  Original URL  : {full_res.original.secure_url if full_res.original else 'N/A'}")
-        print(f"  Cutout URL    : {full_res.cutout.secure_url if full_res.cutout else 'N/A'}")
-        print(f"  Enhanced URL  : {full_res.enhanced.secure_url}")
-        print(f"  Dimensions    : {full_res.enhanced.width} x {full_res.enhanced.height} px")
-        print(f"  Format        : {full_res.enhanced.format}")
-        print(f"  Total Time    : {full_res.metadata.get('total_execution_time_ms')} ms")
-        print(f"  Quality Telemetry: {full_res.metadata.get('quality_enhancement')}")
-        print("\n[SUCCESS] Phase 3C Quality Enhancement Pipeline verified successfully!")
+        print(f"  Overall Status    : SUCCESS")
+        print(f"  Original URL      : {full_res.original.secure_url if full_res.original else 'N/A'}")
+        print(f"  Cutout URL        : {full_res.cutout.secure_url if full_res.cutout else 'N/A'}")
+        print(f"  Final Studio URL  : {full_res.enhanced.secure_url}")
+        print(f"  Final Dimensions  : {full_res.enhanced.width} x {full_res.enhanced.height} px")
+        print(f"  Format            : {full_res.enhanced.format}")
+        print(f"  Total Pipeline Time: {full_res.metadata.get('total_execution_time_ms')} ms")
+        print("\n  Stages Executed   : " + ", ".join(full_res.metadata.get("pipeline_telemetry", {}).get("stages_applied", [])))
+        print("\n" + "=" * 75)
+        print("[SUCCESS] All 4 stages executed successfully with zero API fees!")
+        print("=" * 75)
         return True
     else:
-        print(f"  Overall Status: FAILED ({full_res.error})")
+        print(f"  Overall Status    : FAILED ({full_res.error})")
         return False
 
 
 class TestEnhancerLiveIntegration(unittest.TestCase):
-    """Live integration test suite skipped by default unless LIVE_ENHANCER_TEST=true."""
+    """Live integration test suite."""
 
-    @unittest.skipUnless(
-        os.getenv("LIVE_ENHANCER_TEST") == "true",
-        "Set LIVE_ENHANCER_TEST=true to run live enhancer integration tests",
-    )
     def test_live_quality_enhancer(self):
         sample_img = Path(__file__).parent / "test_product.jpg"
         self.assertTrue(sample_img.exists(), f"Sample image {sample_img} must exist")

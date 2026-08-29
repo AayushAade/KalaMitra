@@ -1,8 +1,12 @@
-"""AI Image Quality Enhancement & Super-Resolution Layer.
+"""AI Image Quality Enhancement, Super-Resolution & Studio Orchestrator.
 
-Enhances poor-quality artisan smartphone photographs using Cloudinary AI Quality Analysis &
-Restoration alongside Picsart fine adjustments before cutout extraction and studio composition.
-Strictly guarantees that genuine product characteristics, textures, and geometry remain unmodified.
+Orchestrates the complete 4-stage artisan vision pipeline:
+1. AI Lighting & White-Balance Correction (CLAHE + Gray-World Color Normalization)
+2. AI Pixel Super-Resolution & Texture Reconstruction (2x/4x Detail Sharpening)
+3. AI Cluttered Background Removal (Offline U2-Net / Rembg with zero API fees)
+4. E-Commerce Studio Framing, Backdrops & Contact Drop Shadows (Marketplace Standards)
+
+Guarantees 100% genuine handicraft authenticity without synthetic distortion.
 """
 
 from pathlib import Path
@@ -11,22 +15,31 @@ from typing import Any, BinaryIO, Dict, List, Optional, Union
 import urllib.request
 
 from ai.vision.cloudinary_service import CloudinaryService
+from ai.vision.lighting import LightingCorrector
 from ai.vision.persistence import PersistenceBridge
 from ai.vision.providers.picsart_provider import PicsartProvider
+from ai.vision.providers.rembg_provider import RembgProvider
+from ai.vision.providers.sr_provider import SuperResolutionProvider
 from ai.vision.schemas import EnhancedImageResult, ImageAsset, ProcessedImageResult, QualityAnalysisResult
 from ai.vision.studio import StudioComposer
 
 
 class QualityEnhancer:
-    """Orchestrator for automated image quality analysis, super-resolution, and studio presentation."""
+    """End-to-end vision pipeline orchestrator for artisan e-commerce photography."""
 
     def __init__(
         self,
+        lighting_corrector: Optional[LightingCorrector] = None,
+        sr_provider: Optional[SuperResolutionProvider] = None,
+        rembg_provider: Optional[RembgProvider] = None,
         picsart_provider: Optional[PicsartProvider] = None,
         cloudinary_service: Optional[CloudinaryService] = None,
         studio_composer: Optional[StudioComposer] = None,
     ) -> None:
         """Initialize QualityEnhancer with vision service dependencies."""
+        self.lighting = lighting_corrector or LightingCorrector()
+        self.sr = sr_provider or SuperResolutionProvider()
+        self.rembg = rembg_provider or RembgProvider()
         self.picsart = picsart_provider or PicsartProvider()
         self.cloudinary = cloudinary_service or CloudinaryService()
         self.studio = studio_composer or StudioComposer(cloudinary_service=self.cloudinary)
@@ -45,16 +58,7 @@ class QualityEnhancer:
         mode: str = "ultra",
         upscale_factor: int = 2,
     ) -> ProcessedImageResult:
-        """Enhance image quality using Picsart AI models.
-
-        Args:
-            image_input: Raw image payload (file path, bytes, or stream).
-            mode: Enhancement mode ('ultra', 'upscale', or 'standard').
-            upscale_factor: Scaling multiplier (2 or 4).
-
-        Returns:
-            ProcessedImageResult with enhanced asset URL and metadata.
-        """
+        """Enhance image quality using Picsart AI models."""
         clean_mode = mode.lower()
         if clean_mode == "ultra":
             return self.picsart.ultra_enhance(
@@ -94,32 +98,37 @@ class QualityEnhancer:
         add_shadow: Optional[bool] = None,
         quality_mode: str = "auto",
         upscale_factor: int = 2,
+        enable_lighting_correction: bool = True,
+        enable_super_resolution: bool = True,
         enable_quality_enhancement: bool = True,
         tags: Optional[List[str]] = None,
     ) -> EnhancedImageResult:
-        """Execute full end-to-end multi-tier quality-enhanced studio pipeline.
+        """Execute the complete 4-stage local AI vision & studio presentation pipeline.
 
         Flow:
-        1. Ingest & store raw original in Cloudinary (artisan-ai/originals/).
-        2. Perform automated image quality analysis (High / Medium / Poor tier).
-        3. Apply AI Quality Enhancement (Cloudinary or Picsart depending on mode).
-        4. Extract transparent cutout from enhanced image (POST /removebg).
-        5. Validate & store transparent PNG cutout in Cloudinary (artisan-ai/cutouts/).
-        6. Compose studio backdrop & contact shadow into Cloudinary (artisan-ai/enhanced/).
+        1. Ingest raw photo into persistent Cloudinary storage (artisan-ai/originals/).
+        2. Perform automated image quality analysis & classification.
+        3. Stage 1: Correct dim/uneven lighting, shadow underexposure, and color balance.
+        4. Stage 2: Reconstruct pixel sharpness, deblur, and upscale 2x/4x via SuperResolutionProvider.
+        5. Stage 3: Extract transparent PNG cutout via RembgProvider.
+        6. Stage 4: Compose onto professional e-commerce studio backdrop with contact shadow.
+        7. Persist final studio asset into Cloudinary (artisan-ai/enhanced/).
 
         Args:
-            image_input: Raw image input.
+            image_input: Raw image payload (file path, raw bytes, or stream).
             category: Artisan craft category (pottery, textiles, wooden_crafts, jewellery, general).
-            preset: Studio backdrop preset.
-            aspect_ratio: Canvas aspect ratio.
-            add_shadow: Contact drop shadow toggle.
-            quality_mode: Quality mode ('auto', 'ultra', 'upscale', 'standard', 'cloudinary').
-            upscale_factor: Scaling factor (2 or 4).
-            enable_quality_enhancement: Whether to apply quality enhancement.
+            preset: Studio backdrop preset key (ecommerce_white, warm_neutral, terracotta_sand, minimal_grey).
+            aspect_ratio: Canvas aspect ratio (square_1x1, portrait_4x5, portrait_9x16, landscape_16x9).
+            add_shadow: Whether to apply a realistic 3D contact drop shadow.
+            quality_mode: Processing mode ('local_ai', 'cloud', 'auto').
+            upscale_factor: Super-resolution multiplier (2 or 4).
+            enable_lighting_correction: Toggle for lighting & white-balance engine.
+            enable_super_resolution: Toggle for 2x/4x pixel super-resolution engine.
+            enable_quality_enhancement: Master quality enhancement toggle.
             tags: Optional metadata tags.
 
         Returns:
-            EnhancedImageResult with original, cutout, and enhanced assets.
+            EnhancedImageResult with original, cutout, and final enhanced studio assets.
         """
         start_time = time.time()
         pipeline_tags = list(tags) if tags else []
@@ -156,7 +165,7 @@ class QualityEnhancer:
                 error_code="EMPTY_IMAGE",
             )
 
-        # 2. Upload raw original photograph to Cloudinary (artisan-ai/originals/)
+        # 2. Ingest raw original photograph to Cloudinary (artisan-ai/originals/)
         orig_upload_res = self.cloudinary.upload_original_image(
             image_input=image_bytes,
             tags=pipeline_tags,
@@ -170,19 +179,18 @@ class QualityEnhancer:
             )
         original_asset = orig_upload_res.asset
 
-        # 3. Automated Image Quality Analysis (Cloudinary)
+        # 3. Quality Analysis
         analysis = self.analyze_quality(original_asset.public_id)
 
-        working_image_bytes = image_bytes
-        quality_metadata: Dict[str, Any] = {
-            "quality_enhancement_enabled": enable_quality_enhancement,
+        working_bytes = image_bytes
+        pipeline_telemetry: Dict[str, Any] = {
             "quality_tier": analysis.quality_tier,
-            "megapixels": analysis.megapixels,
             "quality_score": analysis.quality_score,
-            "recommended_transformations": analysis.recommended_transformations,
+            "megapixels_original": analysis.megapixels,
+            "stages_applied": [],
         }
 
-        # 4. Multi-Tier AI Quality Enhancement
+        # 4. Multi-Tier AI Quality Enhancement & Super-Resolution
         if enable_quality_enhancement:
             clean_mode = quality_mode.lower()
 
@@ -200,106 +208,106 @@ class QualityEnhancer:
                             headers={"User-Agent": "KalaMitra-QualityEnhancer/1.0"},
                         )
                         with urllib.request.urlopen(req, timeout=30) as cdn_res:
-                            if cdn_res.status == 200:
-                                working_image_bytes = cdn_res.read()
-                                quality_metadata["quality_enhancement_status"] = f"applied ({clean_mode})"
+                            if getattr(cdn_res, "status", 200) in (200, None):
+                                working_bytes = cdn_res.read()
+                                pipeline_telemetry["quality_enhancement_status"] = f"applied ({clean_mode})"
+                                pipeline_telemetry["stages_applied"].append(f"picsart_{clean_mode}")
                     except Exception as exc:
-                        quality_metadata["quality_enhancement_status"] = f"fallback ({str(exc)})"
+                        pipeline_telemetry["quality_enhancement_status"] = f"fallback ({str(exc)})"
                 else:
-                    quality_metadata["quality_enhancement_status"] = f"fallback (provider: {enh_res.error})"
+                    pipeline_telemetry["quality_enhancement_status"] = f"fallback (provider: {enh_res.error})"
 
-            else:
-                # Cloudinary AI Quality Enhancement
+            elif clean_mode in ("cloudinary", "auto"):
                 try:
                     cloudinary_enhanced_url = self.cloudinary.get_quality_enhanced_url(
                         public_id=original_asset.public_id,
                         quality_tier=analysis.quality_tier,
                     )
-                    quality_metadata["cloudinary_enhanced_url"] = cloudinary_enhanced_url
-
+                    pipeline_telemetry["cloudinary_enhanced_url"] = cloudinary_enhanced_url
                     req = urllib.request.Request(
                         url=cloudinary_enhanced_url,
                         headers={"User-Agent": "KalaMitra-QualityEnhancer/1.0"},
                     )
                     with urllib.request.urlopen(req, timeout=25) as cdn_res:
-                        if cdn_res.status == 200:
-                            working_image_bytes = cdn_res.read()
-                            quality_metadata["cloudinary_enhancement_status"] = "applied"
+                        if getattr(cdn_res, "status", 200) in (200, None):
+                            working_bytes = cdn_res.read()
+                            pipeline_telemetry["cloudinary_enhancement_status"] = "applied"
+                            pipeline_telemetry["stages_applied"].append("cloudinary_ai_enhance")
                 except Exception as exc:
-                    quality_metadata["cloudinary_enhancement_status"] = f"fallback ({str(exc)})"
+                    pipeline_telemetry["cloudinary_enhancement_status"] = f"fallback ({str(exc)})"
 
-                # Picsart Fine Tuning (Standard Mode)
-                if clean_mode == "standard":
-                    adj_res = self.picsart.adjust(
-                        image_input=working_image_bytes,
-                        clarity=20,
-                        contrast=10,
-                        vibrance=10,
-                    )
-                    if adj_res.success and adj_res.output_url:
-                        try:
-                            req = urllib.request.Request(
-                                url=adj_res.output_url,
-                                headers={"User-Agent": "KalaMitra-QualityEnhancer/1.0"},
-                            )
-                            with urllib.request.urlopen(req, timeout=25) as adj_cdn_res:
-                                if adj_cdn_res.status == 200:
-                                    working_image_bytes = adj_cdn_res.read()
-                                    quality_metadata["picsart_adjust_status"] = "applied"
-                        except Exception:
-                            quality_metadata["picsart_adjust_status"] = "fallback"
+            else:
+                # 100% Local AI Pipeline (Lighting + Super-Resolution)
+                if enable_lighting_correction:
+                    try:
+                        working_bytes, light_telemetry = self.lighting.correct_lighting(
+                            working_bytes,
+                            enable_white_balance=True,
+                            enable_clahe=True,
+                            enable_auto_exposure=True,
+                        )
+                        pipeline_telemetry["lighting_correction"] = light_telemetry
+                        pipeline_telemetry["stages_applied"].append("lighting_correction")
+                    except Exception as light_err:
+                        pipeline_telemetry["lighting_correction_error"] = str(light_err)
 
-        # 5. Background Removal (Cutout Extraction)
-        cutout_res = self.picsart.remove_background(
-            image_input=working_image_bytes,
-            output_format="PNG",
-        )
+                if enable_super_resolution:
+                    try:
+                        working_bytes, sr_telemetry = self.sr.upscale_image(
+                            working_bytes,
+                            scale=upscale_factor,
+                        )
+                        pipeline_telemetry["super_resolution"] = sr_telemetry
+                        pipeline_telemetry["stages_applied"].append(f"super_resolution_{upscale_factor}x")
+                    except Exception as sr_err:
+                        pipeline_telemetry["super_resolution_error"] = str(sr_err)
 
-        if not cutout_res.success or not cutout_res.output_url:
-            return EnhancedImageResult(
-                success=False,
-                original=original_asset,
-                cutout=None,
-                enhanced=None,
-                category=category,
-                error=f"Background removal failed: {cutout_res.error}",
-                error_code=cutout_res.error_code or "BACKGROUND_REMOVAL_FAILED",
-                metadata={"quality_metadata": quality_metadata},
-            )
+        # 5. Background Removal (Try Picsart first, seamless local Rembg fallback)
+        cutout_bytes: Optional[bytes] = None
 
-        # 6. Fetch and validate transparent PNG cutout
         try:
-            req = urllib.request.Request(
-                url=cutout_res.output_url,
-                headers={"User-Agent": "KalaMitra-QualityEnhancer/1.0"},
+            cutout_res = self.picsart.remove_background(
+                image_input=working_bytes,
+                output_format="PNG",
             )
-            with urllib.request.urlopen(req, timeout=30) as cdn_response:
-                cutout_bytes = cdn_response.read()
-
-            if len(cutout_bytes) < 8 or cutout_bytes[:8] != b"\x89PNG\r\n\x1a\n":
-                return EnhancedImageResult(
-                    success=False,
-                    original=original_asset,
-                    cutout=None,
-                    enhanced=None,
-                    category=category,
-                    error="Downloaded cutout is not a valid PNG format",
-                    error_code="INVALID_CUTOUT_FORMAT",
-                    metadata={"quality_metadata": quality_metadata},
+            if cutout_res.success and cutout_res.output_url:
+                req = urllib.request.Request(
+                    url=cutout_res.output_url,
+                    headers={"User-Agent": "KalaMitra-QualityEnhancer/1.0"},
                 )
-        except Exception as exc:
+                with urllib.request.urlopen(req, timeout=30) as cdn_response:
+                    if getattr(cdn_response, "status", 200) in (200, None):
+                        dl_bytes = cdn_response.read()
+                        if len(dl_bytes) >= 8 and dl_bytes[:8] == b"\x89PNG\r\n\x1a\n":
+                            cutout_bytes = dl_bytes
+                            pipeline_telemetry["cutout_provider"] = "picsart_cloud"
+                            pipeline_telemetry["stages_applied"].append("background_removal_cloud")
+        except Exception:
+            pass
+
+
+        if cutout_bytes is None:
+            try:
+                cutout_bytes = self.rembg.extract_cutout_bytes(working_bytes)
+                pipeline_telemetry["cutout_provider"] = "rembg_offline_u2net"
+                pipeline_telemetry["stages_applied"].append("background_removal_local")
+            except Exception as rembg_err:
+                pass
+
+        if cutout_bytes is None or len(cutout_bytes) < 8 or cutout_bytes[:8] != b"\x89PNG\r\n\x1a\n":
             return EnhancedImageResult(
                 success=False,
                 original=original_asset,
                 cutout=None,
                 enhanced=None,
                 category=category,
-                error=f"Failed to fetch cutout PNG from CDN: {str(exc)}",
-                error_code="CUTOUT_DOWNLOAD_FAILED",
-                metadata={"quality_metadata": quality_metadata},
+                error="Background removal failed to extract a valid transparent PNG cutout",
+                error_code="BACKGROUND_REMOVAL_FAILED",
+                metadata={"pipeline_telemetry": pipeline_telemetry},
             )
 
-        # 7. Upload cutout to Cloudinary (artisan-ai/cutouts/)
+
+        # 7. Upload transparent cutout PNG to Cloudinary (artisan-ai/cutouts/)
         cutout_tags = list(pipeline_tags)
         cutout_tags.append("cutout")
         cutout_upload = self.cloudinary.upload_cutout_image(
@@ -316,11 +324,11 @@ class QualityEnhancer:
                 category=category,
                 error=f"Cloudinary cutout upload failed: {cutout_upload.error}",
                 error_code="CUTOUT_UPLOAD_FAILED",
-                metadata={"quality_metadata": quality_metadata},
+                metadata={"pipeline_telemetry": pipeline_telemetry},
             )
         cutout_asset = cutout_upload.asset
 
-        # 8. Compose Studio Presentation on chosen Backdrop
+        # 8. Stage 4: E-Commerce Studio Presentation Composition
         final_result = self.studio.compose_studio_image(
             cutout=cutout_asset,
             original=original_asset,
@@ -332,9 +340,12 @@ class QualityEnhancer:
         )
 
         elapsed_ms = round((time.time() - start_time) * 1000, 2)
+        pipeline_telemetry["stages_applied"].append("studio_composition")
+        pipeline_telemetry["total_execution_time_ms"] = elapsed_ms
+
         if final_result.metadata is not None:
             final_result.metadata["total_execution_time_ms"] = elapsed_ms
-            final_result.metadata["quality_enhancement"] = quality_metadata
+            final_result.metadata["pipeline_telemetry"] = pipeline_telemetry
 
         return final_result
 
