@@ -33,33 +33,49 @@ export default function PricingScreen() {
 
   const [finalPrice, setFinalPrice] = useState('1553');
 
+  const [publishing, setPublishing] = useState(false);
+
   const applySuggested = () => {
     setFinalPrice(recommendedPrice.toString());
   };
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     const finalPriceVal = parseFloat(finalPrice) || recommendedPrice;
+    setPublishing(true);
 
-    // Build the product listing
-    const newProduct = {
-      id: `prod-${Date.now()}`,
-      name: productData.name || 'Handcrafted Product',
-      imageUrl: productData.enhancedImage || 'https://lh3.googleusercontent.com/aida-public/AB6AXuCXcQG2IuC0hmcLXI_X7NLHkQS6FBTajGjmTZYlqwFRaBAchUoU9qXJYnXU85awVMUWhJLn6H8iREvMMm0LOxSqbKMT3mofJ_m9uovpzG-9Knzfv04Z_EPyVum0R5IpYVXGknClHW3hb2Y-ruGkmYBiyFRQFAP6Eg0B56uJ0abfnjTmc45ApRtHGAQFhn7toeu_imQWT1-rgMhI0iK3mklaTSDTIIQHHUHyKPtXnzS7CEQMqVR4xNud',
-      material: productData.material || 'Natural Materials',
-      price: finalPriceVal,
-      artisanName: artisanService.getCurrentArtisan().name
-    };
+    try {
+      // Build the complete product listing
+      const newProduct = {
+        name: productData.name || 'Handcrafted Product',
+        imageUrl: productData.enhancedImage || productData.image || 'https://lh3.googleusercontent.com/aida-public/AB6AXuCXcQG2IuC0hmcLXI_X7NLHkQS6FBTajGjmTZYlqwFRaBAchUoU9qXJYnXU85awVMUWhJLn6H8iREvMMm0LOxSqbKMT3mofJ_m9uovpzG-9Knzfv04Z_EPyVum0R5IpYVXGknClHW3hb2Y-ruGkmYBiyFRQFAP6Eg0B56uJ0abfnjTmc45ApRtHGAQFhn7toeu_imQWT1-rgMhI0iK3mklaTSDTIIQHHUHyKPtXnzS7CEQMqVR4xNud',
+        originalImageUrl: productData.image,
+        material: productData.material || 'Natural Materials',
+        craft: productData.craft || 'Traditional Handicrafts',
+        productionTime: productData.productionTime || '3 days',
+        price: finalPriceVal,
+        descriptionEnglish: productData.descriptionEnglish,
+        descriptionHindi: productData.descriptionHindi,
+        voiceTranscript: productData.voiceText,
+        tags: productData.tags || [],
+        artisanName: artisanService.getCurrentArtisan().name || artisanService.getCurrentArtisan().ownerName || 'My Store'
+      };
 
-    // Save listing into runtime state
-    addProduct(newProduct);
+      // Save listing into Supabase database & runtime state
+      await addProduct(newProduct);
 
-    // Reset creation wizard state
-    resetProductData();
+      // Reset creation wizard state
+      resetProductData();
 
-    alert('Product listed successfully in your Catalog!');
+      alert('Product published successfully to the marketplace!');
 
-    // Redirect to Products Listing view
-    router.replace('/(artisan)/products' as any);
+      // Redirect to Products Listing view
+      router.replace('/(artisan)/products' as any);
+    } catch (err: any) {
+      console.error('[PricingScreen] Failed to publish product:', err);
+      alert(err.message || 'Failed to publish product to the marketplace. Please check your connection.');
+    } finally {
+      setPublishing(false);
+    }
   };
 
   return (
@@ -159,9 +175,10 @@ export default function PricingScreen() {
             </View>
 
             <Button
-              title="Publish Listing to Marketplace"
+              title={publishing ? 'Publishing Listing...' : 'Publish Listing to Marketplace'}
               onPress={handlePublish}
               variant="primary"
+              disabled={publishing}
               style={styles.publishBtn}
             />
           </View>

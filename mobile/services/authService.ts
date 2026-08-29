@@ -72,10 +72,21 @@ export const authService = {
   ): Promise<AuthResult> => {
     console.log(`[AuthService] Registering new user identity for: ${email}`);
 
-    // Create Supabase Auth user
+    // Create Supabase Auth user with role and profile metadata
     const { data, error } = await supabase.auth.signUp({
       email,
-      password
+      password,
+      options: {
+        data: {
+          role: 'artisan',
+          shop_name: storeData.name,
+          owner_name: storeData.ownerName,
+          phone: storeData.phone,
+          craft: storeData.craft,
+          location: storeData.location,
+          language: storeData.language || 'Hindi'
+        }
+      }
     });
 
     if (error) {

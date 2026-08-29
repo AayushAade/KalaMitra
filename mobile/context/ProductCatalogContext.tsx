@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Product, Inquiry, Message } from '../types';
 import { productService } from '../services/productService';
 import { inquiryService } from '../services/inquiryService';
@@ -6,31 +6,48 @@ import { chatService } from '../services/chatService';
 
 interface ProductCatalogContextType {
   products: Product[];
-  addProduct: (product: Product) => void;
+  addProduct: (product: Partial<Product> & { name: string; price: number }) => Promise<Product>;
+  refreshProducts: () => Promise<void>;
   inquiries: Inquiry[];
   addInquiry: (inquiry: Inquiry) => void;
   messagesMap: Record<string, Message[]>;
   addMessage: (inquiryId: string, message: Message) => void;
+  isLoading: boolean;
 }
 
 const ProductCatalogContext = createContext<ProductCatalogContextType | undefined>(undefined);
 
 export const ProductCatalogProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>(productService.getProducts());
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [messagesMap, setMessagesMap] = useState<Record<string, Message[]>>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const refreshProducts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const fetchedProducts = await productService.fetchProducts();
+      setProducts(fetchedProducts);
+    } catch (err) {
+      console.warn('[ProductCatalogContext] Error refreshing products:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     // Load initial listings, inquiries, and dialogs through service layer
-    setProducts(productService.getProducts());
     setInquiries(inquiryService.getInquiries());
     setMessagesMap(chatService.getAllMessages());
-  }, []);
+    // Asynchronously synchronize with live Supabase products
+    refreshProducts();
+  }, [refreshProducts]);
 
-  const addProduct = (product: Product) => {
-    // Add product through service layer
-    const createdProduct = productService.createProduct(product);
-    setProducts(prev => [createdProduct, ...prev]);
+  const addProduct = async (product: Partial<Product> & { name: string; price: number }): Promise<Product> => {
+    // Persist product through service layer to Supabase
+    const createdProduct = await productService.createProduct(product);
+    setProducts(prev => [createdProduct, ...prev.filter(p => p.id !== createdProduct.id)]);
+    return createdProduct;
   };
 
   const addInquiry = (inquiry: Inquiry) => {
@@ -65,10 +82,12 @@ export const ProductCatalogProvider: React.FC<{ children: React.ReactNode }> = (
     <ProductCatalogContext.Provider value={{
       products,
       addProduct,
+      refreshProducts,
       inquiries,
       addInquiry,
       messagesMap,
-      addMessage
+      addMessage,
+      isLoading
     }}>
       {children}
     </ProductCatalogContext.Provider>
