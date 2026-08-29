@@ -1,27 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, ScrollView, Image, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCreation } from '../../context/ProductCreationContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { imageService } from '../../services/imageService';
 
 export default function ImageEnhancementScreen() {
   const { productData, updateProductData } = useProductCreation();
   const [loading, setLoading] = useState(true);
   const [showEnhanced, setShowEnhanced] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    // Simulate AI image processing
-    const timer = setTimeout(() => {
+  const triggerEnhancement = useCallback(async () => {
+    if (!productData.image) {
+      setError('No product photo found. Please go back and select a photo.');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await imageService.enhanceImage(productData.image, {
+        category: productData.category || 'general',
+      });
+      updateProductData({ enhancedImage: result.enhancedUrl });
       setLoading(false);
       setShowEnhanced(true);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    } catch (err: any) {
+      console.error('[ImageEnhancement] Enhancement failure:', err);
+      setError(err.message || 'Image enhancement failed. Please check your backend connection and try again.');
+      setLoading(false);
+      setShowEnhanced(false);
+    }
+  }, [productData.image, productData.category, updateProductData]);
+
+  useEffect(() => {
+    triggerEnhancement();
+  }, [triggerEnhancement]);
 
   const handleAccept = () => {
+    if (!productData.enhancedImage) return;
     updateProductData({ step: 3 });
     router.push('/(artisan)/voice' as any);
   };
@@ -46,7 +70,19 @@ export default function ImageEnhancementScreen() {
             <View style={styles.loaderContainer}>
               <ActivityIndicator size="large" color={Colors.primary} />
               <Text style={styles.loaderText}>Cleaning background clutter...</Text>
-              <Text style={styles.loaderSub}>Optimizing lighting parameters for e-commerce</Text>
+              <Text style={styles.loaderSub}>Optimizing lighting parameters for e-commerce via FastAPI AI Vision</Text>
+            </View>
+          ) : error ? (
+            <View style={styles.errorContainer}>
+              <Ionicons name="alert-circle" size={44} color={Colors.error} />
+              <Text style={styles.errorTitle}>Enhancement Failed</Text>
+              <Text style={styles.errorText}>{error}</Text>
+              <Button
+                title="Retry Enhancement"
+                onPress={triggerEnhancement}
+                variant="primary"
+                style={styles.retryButton}
+              />
             </View>
           ) : (
             <View style={styles.previewContainer}>
@@ -76,6 +112,7 @@ export default function ImageEnhancementScreen() {
                   onPress={() => setShowEnhanced(true)}
                   variant={showEnhanced ? 'primary' : 'secondary'}
                   style={styles.toggleButton}
+                  disabled={!productData.enhancedImage}
                 />
               </View>
 
@@ -89,10 +126,7 @@ export default function ImageEnhancementScreen() {
               <View style={styles.buttonRow}>
                 <Button
                   title="Retry"
-                  onPress={() => {
-                    setLoading(true);
-                    setTimeout(() => setLoading(false), 1500);
-                  }}
+                  onPress={triggerEnhancement}
                   variant="secondary"
                   style={styles.actionBtn}
                 />
@@ -101,6 +135,7 @@ export default function ImageEnhancementScreen() {
                   onPress={handleAccept}
                   variant="primary"
                   style={styles.actionBtn}
+                  disabled={!productData.enhancedImage}
                 />
               </View>
             </View>
@@ -185,6 +220,32 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
     textAlign: 'center',
   },
+  errorContainer: {
+    backgroundColor: Colors.card,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    ...Shadows.soft,
+    alignItems: 'center',
+    padding: Spacing.xl,
+  },
+  errorTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.error,
+    marginTop: Spacing.md,
+    marginBottom: Spacing.xs,
+  },
+  errorText: {
+    fontSize: 13,
+    color: Colors.textMuted,
+    textAlign: 'center',
+    marginBottom: Spacing.lg,
+    lineHeight: 18,
+  },
+  retryButton: {
+    minWidth: 160,
+  },
   previewContainer: {
     width: '100%',
   },
@@ -197,11 +258,12 @@ const styles = StyleSheet.create({
     position: 'relative',
     marginBottom: Spacing.md,
     ...Shadows.soft,
+    backgroundColor: '#000000',
   },
   image: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    resizeMode: 'contain',
   },
   badge: {
     position: 'absolute',

@@ -18,8 +18,8 @@ export default function AddProductScreen() {
     enhanced: p.enhancedImage
   }));
 
-  const selectPreset = (raw: string, enhanced: string, name: string) => {
-    updateProductData({ image: raw, enhancedImage: enhanced, name: name, step: 2 });
+  const selectPreset = (raw: string, _enhanced: string, name: string) => {
+    updateProductData({ image: raw, enhancedImage: undefined, name: name, step: 2 });
   };
 
   const handleNext = () => {
