@@ -29,9 +29,51 @@ export interface VoiceResult {
   detectedLanguage: string;
 }
 
+export interface ImageAssetResponse {
+  public_id: string;
+  secure_url: string;
+  width: number;
+  height: number;
+  format: string;
+  bytes: number;
+  created_at?: string | null;
+}
+
+export interface StudioEnhanceResponse {
+  success: boolean;
+  provider: string;
+  original?: ImageAssetResponse | null;
+  cutout?: ImageAssetResponse | null;
+  enhanced?: ImageAssetResponse | null;
+  category: string;
+  preset: string;
+  aspect_ratio: string;
+  shadow_enabled: boolean;
+  metadata?: Record<string, any> | null;
+  error?: string | null;
+  error_code?: string | null;
+}
+
+export interface ImageEnhanceOptions {
+  category?: string;
+  preset?: string;
+  aspect_ratio?: string;
+  add_shadow?: boolean;
+  quality_mode?: string;
+  upscale_factor?: number;
+  enable_lighting_correction?: boolean;
+  enable_super_resolution?: boolean;
+  enable_quality_enhancement?: boolean;
+}
+
 export interface ImageProcessingResult {
   originalUrl: string;
   enhancedUrl: string;
+  cutoutUrl?: string;
   backgroundRemoved: boolean;
   lightingAdjusted: boolean;
+  provider?: string;
+  metadata?: Record<string, any>;
+  error?: string;
+  errorCode?: string;
 }
