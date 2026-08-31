@@ -6,6 +6,7 @@ import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCreation } from '../../context/ProductCreationContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function CatalogScreen() {
   const { productData, updateProductData } = useProductCreation();
@@ -47,6 +48,36 @@ export default function CatalogScreen() {
           {productData.enhancedImage && (
             <View style={styles.imageBox}>
               <Image source={{ uri: productData.enhancedImage }} style={styles.image} />
+            </View>
+          )}
+
+          {/* AI Extracted Craft Specs */}
+          {(productData.material || productData.craft || productData.productionTime) && (
+            <View style={styles.specsCard}>
+              <View style={styles.specsHeader}>
+                <Ionicons name="information-circle-outline" size={16} color={Colors.primary} />
+                <Text style={styles.specsTitle}>AI Detected Craft Attributes</Text>
+              </View>
+              <View style={styles.specsGrid}>
+                {productData.material && (
+                  <View style={styles.specChip}>
+                    <Text style={styles.specLabel}>Material:</Text>
+                    <Text style={styles.specVal}>{productData.material}</Text>
+                  </View>
+                )}
+                {productData.craft && (
+                  <View style={styles.specChip}>
+                    <Text style={styles.specLabel}>Craft:</Text>
+                    <Text style={styles.specVal}>{productData.craft}</Text>
+                  </View>
+                )}
+                {productData.productionTime && (
+                  <View style={styles.specChip}>
+                    <Text style={styles.specLabel}>Production Time:</Text>
+                    <Text style={styles.specVal}>{productData.productionTime}</Text>
+                  </View>
+                )}
+              </View>
             </View>
           )}
 
@@ -234,6 +265,52 @@ const styles = StyleSheet.create({
     height: 90,
     paddingVertical: Spacing.sm,
     textAlignVertical: 'top',
+  },
+  specsCard: {
+    backgroundColor: Colors.card,
+    borderRadius: BorderRadius.md,
+    padding: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    marginBottom: Spacing.md,
+    ...Shadows.soft,
+  },
+  specsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 6,
+  },
+  specsTitle: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.primary,
+  },
+  specsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  specChip: {
+    backgroundColor: Colors.background,
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.xs,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  specLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.textMuted,
+  },
+  specVal: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: Colors.onBackground,
   },
   nextButton: {
     width: '100%',

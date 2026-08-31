@@ -29,6 +29,29 @@ export interface VoiceResult {
   detectedLanguage: string;
 }
 
+export interface VoiceExtractionMetadata {
+  product_name: string;
+  category: string;
+  subcategory?: string | null;
+  material?: string | null;
+  craft_type?: string | null;
+  colors?: string[];
+  production_time_days?: number | null;
+  size?: string | null;
+  description_english?: string | null;
+  description_hindi?: string | null;
+  tags?: string[];
+  additional_details?: string[];
+}
+
+export interface VoiceTranscribeResponse {
+  success: boolean;
+  transcript: string;
+  detected_language: string;
+  metadata: VoiceExtractionMetadata;
+  error?: string | null;
+}
+
 export interface ImageAssetResponse {
   public_id: string;
   secure_url: string;

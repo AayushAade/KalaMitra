@@ -38,6 +38,18 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow KalaMitra to access your camera to photograph artisan crafts."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow KalaMitra to access your microphone to describe your handcrafted products in your own voice."
+        }
       ]
     ],
     "experiments": {

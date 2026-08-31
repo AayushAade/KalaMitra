@@ -38,6 +38,7 @@ class OriginalImageResult(BaseModel):
     stage: str = Field("original_upload", description="Processing lifecycle stage")
     asset: Optional[ImageAsset] = Field(None, description="Uploaded asset details")
     error: Optional[str] = Field(None, description="Error message if upload failed")
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Optimization and upload telemetry")
 
 
 class ProcessedImageResult(BaseModel):

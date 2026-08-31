@@ -261,7 +261,7 @@ export const productService = {
       {
         id: 'preset-1',
         name: 'Silk Dupatta',
-        rawImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDTUa1QpA9Wp_sE8hHw8G5m5qW4Jt9Gk7O2LqV0v2s3x4c5v6b7n8m9',
+        rawImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD9NdqtHHuX-C3fTyPOFZyJHmhxGdmIUVFNHQnBFec-x4sM6nam9v8zGl_A50EYGmZPn11LroWhvKHY5FCPYBHMXB8smCONqVv0H_O5bW-yoFUMcCyNZrnpHOq1c5STMMu_HCBEfCqtgew-DNpDA_CpmKQ8Hqd4TNZ9Ul3u_9AuI_LdlQ_rhb5UzODrcnCCzKSeWTTtYcrI2hIt2BuU6Z06-W5UYr8AKVJJQ3n9_6C3Kg4iBz6f2QhI',
         enhancedImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD9NdqtHHuX-C3fTyPOFZyJHmhxGdmIUVFNHQnBFec-x4sM6nam9v8zGl_A50EYGmZPn11LroWhvKHY5FCPYBHMXB8smCONqVv0H_O5bW-yoFUMcCyNZrnpHOq1c5STMMu_HCBEfCqtgew-DNpDA_CpmKQ8Hqd4TNZ9Ul3u_9AuI_LdlQ_rhb5UzODrcnCCzKSeWTTtYcrI2hIt2BuU6Z06-W5UYr8AKVJJQ3n9_6C3Kg4iBz6f2QhI',
       },
       {
@@ -273,8 +273,8 @@ export const productService = {
       {
         id: 'preset-3',
         name: 'Pottery Vase',
-        rawImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD9L4t3U8f9O_Pq5f8g7h9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z',
-        enhancedImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD7xJz0GjR9O1y2u3v4w5x6y7z8a9b0c1d2e3f4g5h6i7j8k9l0',
+        rawImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYDVxXiG1dMVQO05bifmAAM_MlqVdxlRfbr0Q7nWUR4dc93terX2jKdxbmNSe-axfInjZH-ReiV2UeHBUJY_eszFGNG3U-0th9I9hWDsxr6D3jNeV-Nfq-gk1-QO0WAQ56z8r8tqZWnx1oBcGYB2gOWuqMCg2SRtl5PGzHznvmQH7hUw9pLkHoIhfPEojBMtrlOoHPOncYYLAjMmewJxDfEOtITbyH3dOIFNFE0X20UVfMrJ-Cqz9E',
+        enhancedImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYDVxXiG1dMVQO05bifmAAM_MlqVdxlRfbr0Q7nWUR4dc93terX2jKdxbmNSe-axfInjZH-ReiV2UeHBUJY_eszFGNG3U-0th9I9hWDsxr6D3jNeV-Nfq-gk1-QO0WAQ56z8r8tqZWnx1oBcGYB2gOWuqMCg2SRtl5PGzHznvmQH7hUw9pLkHoIhfPEojBMtrlOoHPOncYYLAjMmewJxDfEOtITbyH3dOIFNFE0X20UVfMrJ-Cqz9E',
       }
     ];
   }

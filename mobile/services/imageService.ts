@@ -33,19 +33,37 @@ export const imageService = {
       throw new Error('No image URI provided for enhancement.');
     }
 
-    console.log(`[ImageService] Enhancing image via FastAPI: ${imageUri} (Platform: ${Platform.OS})`);
+    const uriScheme = imageUri.startsWith('http://') || imageUri.startsWith('https://')
+      ? 'remote_http'
+      : imageUri.startsWith('data:')
+      ? 'data_uri'
+      : imageUri.startsWith('file://')
+      ? 'local_file_uri'
+      : imageUri.startsWith('content://')
+      ? 'android_content_uri'
+      : 'local_path';
+
+    console.log(`[ImageService] ========================================`);
+    console.log(`[ImageService] Starting Image Enhancement`);
+    console.log(`[ImageService] Platform:   ${Platform.OS}`);
+    console.log(`[ImageService] URI Scheme: ${uriScheme}`);
+    console.log(`[ImageService] Image URI:  ${imageUri.length > 80 ? imageUri.substring(0, 80) + '...' : imageUri}`);
+    console.log(`[ImageService] Target API: /api/v1/studio/enhance`);
+    console.log(`[ImageService] ========================================`);
 
     const formData = new FormData();
 
     // 1. Prepare image payload based on URI scheme and platform
-    if (imageUri.startsWith('http://') || imageUri.startsWith('https://')) {
+    if (uriScheme === 'remote_http') {
       // Remote image URL: fetch the image bytes
       try {
+        console.log(`[ImageService] Downloading remote image asset for enhancement...`);
         const fetchRes = await fetch(imageUri);
         if (!fetchRes.ok) {
           throw new Error(`Failed to download remote preset image (HTTP ${fetchRes.status})`);
         }
         const blob = await fetchRes.blob();
+        console.log(`[ImageService] Downloaded remote image blob: ${blob.size} bytes, type: ${blob.type}`);
         const mimeType = blob.type || 'image/jpeg';
         const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
 

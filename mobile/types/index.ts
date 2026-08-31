@@ -7,6 +7,8 @@ export type {
   PricingRecommendation,
   CatalogDraft,
   VoiceResult,
+  VoiceExtractionMetadata,
+  VoiceTranscribeResponse,
   ImageAssetResponse,
   StudioEnhanceResponse,
   ImageEnhanceOptions,
