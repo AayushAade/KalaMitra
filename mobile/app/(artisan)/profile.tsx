@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, TextInput, Alert } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
@@ -100,11 +100,16 @@ export default function ArtisanProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Profile" />
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
+      <Header showBack={true} title="Profile" />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
       >
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={styles.avatarCircle}>
@@ -207,6 +212,7 @@ export default function ArtisanProfileScreen() {
           />
         </View>
       </ScrollView>
+      </KeyboardAvoidingView>
 
       <BottomNavigation role="artisan" active="profile" onPress={handleNav} />
     </SafeAreaView>

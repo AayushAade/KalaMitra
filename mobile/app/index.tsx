@@ -27,15 +27,15 @@ export default function LandingScreen() {
           <Text style={styles.promptText}>Choose your profile to begin</Text>
           
           <Button
-            title="I'm an Artisan"
-            onPress={() => router.push('/(auth)/login' as any)}
+            title="Artisan Login / Start Selling"
+            onPress={() => router.push({ pathname: '/(auth)/login', params: { role: 'artisan' } } as any)}
             variant="primary"
             style={styles.actionButton}
           />
           
           <Button
-            title="I'm a Buyer"
-            onPress={() => router.push('/(buyer)/buyer-home' as any)}
+            title="Buyer Login / Explore Marketplace"
+            onPress={() => router.push({ pathname: '/(auth)/login', params: { role: 'buyer' } } as any)}
             variant="secondary"
             style={styles.actionButton}
           />

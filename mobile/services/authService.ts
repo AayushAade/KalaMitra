@@ -10,11 +10,19 @@ export interface AuthResult {
   artisan?: Artisan;
 }
 
+let activeRole: 'artisan' | 'buyer' = 'artisan';
+
 export const authService = {
+  getRole: (): 'artisan' | 'buyer' => activeRole,
+  setRole: (role: 'artisan' | 'buyer') => {
+    activeRole = role;
+  },
+
   /**
    * Logs in a user using email and password, verifying their public.users metadata role and loading their profile.
    */
   login: async (email: string, password: string, role: 'artisan' | 'buyer'): Promise<boolean> => {
+    activeRole = role;
     console.log(`[AuthService] Login attempt for: ${email} as role: ${role}`);
 
     const { data, error } = await supabase.auth.signInWithPassword({

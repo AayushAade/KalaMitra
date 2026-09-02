@@ -12,10 +12,24 @@ interface HeaderProps {
 export default function Header({ title, showBack = false }: HeaderProps) {
   const router = useRouter();
 
+  const handleBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
+
   return (
     <View style={styles.header}>
       {showBack ? (
-        <Pressable onPress={() => router.back()} style={styles.backButton}>
+        <Pressable
+          onPress={handleBack}
+          style={styles.backButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityLabel="Go back"
+          accessibilityRole="button"
+        >
           <Ionicons name="arrow-back" size={24} color={Colors.primary} />
         </Pressable>
       ) : (

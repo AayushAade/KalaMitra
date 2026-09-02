@@ -1,22 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, KeyboardAvoidingView, Platform, ScrollView, Pressable } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Button from '../../components/Button';
 import Header from '../../components/Header';
 import { authService } from '../../services/authService';
 
 export default function LoginScreen() {
-  const [role, setRole] = useState<'artisan' | 'buyer'>('artisan');
-  const [identifier, setIdentifier] = useState('savita@diynest.org'); // Set default dev email
-  const [password, setPassword] = useState('pass1234');
+  const params = useLocalSearchParams<{ role?: string }>();
+  const [role, setRole] = useState<'artisan' | 'buyer'>(params.role === 'buyer' ? 'buyer' : 'artisan');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (params.role === 'buyer' || params.role === 'artisan') {
+      setRole(params.role);
+      authService.setRole(params.role);
+    }
+  }, [params.role]);
+
+  const handleRoleSelect = (selectedRole: 'artisan' | 'buyer') => {
+    setRole(selectedRole);
+    authService.setRole(selectedRole);
+    setErrorMessage(null);
+  };
 
   const handleLogin = async () => {
     setErrorMessage(null);
+    if (!identifier.trim()) {
+      setErrorMessage('Please enter your email or mobile number.');
+      return;
+    }
+    if (!password) {
+      setErrorMessage('Please enter your password.');
+      return;
+    }
     try {
-      const success = await authService.login(identifier, password, role);
+      authService.setRole(role);
+      const success = await authService.login(identifier.trim(), password, role);
       if (success) {
         if (role === 'artisan') {
           router.replace('/(artisan)/dashboard' as any);
@@ -36,7 +61,7 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
             <Text style={styles.title}>
               {role === 'artisan' ? 'Artisan Login' : 'Buyer Login'}
@@ -51,7 +76,7 @@ export default function LoginScreen() {
               {/* Role Toggle Selector */}
               <View style={styles.roleToggleContainer}>
                 <Pressable
-                  onPress={() => setRole('artisan')}
+                  onPress={() => handleRoleSelect('artisan')}
                   style={[styles.roleTab, role === 'artisan' && styles.roleTabActive]}
                 >
                   <Text style={[styles.roleTabText, role === 'artisan' && styles.roleTabTextActive]}>
@@ -59,7 +84,7 @@ export default function LoginScreen() {
                   </Text>
                 </Pressable>
                 <Pressable
-                  onPress={() => setRole('buyer')}
+                  onPress={() => handleRoleSelect('buyer')}
                   style={[styles.roleTab, role === 'buyer' && styles.roleTabActive]}
                 >
                   <Text style={[styles.roleTabText, role === 'buyer' && styles.roleTabTextActive]}>
@@ -74,10 +99,10 @@ export default function LoginScreen() {
                 <TextInput
                   style={styles.input}
                   placeholder="e.g. +91 98765 43210"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={Colors.border}
                   value={identifier}
                   onChangeText={setIdentifier}
-                  keyboardType={identifier.includes('@') ? 'email-address' : 'phone-pad'}
+                  keyboardType="email-address"
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
@@ -85,16 +110,32 @@ export default function LoginScreen() {
 
               <View style={styles.inputContainer}>
                 <Text style={styles.label}>Password</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter your password"
-                  placeholderTextColor={Colors.textMuted}
-                  secureTextEntry
-                  value={password}
-                  onChangeText={setPassword}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                />
+                <View style={styles.passwordContainer}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Enter your password"
+                    placeholderTextColor={Colors.border}
+                    secureTextEntry={!showPassword}
+                    value={password}
+                    onChangeText={setPassword}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="default"
+                  />
+                  <Pressable
+                    onPress={() => setShowPassword(prev => !prev)}
+                    style={styles.eyeButton}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+                    accessibilityRole="button"
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={22}
+                      color={Colors.textMuted}
+                    />
+                  </Pressable>
+                </View>
               </View>
 
               {errorMessage && (
@@ -212,6 +253,29 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.onBackground,
     backgroundColor: Colors.background,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: Spacing.touchTarget,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: BorderRadius.md,
+    backgroundColor: Colors.background,
+    paddingHorizontal: Spacing.md,
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 15,
+    color: Colors.onBackground,
+    height: '100%',
+    padding: 0,
+  },
+  eyeButton: {
+    padding: Spacing.xs,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: Spacing.xs,
   },
   warningContainer: {
     backgroundColor: Colors.background,

@@ -56,7 +56,7 @@ export default function BuyerProfileScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Profile" />
+      <Header showBack={true} title="Profile" />
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}

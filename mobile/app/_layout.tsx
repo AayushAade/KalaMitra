@@ -73,8 +73,13 @@ function RootLayoutNav() {
       console.log(`[RouteGuard] Blocking access to ${segments.join('/')}. Redirecting to Login.`);
       router.replace('/(auth)/login' as any);
     } else if (hasUser && inAuthGroup) {
-      console.log(`[RouteGuard] Authenticated user on auth screen. Redirecting to Dashboard.`);
-      router.replace('/(artisan)/dashboard' as any);
+      const currentRole = authService.getRole();
+      console.log(`[RouteGuard] Authenticated user (${currentRole}) on auth screen. Redirecting.`);
+      if (currentRole === 'buyer') {
+        router.replace('/(buyer)/marketplace' as any);
+      } else {
+        router.replace('/(artisan)/dashboard' as any);
+      }
     }
   }, [hasUser, segments, isSessionLoaded, router]);
 

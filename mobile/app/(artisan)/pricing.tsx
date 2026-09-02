@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TextInput } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
@@ -81,109 +81,114 @@ export default function PricingScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Header showBack={true} title="AI Pricing Studio" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Wizard Progress */}
-        <View style={styles.wizard}>
-          <Text style={styles.wizardLabel}>Step 5 of 5: AI Pricing Assistant</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressIndicator, { width: '100%' }]} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+          {/* Wizard Progress */}
+          <View style={styles.wizard}>
+            <Text style={styles.wizardLabel}>Step 5 of 5: AI Pricing Assistant</Text>
+            <View style={styles.progressBar}>
+              <View style={[styles.progressIndicator, { width: '100%' }]} />
+            </View>
           </View>
-        </View>
 
-        <View style={styles.content}>
-          <Text style={styles.title}>Calculate Fair Value</Text>
-          <Text style={styles.subtitle}>Enter your material and time inputs. AI calculates market rates.</Text>
+          <View style={styles.content}>
+            <Text style={styles.title}>Calculate Fair Value</Text>
+            <Text style={styles.subtitle}>Enter your material and time inputs. AI calculates market rates.</Text>
 
-          <View style={styles.card}>
-            {/* Input Row */}
-            <View style={styles.inputRow}>
-              <View style={styles.inputCol}>
-                <Text style={styles.inputLabel}>Material Cost (₹)</Text>
-                <TextInput
-                  style={styles.textInput}
-                  keyboardType="numeric"
-                  value={matCost}
-                  onChangeText={(val) => {
-                    setMatCost(val);
-                    const cost = (parseFloat(val) || 0) + laborVal + otherVal;
-                    setFinalPrice(Math.round(cost * 1.35).toString());
-                  }}
+            <View style={styles.card}>
+              {/* Input Row */}
+              <View style={styles.inputRow}>
+                <View style={styles.inputCol}>
+                  <Text style={styles.inputLabel}>Material Cost (₹)</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    keyboardType="decimal-pad"
+                    value={matCost}
+                    onChangeText={(val) => {
+                      setMatCost(val);
+                      const cost = (parseFloat(val) || 0) + laborVal + otherVal;
+                      setFinalPrice(Math.round(cost * 1.35).toString());
+                    }}
+                  />
+                </View>
+                <View style={styles.inputCol}>
+                  <Text style={styles.inputLabel}>Labor Cost (₹)</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    keyboardType="decimal-pad"
+                    value={labCost}
+                    onChangeText={(val) => {
+                      setLabCost(val);
+                      const cost = materialVal + (parseFloat(val) || 0) + otherVal;
+                      setFinalPrice(Math.round(cost * 1.35).toString());
+                    }}
+                  />
+                </View>
+              </View>
+
+              <View style={styles.inputRow}>
+                <View style={styles.inputCol}>
+                  <Text style={styles.inputLabel}>Other Costs (₹)</Text>
+                  <TextInput
+                    style={styles.textInput}
+                    keyboardType="decimal-pad"
+                    value={othCost}
+                    onChangeText={(val) => {
+                      setOthCost(val);
+                      const cost = materialVal + laborVal + (parseFloat(val) || 0);
+                      setFinalPrice(Math.round(cost * 1.35).toString());
+                    }}
+                  />
+                </View>
+                <View style={styles.inputCol}>
+                  <Text style={styles.inputLabel}>Total cost: ₹{totalCost}</Text>
+                  <View style={styles.costBox} />
+                </View>
+              </View>
+
+              {/* AI Outcome */}
+              <View style={styles.aiOutputBox}>
+                <Text style={styles.suggestedLabel}>💡 Recommended Price</Text>
+                <Text style={styles.suggestedValue}>₹{recommendedPrice}</Text>
+                <Text style={styles.rangeText}>
+                  Acceptable Range: ₹{minPrice} - ₹{maxPrice}
+                </Text>
+                <Text style={styles.explanation}>
+                  {explanation}
+                </Text>
+                <Button
+                  title="Apply Recommendation"
+                  onPress={applySuggested}
+                  variant="secondary"
+                  style={styles.applyBtn}
                 />
               </View>
-              <View style={styles.inputCol}>
-                <Text style={styles.inputLabel}>Labor Cost (₹)</Text>
+
+              {/* Final Listing Price */}
+              <View style={styles.finalSection}>
+                <Text style={styles.finalLabel}>Final Listing Price (₹)</Text>
                 <TextInput
-                  style={styles.textInput}
-                  keyboardType="numeric"
-                  value={labCost}
-                  onChangeText={(val) => {
-                    setLabCost(val);
-                    const cost = materialVal + (parseFloat(val) || 0) + otherVal;
-                    setFinalPrice(Math.round(cost * 1.35).toString());
-                  }}
+                  style={styles.finalInput}
+                  keyboardType="decimal-pad"
+                  value={finalPrice}
+                  onChangeText={setFinalPrice}
                 />
               </View>
-            </View>
 
-            <View style={styles.inputRow}>
-              <View style={styles.inputCol}>
-                <Text style={styles.inputLabel}>Other Costs (₹)</Text>
-                <TextInput
-                  style={styles.textInput}
-                  keyboardType="numeric"
-                  value={othCost}
-                  onChangeText={(val) => {
-                    setOthCost(val);
-                    const cost = materialVal + laborVal + (parseFloat(val) || 0);
-                    setFinalPrice(Math.round(cost * 1.35).toString());
-                  }}
-                />
-              </View>
-              <View style={styles.inputCol}>
-                <Text style={styles.inputLabel}>Total cost: ₹{totalCost}</Text>
-                <View style={styles.costBox} />
-              </View>
-            </View>
-
-            {/* AI Outcome */}
-            <View style={styles.aiOutputBox}>
-              <Text style={styles.suggestedLabel}>💡 Recommended Price</Text>
-              <Text style={styles.suggestedValue}>₹{recommendedPrice}</Text>
-              <Text style={styles.rangeText}>
-                Acceptable Range: ₹{minPrice} - ₹{maxPrice}
-              </Text>
-              <Text style={styles.explanation}>
-                {explanation}
-              </Text>
               <Button
-                title="Apply Recommendation"
-                onPress={applySuggested}
-                variant="secondary"
-                style={styles.applyBtn}
+                title={publishing ? 'Publishing Listing...' : 'Publish Listing to Marketplace'}
+                onPress={handlePublish}
+                variant="primary"
+                disabled={publishing}
+                style={styles.publishBtn}
               />
             </View>
-
-            {/* Final Listing Price */}
-            <View style={styles.finalSection}>
-              <Text style={styles.finalLabel}>Final Listing Price (₹)</Text>
-              <TextInput
-                style={styles.finalInput}
-                keyboardType="numeric"
-                value={finalPrice}
-                onChangeText={setFinalPrice}
-              />
-            </View>
-
-            <Button
-              title={publishing ? 'Publishing Listing...' : 'Publish Listing to Marketplace'}
-              onPress={handlePublish}
-              variant="primary"
-              disabled={publishing}
-              style={styles.publishBtn}
-            />
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

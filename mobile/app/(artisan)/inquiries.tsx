@@ -45,7 +45,7 @@ export default function ArtisanInquiriesScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header title="Inbox" />
+      <Header showBack={true} title="Inbox" />
 
       {isLoading && !refreshing ? (
         <View style={styles.loadingContainer}>

@@ -62,7 +62,7 @@ export default function MarketplaceScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header />
+      <Header showBack={true} title="Marketplace" />
 
       {/* Search Bar */}
       <View style={styles.searchSection}>
