@@ -1,0 +1,21 @@
+{
+  "success": true,
+  "original": {
+    "public_id": "artisan-ai/originals/vi2f9zwr5st5d0dub4xa",
+    "url": "https://res.cloudinary.com/dyqdsvh2i/image/upload/v1787768677/artisan-ai/originals/vi2f9zwr5st5d0dub4xa.jpg",
+    "width": 335,
+    "height": 597,
+    "format": "jpg"
+  },
+  "processing": {
+    "background_removed": true,
+    "picsart_enhanced": false,
+    "optimized": true
+  },
+  "images": {
+    "original_url": "https://res.cloudinary.com/dyqdsvh2i/image/upload/v1787768677/artisan-ai/originals/vi2f9zwr5st5d0dub4xa.jpg",
+    "background_removed_url": "https://res.cloudinary.com/dyqdsvh2i/image/upload/e_background_removal/v1/artisan-ai/originals/vi2f9zwr5st5d0dub4xa",
+    "enhanced_url": "https://res.cloudinary.com/dyqdsvh2i/image/upload/e_background_removal/e_trim/e_auto_enhance/b_white,c_pad,h_1080,w_1080/f_auto,q_auto/v1/artisan-ai/originals/vi2f9zwr5st5d0dub4xa",
+    "final_url": "https://res.cloudinary.com/dyqdsvh2i/image/upload/e_background_removal/e_trim/e_auto_enhance/b_white,c_pad,h_1080,w_1080/f_auto,q_auto/v1/artisan-ai/originals/vi2f9zwr5st5d0dub4xa"
+  }
+}

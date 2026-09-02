@@ -1,0 +1,1 @@
+"""KalaMitra FastAPI Application Package."""
