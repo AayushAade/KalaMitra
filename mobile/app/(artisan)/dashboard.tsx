@@ -1,60 +1,110 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, Pressable } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  RefreshControl,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
-import Button from '../../components/Button';
+import BottomNavigation from '../../components/BottomNavigation';
+import SkeletonCard from '../../components/SkeletonCard';
 import { Ionicons } from '@expo/vector-icons';
 import { artisanService } from '../../services/artisanService';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 
-export default function ArtisanDashboard() {
+export default function ArtisanHome() {
   const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
-  const { myProducts, inquiries, refreshProducts } = useProductCatalog();
-  const tips = artisanService.getDashboardRecommendations();
+  const { myProducts, inquiries, refreshProducts, isLoading } = useProductCatalog();
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = artisanService.subscribe((updatedArtisan) => {
-      setArtisan(updatedArtisan);
+    const unsubscribe = artisanService.subscribe((updated) => {
+      setArtisan(updated);
     });
     setArtisan(artisanService.getCurrentArtisan());
     refreshProducts();
     return unsubscribe;
   }, [refreshProducts]);
 
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refreshProducts();
+    setRefreshing(false);
+  }, [refreshProducts]);
+
+  const handleNav = (tab: string) => {
+    switch (tab) {
+      case 'home':
+        break;
+      case 'products':
+        router.push('/(artisan)/artisan-catalogue' as any);
+        break;
+      case 'marketplace':
+        router.push('/(buyer)/marketplace' as any);
+        break;
+      case 'inbox':
+        router.push('/(artisan)/inquiries' as any);
+        break;
+      case 'profile':
+        router.push('/(artisan)/profile' as any);
+        break;
+    }
+  };
+
+  const publishedProducts = myProducts.filter(p => p.isPublished !== false);
+  const recentProducts = publishedProducts.slice(0, 3);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Header />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Welcome Section settings gear */}
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={Colors.primary}
+            colors={[Colors.primary]}
+          />
+        }
+      >
+        {/* Welcome Banner */}
         <Pressable
           onPress={() => router.push('/(artisan)/profile' as any)}
           style={({ pressed }) => [styles.welcomeCard, pressed && styles.pressedCard]}
         >
-          <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>{(artisan.ownerName || 'A').charAt(0).toUpperCase()}</Text>
+          <View style={styles.avatarCircle}>
+            <Text style={styles.avatarLetter}>
+              {(artisan.ownerName || artisan.name || 'A').charAt(0).toUpperCase()}
+            </Text>
           </View>
-          <View style={styles.welcomeTextContainer}>
-            <Text style={styles.welcomeName}>{artisan.name}</Text>
-            <View style={styles.statusRow}>
-              <Text style={styles.welcomeSub}>Namaste, {artisan.ownerName} • {artisan.location}</Text>
-              <View style={styles.activePill}>
-                <Text style={styles.activeText}>Active</Text>
+          <View style={styles.welcomeText}>
+            <Text style={styles.namaste}>Namaste, {artisan.ownerName || artisan.name} 👋</Text>
+            <Text style={styles.shopName} numberOfLines={1}>{artisan.name}</Text>
+            {artisan.location ? (
+              <View style={styles.locationRow}>
+                <Ionicons name="location-outline" size={11} color={Colors.textMuted} />
+                <Text style={styles.location}>{artisan.location}</Text>
               </View>
-            </View>
+            ) : null}
           </View>
-          <Ionicons name="settings-outline" size={22} color={Colors.primary} />
+          <Ionicons name="chevron-forward" size={18} color={Colors.border} />
         </Pressable>
 
         {/* Stats Row */}
         <View style={styles.statsRow}>
           <Pressable
-            onPress={() => router.push('/(artisan)/products' as any)}
+            onPress={() => router.push('/(artisan)/artisan-catalogue' as any)}
             style={({ pressed }) => [styles.statBox, pressed && styles.pressedCard]}
           >
             <Text style={styles.statNumber}>{myProducts.length}</Text>
-            <Text style={styles.statLabel}>Listings</Text>
+            <Text style={styles.statLabel}>Products</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/(artisan)/inquiries' as any)}
@@ -63,123 +113,130 @@ export default function ArtisanDashboard() {
             <Text style={styles.statNumber}>{inquiries.length}</Text>
             <Text style={styles.statLabel}>Inquiries</Text>
           </Pressable>
-          <Pressable
-            onPress={() => router.push('/(artisan)/store' as any)}
-            style={({ pressed }) => [styles.statBox, pressed && styles.pressedCard]}
-          >
-            <Text style={styles.statNumber}>5.0</Text>
+          <View style={styles.statBox}>
+            <View style={styles.ratingRow}>
+              <Ionicons name="star" size={14} color="#F59E0B" />
+              <Text style={styles.statNumber}>
+                {myProducts.length > 0 ? '4.8' : '—'}
+              </Text>
+            </View>
             <Text style={styles.statLabel}>Rating</Text>
+          </View>
+        </View>
+
+        {/* Quick Action Tiles */}
+        <View style={styles.quickGrid}>
+          <Pressable
+            onPress={() => router.push('/(artisan)/add-product' as any)}
+            style={({ pressed }) => [styles.quickTile, styles.quickTilePrimary, pressed && styles.pressedCard]}
+          >
+            <Ionicons name="add-circle-outline" size={28} color={Colors.textLight} />
+            <Text style={styles.quickTileTextLight}>Add Product</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.push('/(artisan)/artisan-catalogue' as any)}
+            style={({ pressed }) => [styles.quickTile, pressed && styles.pressedCard]}
+          >
+            <Ionicons name="albums-outline" size={28} color={Colors.primary} />
+            <Text style={styles.quickTileText}>Artisan Catalogue</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.push('/(artisan)/artisan-review' as any)}
+            style={({ pressed }) => [styles.quickTile, pressed && styles.pressedCard]}
+          >
+            <Ionicons name="star-outline" size={28} color={Colors.primary} />
+            <Text style={styles.quickTileText}>Artisan Review</Text>
+          </Pressable>
+
+          <Pressable
+            onPress={() => router.push('/(artisan)/inquiries' as any)}
+            style={({ pressed }) => [styles.quickTile, pressed && styles.pressedCard]}
+          >
+            <Ionicons name="chatbubbles-outline" size={28} color={Colors.primary} />
+            <Text style={styles.quickTileText}>Recent Messages</Text>
           </Pressable>
         </View>
 
-        {/* Main Action: Add New Product Tile */}
-        <Pressable
-          onPress={() => router.push('/(artisan)/add-product' as any)}
-          style={({ pressed }) => [styles.addProductTile, pressed && styles.pressedCard]}
-        >
-          <View style={styles.tileIcons}>
-            <Ionicons name="camera-outline" size={32} color={Colors.primary} />
-            <Text style={styles.tilePlus}>+</Text>
-            <Ionicons name="mic-outline" size={32} color={Colors.primary} />
+        {/* My Products Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>My Products</Text>
+            <Pressable onPress={() => router.push('/(artisan)/artisan-catalogue' as any)}>
+              <Text style={styles.seeAll}>See All</Text>
+            </Pressable>
           </View>
-          <Text style={styles.tileTitle}>Add New Product</Text>
-          <Text style={styles.tileDesc}>Snap a photo and speak in your language to create a listing.</Text>
+
+          {isLoading ? (
+            <>
+              <SkeletonCard height={100} />
+              <SkeletonCard height={100} />
+            </>
+          ) : recentProducts.length === 0 ? (
+            <Pressable
+              onPress={() => router.push('/(artisan)/add-product' as any)}
+              style={({ pressed }) => [styles.emptyProductsCard, pressed && styles.pressedCard]}
+            >
+              <Ionicons name="add-circle-outline" size={32} color={Colors.primaryContainer} />
+              <Text style={styles.emptyProductsText}>No products yet. Tap to add your first product.</Text>
+            </Pressable>
+          ) : (
+            recentProducts.map((product) => (
+              <Pressable
+                key={product.id}
+                style={({ pressed }) => [styles.productRow, pressed && styles.pressedCard]}
+                onPress={() => router.push({
+                  pathname: '/(buyer)/product',
+                  params: { productId: product.id }
+                } as any)}
+              >
+                <View style={styles.productThumb}>
+                  <Ionicons name="image-outline" size={22} color={Colors.border} />
+                </View>
+                <View style={styles.productRowInfo}>
+                  <Text style={styles.productRowName} numberOfLines={1}>{product.name}</Text>
+                  <Text style={styles.productRowPrice}>
+                    ₹{product.price?.toLocaleString('en-IN')}
+                  </Text>
+                </View>
+                <View style={[styles.statusPill, product.isPublished !== false ? styles.pillPublished : styles.pillDraft]}>
+                  <Text style={[styles.statusText, product.isPublished !== false ? styles.statusPublished : styles.statusDraft]}>
+                    {product.isPublished !== false ? 'Published' : 'Draft'}
+                  </Text>
+                </View>
+              </Pressable>
+            ))
+          )}
+        </View>
+
+        {/* Marketplace Link */}
+        <Pressable
+          onPress={() => router.push('/(buyer)/marketplace' as any)}
+          style={({ pressed }) => [styles.marketplaceBanner, pressed && styles.pressedCard]}
+        >
+          <View style={styles.marketplaceLeft}>
+            <Ionicons name="storefront-outline" size={24} color={Colors.tertiary} />
+            <View style={{ marginLeft: Spacing.md }}>
+              <Text style={styles.marketplaceTitle}>Marketplace</Text>
+              <Text style={styles.marketplaceSub}>Explore crafts from all artisans</Text>
+            </View>
+          </View>
+          <Ionicons name="arrow-forward" size={20} color={Colors.tertiary} />
         </Pressable>
 
-        {/* AI Cataloging Tools Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Smart Tools</Text>
-          
-          <Pressable
-            style={({ pressed }) => [styles.toolCard, pressed && styles.pressedCard]}
-            onPress={() => router.push('/(artisan)/voice' as any)}
-          >
-            <View style={[styles.toolIconContainer, { backgroundColor: Colors.primaryContainer }]}>
-              <Ionicons name="mic-outline" size={24} color={Colors.textLight} />
-            </View>
-            <View style={styles.toolText}>
-              <Text style={styles.toolTitle}>Voice Cataloging</Text>
-              <Text style={styles.toolDesc}>Describe your product in Hindi, Marathi, or English.</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.border} />
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [styles.toolCard, pressed && styles.pressedCard]}
-            onPress={() => router.push('/(artisan)/image-enhancement' as any)}
-          >
-            <View style={[styles.toolIconContainer, { backgroundColor: Colors.tertiary }]}>
-              <Ionicons name="sparkles-outline" size={24} color={Colors.textLight} />
-            </View>
-            <View style={styles.toolText}>
-              <Text style={styles.toolTitle}>Image Enhancement</Text>
-              <Text style={styles.toolDesc}>Clean background & improve photo lighting instantly.</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.border} />
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [styles.toolCard, pressed && styles.pressedCard]}
-            onPress={() => router.push('/(artisan)/pricing' as any)}
-          >
-            <View style={[styles.toolIconContainer, { backgroundColor: Colors.secondary }]}>
-              <Ionicons name="calculator-outline" size={24} color={Colors.textLight} />
-            </View>
-            <View style={styles.toolText}>
-              <Text style={styles.toolTitle}>Pricing Assistant</Text>
-              <Text style={styles.toolDesc}>Calculate suggestions based on material and labor.</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={20} color={Colors.border} />
-          </Pressable>
-        </View>
-
-        {/* Tips & Recommendations */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recommendations</Text>
-          {tips.map(tip => {
-            const getRoute = () => {
-              if (tip.id === '1') return '/(artisan)/inquiries';
-              if (tip.id === '2') return '/(artisan)/pricing';
-              return '/(artisan)/add-product';
-            };
-            return (
-              <Pressable
-                key={tip.id}
-                onPress={() => router.push(getRoute() as any)}
-                style={({ pressed }) => [styles.tipCard, pressed && styles.pressedCard]}
-              >
-                <Ionicons name={tip.icon as any} size={22} color={Colors.primary} style={styles.tipIcon} />
-                <View style={styles.tipText}>
-                  <Text style={styles.tipTitle}>{tip.title}</Text>
-                  <Text style={styles.tipDesc}>{tip.desc}</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color={Colors.border} style={{ alignSelf: 'center' }} />
-              </Pressable>
-            );
-          })}
-        </View>
-
-        {/* Switch Role Button */}
-        <Button
-          title="Switch to Buyer View"
-          onPress={() => router.replace('/')}
-          variant="secondary"
-          style={styles.switchButton}
-        />
+        <View style={{ height: Spacing.xl }} />
       </ScrollView>
+
+      <BottomNavigation role="artisan" active="home" onPress={handleNav} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  scrollContainer: {
-    paddingHorizontal: Spacing.marginMobile,
-    paddingVertical: Spacing.md,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  scrollContainer: { paddingHorizontal: Spacing.marginMobile, paddingTop: Spacing.sm },
+
   welcomeCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -191,55 +248,26 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     ...Shadows.soft,
   },
-  avatarPlaceholder: {
-    width: 50,
-    height: 50,
+  avatarCircle: {
+    width: 52,
+    height: 52,
     borderRadius: BorderRadius.full,
     backgroundColor: Colors.primaryContainer,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
   },
-  avatarText: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.textLight,
-  },
-  welcomeTextContainer: {
-    flex: 1,
-  },
-  welcomeName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.onBackground,
-  },
-  statusRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 2,
-    gap: Spacing.xs,
-  },
-  welcomeSub: {
-    fontSize: 11,
-    color: Colors.textMuted,
-    flexShrink: 1,
-  },
-  activePill: {
-    backgroundColor: 'rgba(0,180,100,0.1)',
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-    borderRadius: BorderRadius.full,
-  },
-  activeText: {
-    fontSize: 9,
-    color: 'rgb(0,140,80)',
-    fontWeight: '700',
-  },
+  avatarLetter: { fontSize: 22, fontWeight: '800', color: Colors.textLight },
+  welcomeText: { flex: 1 },
+  namaste: { fontSize: 15, fontWeight: '700', color: Colors.onBackground },
+  shopName: { fontSize: 12, color: Colors.textMuted, marginTop: 1 },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 2, marginTop: 2 },
+  location: { fontSize: 11, color: Colors.textMuted },
+
   statsRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: Spacing.lg,
-    gap: Spacing.xs,
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   statBox: {
     flex: 1,
@@ -251,60 +279,76 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     ...Shadows.soft,
   },
-  statNumber: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: Colors.primary,
+  ratingRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  statNumber: { fontSize: 20, fontWeight: '800', color: Colors.primary },
+  statLabel: { fontSize: 11, color: Colors.textMuted, marginTop: 3 },
+
+  quickGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.lg,
   },
-  statLabel: {
-    fontSize: 11,
-    color: Colors.textMuted,
-    marginTop: 4,
-  },
-  addProductTile: {
+  quickTile: {
+    width: '47.5%',
     backgroundColor: Colors.card,
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    minHeight: 90,
+    ...Shadows.soft,
+  },
+  quickTilePrimary: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  quickTileText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.primary,
+    textAlign: 'center',
+    marginTop: Spacing.xs,
+  },
+  quickTileTextLight: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.textLight,
+    textAlign: 'center',
+    marginTop: Spacing.xs,
+  },
+
+  section: { marginBottom: Spacing.lg },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.sm,
+  },
+  sectionTitle: { fontSize: 18, fontWeight: '700', color: Colors.onBackground },
+  seeAll: { fontSize: 13, fontWeight: '600', color: Colors.primary },
+
+  emptyProductsCard: {
+    backgroundColor: Colors.card,
+    borderRadius: BorderRadius.md,
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: Colors.primaryContainer,
-    marginBottom: Spacing.lg,
-    ...Shadows.soft,
-  },
-  tileIcons: {
-    flexDirection: 'row',
+    padding: Spacing.lg,
     alignItems: 'center',
-    gap: Spacing.xs,
-    marginBottom: Spacing.xs,
+    justifyContent: 'center',
+    gap: Spacing.sm,
   },
-  tilePlus: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.border,
-  },
-  tileTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
-  tileDesc: {
-    fontSize: 11,
+  emptyProductsText: {
+    fontSize: 13,
     color: Colors.textMuted,
-    marginTop: 2,
     textAlign: 'center',
+    lineHeight: 18,
   },
-  section: {
-    marginBottom: Spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: Colors.onBackground,
-    marginBottom: Spacing.md,
-  },
-  toolCard: {
+
+  productRow: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.card,
@@ -315,62 +359,44 @@ const styles = StyleSheet.create({
     borderColor: Colors.borderLight,
     ...Shadows.soft,
   },
-  toolIconContainer: {
+  productThumb: {
     width: 44,
     height: 44,
-    borderRadius: BorderRadius.md,
+    borderRadius: BorderRadius.sm,
+    backgroundColor: Colors.borderLight,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
+    overflow: 'hidden',
   },
-  toolText: {
-    flex: 1,
+  productRowInfo: { flex: 1 },
+  productRowName: { fontSize: 14, fontWeight: '700', color: Colors.onBackground },
+  productRowPrice: { fontSize: 13, color: Colors.primary, fontWeight: '600', marginTop: 2 },
+  statusPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: BorderRadius.full,
   },
-  toolTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.onBackground,
-  },
-  toolDesc: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginTop: 2,
-  },
-  tipCard: {
+  pillPublished: { backgroundColor: 'rgba(0,180,100,0.1)' },
+  pillDraft: { backgroundColor: 'rgba(148,68,46,0.08)' },
+  statusText: { fontSize: 10, fontWeight: '700' },
+  statusPublished: { color: 'rgb(0,140,80)' },
+  statusDraft: { color: Colors.primary },
+
+  marketplaceBanner: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    backgroundColor: Colors.card,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: 'rgba(0,97,149,0.06)',
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
-    marginBottom: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.borderLight,
+    borderColor: 'rgba(0,97,149,0.15)',
+    marginBottom: Spacing.sm,
   },
-  tipIcon: {
-    marginRight: Spacing.sm,
-    marginTop: 2,
-  },
-  tipText: {
-    flex: 1,
-  },
-  tipTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.onBackground,
-  },
-  tipDesc: {
-    fontSize: 12,
-    color: Colors.textMuted,
-    marginTop: 2,
-    lineHeight: 16,
-  },
-  switchButton: {
-    marginTop: Spacing.md,
-    marginBottom: Spacing.xl,
-    width: '100%',
-  },
-  pressedCard: {
-    opacity: 0.85,
-    transform: [{ scale: 0.99 }],
-  },
+  marketplaceLeft: { flexDirection: 'row', alignItems: 'center' },
+  marketplaceTitle: { fontSize: 15, fontWeight: '700', color: Colors.tertiary },
+  marketplaceSub: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+
+  pressedCard: { opacity: 0.85, transform: [{ scale: 0.99 }] },
 });

@@ -1,16 +1,22 @@
-import React, { useCallback, useState } from 'react';
-import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  FlatList,
+  RefreshControl,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing } from '../../constants/theme';
 import Header from '../../components/Header';
-import InquiryCard from '../../components/InquiryCard';
 import BottomNavigation from '../../components/BottomNavigation';
 import EmptyState from '../../components/EmptyState';
+import InquiryCard from '../../components/InquiryCard';
 import SkeletonCard from '../../components/SkeletonCard';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function ArtisanInquiriesScreen() {
+export default function BuyerInboxScreen() {
   const { inquiries, refreshProducts, isLoading } = useProductCatalog();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -20,17 +26,10 @@ export default function ArtisanInquiriesScreen() {
     setRefreshing(false);
   }, [refreshProducts]);
 
-  const handleInquiryPress = (id: string) => {
-    router.push(`/chat/${id}` as any);
-  };
-
   const handleNav = (tab: string) => {
     switch (tab) {
       case 'home':
-        router.replace('/(artisan)/dashboard' as any);
-        break;
-      case 'products':
-        router.push('/(artisan)/artisan-catalogue' as any);
+        router.replace('/(buyer)/buyer-home' as any);
         break;
       case 'marketplace':
         router.push('/(buyer)/marketplace' as any);
@@ -38,7 +37,7 @@ export default function ArtisanInquiriesScreen() {
       case 'inbox':
         break;
       case 'profile':
-        router.push('/(artisan)/profile' as any);
+        router.push('/(buyer)/buyer-profile' as any);
         break;
     }
   };
@@ -59,7 +58,7 @@ export default function ArtisanInquiriesScreen() {
           renderItem={({ item }) => (
             <InquiryCard
               inquiry={item}
-              onPress={() => handleInquiryPress(item.id)}
+              onPress={() => router.push(`/chat/${item.id}` as any)}
             />
           )}
           contentContainerStyle={styles.listContent}
@@ -73,24 +72,24 @@ export default function ArtisanInquiriesScreen() {
           }
           ListHeaderComponent={
             <View style={styles.listHeader}>
-              <Text style={styles.title}>Buyer Inquiries</Text>
-              <Text style={styles.subtitle}>
-                Respond to bulk order requests from buyers.
-              </Text>
+              <Text style={styles.title}>My Messages</Text>
+              <Text style={styles.subtitle}>Conversations with artisans</Text>
             </View>
           }
           ListEmptyComponent={
             <EmptyState
               icon="chatbubbles-outline"
               title="No conversations yet"
-              message="When buyers contact you about products, their messages will appear here."
+              message="Contact artisans from product pages to start a conversation."
+              actionLabel="Browse Marketplace"
+              onAction={() => router.push('/(buyer)/marketplace' as any)}
             />
           }
           showsVerticalScrollIndicator={false}
         />
       )}
 
-      <BottomNavigation role="artisan" active="inbox" onPress={handleNav} />
+      <BottomNavigation role="buyer" active="inbox" onPress={handleNav} />
     </SafeAreaView>
   );
 }
@@ -101,5 +100,5 @@ const styles = StyleSheet.create({
   listContent: { paddingHorizontal: Spacing.marginMobile, paddingBottom: Spacing.xl },
   listHeader: { paddingVertical: Spacing.md },
   title: { fontSize: 22, fontWeight: '800', color: Colors.onBackground },
-  subtitle: { fontSize: 14, color: Colors.textMuted, marginTop: 4, lineHeight: 18 },
+  subtitle: { fontSize: 14, color: Colors.textMuted, marginTop: 4 },
 });

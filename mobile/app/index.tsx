@@ -35,7 +35,7 @@ export default function LandingScreen() {
           
           <Button
             title="I'm a Buyer"
-            onPress={() => router.push('/(buyer)/marketplace' as any)}
+            onPress={() => router.push('/(buyer)/buyer-home' as any)}
             variant="secondary"
             style={styles.actionButton}
           />

@@ -84,6 +84,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(artisan)" />
       <Stack.Screen name="(buyer)" />
+      <Stack.Screen name="chat" />
     </Stack>
   );
 }

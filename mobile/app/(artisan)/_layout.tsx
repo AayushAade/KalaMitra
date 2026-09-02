@@ -7,6 +7,8 @@ export default function ArtisanLayout() {
     <ProductCreationProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="dashboard" />
+        <Stack.Screen name="artisan-catalogue" />
+        <Stack.Screen name="artisan-review" />
         <Stack.Screen name="add-product" />
         <Stack.Screen name="image-enhancement" />
         <Stack.Screen name="voice" />
