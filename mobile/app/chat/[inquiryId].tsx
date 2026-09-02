@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, FlatList, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
@@ -9,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Message } from '../../types';
 import { chatService } from '../../services/chatService';
+import { authService } from '../../services/authService';
 
 export default function ChatScreen() {
   const { colors, isDarkMode } = useTheme();
@@ -18,29 +19,52 @@ export default function ChatScreen() {
   const activeInquiryId = inquiryId || 'inq-1001';
   const inquiry = inquiries.find(i => i.id === activeInquiryId) || inquiries[0];
 
-  // Retrieve message list from catalog context map
-  const messages = messagesMap[activeInquiryId] || [];
+  const currentRole = authService.getRole() === 'artisan' ? 'Artisan' : 'Buyer';
+  const [localMessages, setLocalMessages] = useState<Message[]>(messagesMap[activeInquiryId] || []);
   const [inputText, setInputText] = useState('');
 
-  const handleSend = () => {
+  // Fetch messages from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    const loadMessages = async () => {
+      if (activeInquiryId) {
+        const fetched = await chatService.fetchMessages(activeInquiryId);
+        if (isMounted && fetched.length > 0) {
+          setLocalMessages(fetched);
+        }
+      }
+    };
+    loadMessages();
+    return () => {
+      isMounted = false;
+    };
+  }, [activeInquiryId]);
+
+  const handleSend = async () => {
     if (!inputText.trim()) return;
 
-    // Send Buyer message (simulate role based on sender context or fallback to Buyer/Artisan toggle)
-    const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      sender: 'Buyer', // Mock sender
-      text: inputText.trim(),
-      time: 'Just Now'
-    };
-
-    addMessage(activeInquiryId, newMessage);
+    const textToSend = inputText.trim();
     setInputText('');
 
-    // Simulate artisan auto-response after 1.5s to make it feel extremely responsive!
-    setTimeout(() => {
-      const autoReply = chatService.getSimulatedReply();
-      addMessage(activeInquiryId, autoReply);
-    }, 1500);
+    const newMsg: Message = {
+      id: `msg-${Date.now()}`,
+      sender: currentRole,
+      text: textToSend,
+      time: 'Just Now',
+    };
+
+    setLocalMessages(prev => [...prev, newMsg]);
+    addMessage(activeInquiryId, newMsg);
+
+    try {
+      await chatService.sendMessage(activeInquiryId, newMsg);
+      const refreshed = await chatService.fetchMessages(activeInquiryId);
+      if (refreshed.length > 0) {
+        setLocalMessages(refreshed);
+      }
+    } catch (err) {
+      console.warn('[ChatScreen] Error persisting message:', err);
+    }
   };
 
   return (
@@ -67,10 +91,10 @@ export default function ChatScreen() {
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <FlatList
-          data={messages}
+          data={localMessages}
           keyExtractor={item => item.id}
           renderItem={({ item }) => {
-            const isMe = item.sender === 'Buyer';
+            const isMe = item.sender === currentRole;
             return (
               <View
                 style={[

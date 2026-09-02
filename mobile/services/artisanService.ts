@@ -90,6 +90,21 @@ export const artisanService = {
         return currentArtisanState;
       }
 
+      // Query phone from public.users
+      let userPhone = '';
+      try {
+        const { data: userRow } = await supabase
+          .from('users')
+          .select('phone')
+          .eq('id', targetId)
+          .single();
+        if (userRow?.phone) {
+          userPhone = userRow.phone;
+        }
+      } catch (phoneErr) {
+        console.warn(`[ArtisanService] Non-fatal error loading phone from users table:`, phoneErr);
+      }
+
       if (data) {
         const email = authenticatedUser?.email || '';
         const namePrefix = email.split('@')[0] || 'Artisan';
@@ -100,7 +115,7 @@ export const artisanService = {
           ownerName: data.owner_name || namePrefix,
           location: data.location || 'India',
           craft: data.craft_specialization || 'Traditional Handicrafts',
-          phone: data.phone || '',
+          phone: userPhone || '',
           email: email,
           language: data.language || 'Hindi',
           bio: data.bio || 'Master artisan digital storefront on KalaMitra.',
@@ -133,7 +148,8 @@ export const artisanService = {
   },
 
   /**
-   * Updates local state and persists changes to Supabase public.artisan_profiles table.
+   * Updates local state and persists changes to Supabase public.artisan_profiles table
+   * and public.users (for phone number).
    */
   saveProfile: async (profileUpdates: Partial<Artisan>): Promise<Artisan> => {
     console.log('[ArtisanService] Saving profile updates to Supabase:', profileUpdates);
@@ -148,22 +164,40 @@ export const artisanService = {
     // 2. Persist to Supabase if authenticated
     if (authenticatedUser?.id) {
       try {
-        const { error } = await supabase
+        // Update public.artisan_profiles (strictly omitting phone)
+        const profilePayload: Record<string, any> = {
+          shop_name: profileUpdates.name || currentArtisanState.name,
+          owner_name: profileUpdates.ownerName || currentArtisanState.ownerName,
+          location: profileUpdates.location || currentArtisanState.location,
+          craft_specialization: profileUpdates.craft || currentArtisanState.craft,
+          bio: profileUpdates.bio !== undefined ? profileUpdates.bio : currentArtisanState.bio,
+          language: profileUpdates.language || currentArtisanState.language,
+        };
+
+        if (profileUpdates.avatar !== undefined) {
+          profilePayload.avatar_url = profileUpdates.avatar;
+        }
+
+        const { error: profileErr } = await supabase
           .from('artisan_profiles')
-          .update({
-            shop_name: profileUpdates.name || currentArtisanState.name,
-            owner_name: profileUpdates.ownerName || currentArtisanState.ownerName,
-            location: profileUpdates.location || currentArtisanState.location,
-            craft_specialization: profileUpdates.craft || currentArtisanState.craft,
-            bio: profileUpdates.bio !== undefined ? profileUpdates.bio : currentArtisanState.bio,
-            phone: profileUpdates.phone !== undefined ? profileUpdates.phone : currentArtisanState.phone,
-            language: profileUpdates.language || currentArtisanState.language,
-          })
+          .update(profilePayload)
           .eq('id', authenticatedUser.id);
 
-        if (error) {
-          console.error('[ArtisanService] Failed to save profile to Supabase:', error.message);
-          throw new Error(`Failed to save profile: ${error.message}`);
+        if (profileErr) {
+          console.error('[ArtisanService] Failed to save profile to artisan_profiles:', profileErr.message);
+          throw new Error(`Failed to save profile: ${profileErr.message}`);
+        }
+
+        // Update phone in public.users if provided
+        if (profileUpdates.phone !== undefined) {
+          const { error: userErr } = await supabase
+            .from('users')
+            .update({ phone: profileUpdates.phone })
+            .eq('id', authenticatedUser.id);
+
+          if (userErr) {
+            console.warn('[ArtisanService] Failed to update phone on users table (non-fatal):', userErr.message);
+          }
         }
 
         console.log('[ArtisanService] Profile persisted to Supabase successfully.');

@@ -1,14 +1,32 @@
 export interface PricingInput {
+  productName?: string;
+  category?: string;
+  material?: string;
+  craftType?: string;
   materialCost: number;
-  laborCost: number;
-  otherCost: number;
+  timeSpentHours?: number;
+  craftsmanshipLevel?: 'basic' | 'skilled' | 'intricate';
+  hourlyRateOverride?: number;
+  tags?: string[];
+  laborCost?: number;
+  otherCost?: number;
 }
 
 export interface PricingRecommendation {
-  totalCost: number;
   recommendedPrice: number;
+  costFloor: number;
+  marketMedian?: number;
   minPrice: number;
   maxPrice: number;
+  confidence: 'high' | 'medium' | 'low' | 'cost_only';
+  dataSourceType: 'live_market_data' | 'craft_benchmark' | 'cost_only';
+  dataSourceLabel: string;
+  dataSourceDescription: string;
+  comparableCount: number;
+  explanationPoints: string[];
+  summaryExplanation: string;
+  craftsmanshipAdjustmentPercent?: number;
+  totalCost: number;
   marginPercent: number;
   explanation: string;
 }

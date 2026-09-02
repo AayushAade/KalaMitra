@@ -57,6 +57,14 @@ export const ProductCatalogProvider: React.FC<{ children: React.ReactNode }> = (
       if (currentUserId) {
         await refreshMyProducts(currentUserId);
       }
+
+      // Refresh real inquiries from Supabase
+      try {
+        const liveInquiries = await inquiryService.fetchInquiries();
+        setInquiries(liveInquiries);
+      } catch (inqErr) {
+        console.warn('[ProductCatalogContext] Non-fatal error loading inquiries:', inqErr);
+      }
     } catch (err) {
       console.warn('[ProductCatalogContext] Error refreshing products:', err);
     } finally {
@@ -109,27 +117,15 @@ export const ProductCatalogProvider: React.FC<{ children: React.ReactNode }> = (
   }, []);
 
   const addInquiry = (inquiry: Inquiry) => {
-    const createdInquiry = inquiryService.createInquiry({
-      productId: inquiry.productId,
-      productTitle: inquiry.productTitle,
-      productPrice: inquiry.productPrice,
-      productImage: inquiry.productImage,
-      buyerName: inquiry.buyerName,
-      buyerType: inquiry.buyerType,
-      quantity: inquiry.quantity,
-      expectedDelivery: inquiry.expectedDelivery,
-      message: inquiry.message,
-    });
-    setInquiries(prev => [createdInquiry, ...prev]);
+    setInquiries(prev => [inquiry, ...prev.filter(i => i.id !== inquiry.id)]);
   };
 
   const addMessage = (inquiryId: string, message: Message) => {
-    const savedMessage = chatService.sendMessage(inquiryId, message);
     setMessagesMap(prev => {
       const existing = prev[inquiryId] || [];
       return {
         ...prev,
-        [inquiryId]: [...existing, savedMessage],
+        [inquiryId]: [...existing.filter(m => m.id !== message.id), message],
       };
     });
   };

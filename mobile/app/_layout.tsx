@@ -30,11 +30,16 @@ function RootLayoutNav() {
       setIsSessionLoaded(true);
 
       if (session?.user) {
-        artisanService.setAuthenticatedUser({
-          id: session.user.id,
-          email: session.user.email || ''
-        });
-        await artisanService.fetchProfile(session.user.id);
+        const role = await authService.fetchUserRole(session.user.id);
+        if (role === 'artisan') {
+          artisanService.setAuthenticatedUser({
+            id: session.user.id,
+            email: session.user.email || ''
+          });
+          await artisanService.fetchProfile(session.user.id);
+        } else {
+          artisanService.reset();
+        }
       } else {
         artisanService.reset();
         productService.reset();
@@ -48,11 +53,16 @@ function RootLayoutNav() {
         setHasUser(!!user);
         setIsSessionLoaded(true);
         if (user) {
-          artisanService.setAuthenticatedUser({
-            id: user.id,
-            email: user.email || ''
-          });
-          await artisanService.fetchProfile(user.id);
+          const role = await authService.fetchUserRole(user.id);
+          if (role === 'artisan') {
+            artisanService.setAuthenticatedUser({
+              id: user.id,
+              email: user.email || ''
+            });
+            await artisanService.fetchProfile(user.id);
+          } else {
+            artisanService.reset();
+          }
         } else {
           artisanService.reset();
           productService.reset();
@@ -84,7 +94,7 @@ function RootLayoutNav() {
       const currentRole = authService.getRole();
       console.log(`[RouteGuard] Authenticated user (${currentRole}) on auth screen. Redirecting.`);
       if (currentRole === 'buyer') {
-        router.replace('/(buyer)/marketplace' as any);
+        router.replace('/(buyer)/buyer-home' as any);
       } else {
         router.replace('/(artisan)/dashboard' as any);
       }
@@ -103,7 +113,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(artisan)" />
       <Stack.Screen name="(buyer)" />
-      <Stack.Screen name="chat" />
+      <Stack.Screen name="chat/[inquiryId]" />
     </Stack>
   );
 }

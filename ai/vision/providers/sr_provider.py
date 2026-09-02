@@ -90,6 +90,13 @@ class SuperResolutionProvider:
         target_w = orig_w * scale
         target_h = orig_h * scale
 
+        # Cap target dimension to 4096px to prevent resource exhaustion on high-megapixel camera photos
+        MAX_TARGET_DIM = 4096
+        if max(target_w, target_h) > MAX_TARGET_DIM:
+            dim_scale = MAX_TARGET_DIM / max(target_w, target_h)
+            target_w = max(orig_w, int(target_w * dim_scale))
+            target_h = max(orig_h, int(target_h * dim_scale))
+
         # High-order Lanczos-4 interpolation for crisp detail reconstruction
         upscaled = cv2.resize(bgr, (target_w, target_h), interpolation=cv2.INTER_LANCZOS4)
 

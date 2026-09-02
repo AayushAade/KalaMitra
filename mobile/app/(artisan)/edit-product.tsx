@@ -429,7 +429,7 @@ export default function EditProductScreen() {
                 placeholder="उत्पाद की हस्तकला, पारंपरिक निर्माण विधि और कहानी हिंदी में लिखें..."
                 placeholderTextColor={colors.textMuted}
                 multiline
-                numberOfLines={3}
+                numberOfLines={4}
               />
             </View>
           </View>

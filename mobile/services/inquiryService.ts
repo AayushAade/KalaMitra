@@ -1,3 +1,4 @@
+import { supabase } from '../lib/supabase';
 import { Inquiry } from '../types';
 import { mockInquiries } from '../data/mockInquiries';
 
@@ -12,7 +13,86 @@ export const inquiryService = {
     return inMemoryInquiries.find(i => i.id === id);
   },
 
-  createInquiry: (inquiryData: {
+  /**
+   * Fetches real inquiries for the authenticated participant from Supabase.
+   */
+  fetchInquiries: async (): Promise<Inquiry[]> => {
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData?.user) {
+        return inMemoryInquiries;
+      }
+
+      const { data, error } = await supabase
+        .from('inquiries')
+        .select(`
+          id,
+          buyer_id,
+          product_id,
+          quantity,
+          expected_delivery,
+          status,
+          created_at,
+          products (
+            id,
+            price,
+            artisan_id,
+            product_translations ( name ),
+            product_images ( enhanced_url, original_url, is_primary )
+          ),
+          buyer_profiles (
+            id,
+            company_name,
+            location
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.warn('[InquiryService] Failed to fetch inquiries from Supabase:', error.message);
+        return inMemoryInquiries;
+      }
+
+      if (data) {
+        const mapped: Inquiry[] = data.map((row: any) => {
+          const product = row.products;
+          const translation = product?.product_translations?.[0];
+          const image = product?.product_images?.find((img: any) => img.is_primary) || product?.product_images?.[0];
+          const buyer = row.buyer_profiles;
+
+          return {
+            id: row.id,
+            productId: row.product_id,
+            productTitle: translation?.name || 'Handcrafted Product',
+            productPrice: product?.price || 0,
+            productImage: image?.enhanced_url || image?.original_url || '',
+            buyerName: buyer?.company_name || 'Verified Buyer',
+            buyerType: 'Wholesale Buyer',
+            buyerLocation: buyer?.location || 'India',
+            quantity: row.quantity,
+            expectedDelivery: row.expected_delivery || undefined,
+            message: '',
+            status: row.status,
+            date: new Date(row.created_at).toLocaleDateString('en-IN', {
+              month: 'short',
+              day: 'numeric'
+            }),
+          };
+        });
+
+        inMemoryInquiries = mapped;
+        return mapped;
+      }
+    } catch (err) {
+      console.error('[InquiryService] Exception fetching inquiries:', err);
+    }
+    return inMemoryInquiries;
+  },
+
+  /**
+   * Persists a new wholesale inquiry to Supabase and records the initial message.
+   */
+  createInquiry: async (inquiryData: {
     productId: string;
     productTitle: string;
     productPrice: number;
@@ -22,33 +102,95 @@ export const inquiryService = {
     quantity?: number;
     expectedDelivery?: string;
     message: string;
-  }): Inquiry => {
+  }): Promise<Inquiry> => {
     console.log(`[InquiryService] Creating new inquiry proposal:`, inquiryData);
+
+    let savedId = `inq-${Date.now()}`;
+    try {
+      const { data: authData } = await supabase.auth.getUser();
+      const userId = authData?.user?.id;
+
+      if (userId) {
+        // Ensure buyer profile exists
+        await supabase.from('buyer_profiles').upsert({
+          id: userId,
+          company_name: inquiryData.buyerName || 'Verified Buyer',
+          business_type: inquiryData.buyerType || 'Wholesale Buyer',
+          location: 'India'
+        }, { onConflict: 'id' });
+
+        const { data: newRow, error: inqErr } = await supabase
+          .from('inquiries')
+          .insert({
+            buyer_id: userId,
+            product_id: inquiryData.productId,
+            quantity: inquiryData.quantity || 1,
+            expected_delivery: inquiryData.expectedDelivery || null,
+            status: 'New'
+          })
+          .select()
+          .single();
+
+        if (inqErr) {
+          console.error('[InquiryService] Error inserting inquiry:', inqErr.message);
+        } else if (newRow) {
+          savedId = newRow.id;
+
+          // Also insert initial message if present
+          if (inquiryData.message) {
+            const { error: msgErr } = await supabase
+              .from('messages')
+              .insert({
+                inquiry_id: newRow.id,
+                sender_id: userId,
+                sender_role: 'Buyer',
+                text: inquiryData.message
+              });
+
+            if (msgErr) {
+              console.warn('[InquiryService] Failed to insert initial message:', msgErr.message);
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[InquiryService] Exception during inquiry creation:', err);
+    }
+
     const newInquiry: Inquiry = {
-      id: `inq-${Date.now()}`,
+      id: savedId,
       productId: inquiryData.productId,
       productTitle: inquiryData.productTitle,
       productPrice: inquiryData.productPrice,
       productImage: inquiryData.productImage,
       buyerName: inquiryData.buyerName,
       buyerType: inquiryData.buyerType,
-      buyerLocation: 'Mumbai, Maharashtra',
+      buyerLocation: 'India',
       quantity: inquiryData.quantity,
       expectedDelivery: inquiryData.expectedDelivery,
       message: inquiryData.message,
       status: 'New',
-      date: 'Today, Just Now'
+      date: 'Just Now'
     };
-    inMemoryInquiries = [newInquiry, ...inMemoryInquiries];
+
+    inMemoryInquiries = [newInquiry, ...inMemoryInquiries.filter(i => i.id !== newInquiry.id)];
     return newInquiry;
   },
 
-  updateInquiryStatus: (id: string, status: 'New' | 'Replied' | 'Closed'): Inquiry | undefined => {
+  updateInquiryStatus: async (id: string, status: 'New' | 'Replied' | 'Closed'): Promise<void> => {
     console.log(`[InquiryService] Updating status of inquiry ${id} to ${status}`);
     const inquiry = inMemoryInquiries.find(i => i.id === id);
     if (inquiry) {
       inquiry.status = status;
     }
-    return inquiry;
+
+    try {
+      await supabase
+        .from('inquiries')
+        .update({ status })
+        .eq('id', id);
+    } catch (err) {
+      console.warn('[InquiryService] Failed to update inquiry status in Supabase:', err);
+    }
   }
 };

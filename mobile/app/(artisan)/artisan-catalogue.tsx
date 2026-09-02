@@ -80,7 +80,8 @@ export default function ArtisanCatalogueScreen() {
       await refreshMyProducts();
       setDeleteTarget(null);
       showToast('Product deleted successfully.', false);
-    } catch {
+    } catch (err: any) {
+      console.error('[ArtisanCatalogue] Delete error:', err);
       setDeleteTarget(null);
       showToast('Unable to delete product. Please try again.', true);
     } finally {

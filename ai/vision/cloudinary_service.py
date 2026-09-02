@@ -100,6 +100,15 @@ class CloudinaryService:
             curr_w, curr_h = orig_w, orig_h
             telemetry["initial_dimensions"] = [orig_w, orig_h]
 
+            # Stage 0: Safe dimension ceiling to guarantee compatibility with Cloudinary 25MP limit
+            MAX_MEGAPIXELS = 20_000_000
+            if (curr_w * curr_h) > MAX_MEGAPIXELS or max(curr_w, curr_h) > 4096:
+                ceiling_scale = min(4096 / max(curr_w, curr_h), (MAX_MEGAPIXELS / (curr_w * curr_h)) ** 0.5)
+                curr_w = int(curr_w * ceiling_scale)
+                curr_h = int(curr_h * ceiling_scale)
+                img = img.resize((curr_w, curr_h), Image.Resampling.LANCZOS)
+                telemetry["ceiling_clamped_dimensions"] = [curr_w, curr_h]
+
             # Stage 1: In-memory PNG compression with optimize=True, compress_level=9
             out_buf = io.BytesIO()
             img.save(out_buf, format="PNG", optimize=True, compress_level=9)

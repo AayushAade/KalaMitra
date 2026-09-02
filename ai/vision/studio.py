@@ -188,9 +188,12 @@ class StudioComposer:
             aspect_ratio=aspect_ratio,
             add_shadow=add_shadow,
         )
+        # Prepend safe dimension limit (2048x2048) to guarantee Cloudinary on-the-fly transformations
+        # never exceed Cloudinary's 25 Megapixel transformation limit on raw camera cutouts
+        safe_transformations = [{"crop": "limit", "width": 2048, "height": 2048}] + transformations
         url, _ = cloudinary.utils.cloudinary_url(
             cutout_public_id,
-            transformation=transformations,
+            transformation=safe_transformations,
             secure=True,
         )
         return url

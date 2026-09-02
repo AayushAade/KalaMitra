@@ -14,6 +14,11 @@ export interface ProductCreationState {
   materialCost?: number;
   laborCost?: number;
   otherCost?: number;
+  timeSpentHours?: number;
+  craftsmanshipLevel?: 'basic' | 'skilled' | 'intricate';
+  costFloor?: number;
+  confidence?: string;
+  pricingMetadata?: any;
   descriptionEnglish?: string;
   descriptionHindi?: string;
   keywords?: string[];

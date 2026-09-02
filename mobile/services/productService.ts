@@ -332,7 +332,7 @@ export const productService = {
   },
 
   /**
-   * Updates an existing product in Supabase and in-memory cache.
+   * Updates an existing product listing and its translations in Supabase and in-memory cache.
    */
   updateProduct: async (
     productId: string,
@@ -356,7 +356,7 @@ export const productService = {
       inMemoryProducts = [updatedProduct, ...inMemoryProducts];
     }
 
-    // 2. Try persisting to Supabase if connected
+    // 2. Persist to Supabase
     try {
       // Update core products table
       const productRowUpdates: Record<string, any> = {};
@@ -366,17 +366,23 @@ export const productService = {
       if (updates.craft !== undefined) productRowUpdates.craft = updates.craft;
       if (updates.stock !== undefined) productRowUpdates.stock = updates.stock;
       if (updates.minOrderQuantity !== undefined) productRowUpdates.min_order_quantity = updates.minOrderQuantity;
+      if (updates.isPublished !== undefined) productRowUpdates.is_published = updates.isPublished;
 
       if (Object.keys(productRowUpdates).length > 0) {
-        await supabase
+        const { error: prodErr } = await supabase
           .from('products')
           .update(productRowUpdates)
           .eq('id', productId);
+
+        if (prodErr) {
+          console.error('[ProductService] Failed to update product row:', prodErr);
+          throw new Error(`Failed to update product: ${prodErr.message}`);
+        }
       }
 
       // Update product_translations if name or description changed
-      if (updates.name || updates.descriptionEnglish || updates.descriptionHindi || updates.voiceTranscript) {
-        if (updates.name || updates.descriptionEnglish || updates.voiceTranscript) {
+      if (updates.name || updates.descriptionEnglish !== undefined || updates.descriptionHindi !== undefined || updates.voiceTranscript !== undefined) {
+        if (updates.name || updates.descriptionEnglish !== undefined || updates.voiceTranscript !== undefined) {
           const { data: existingEn } = await supabase
             .from('product_translations')
             .select('id')
@@ -385,14 +391,17 @@ export const productService = {
             .maybeSingle();
 
           if (existingEn) {
-            await supabase
-              .from('product_translations')
-              .update({
-                name: updates.name || undefined,
-                description: updates.descriptionEnglish || undefined,
-                voice_transcript: updates.voiceTranscript || undefined,
-              })
-              .eq('id', existingEn.id);
+            const enUpdates: Record<string, any> = {};
+            if (updates.name) enUpdates.name = updates.name;
+            if (updates.descriptionEnglish !== undefined) enUpdates.description = updates.descriptionEnglish;
+            if (updates.voiceTranscript !== undefined) enUpdates.voice_transcript = updates.voiceTranscript;
+
+            if (Object.keys(enUpdates).length > 0) {
+              await supabase
+                .from('product_translations')
+                .update(enUpdates)
+                .eq('id', existingEn.id);
+            }
           } else if (updates.name) {
             await supabase
               .from('product_translations')
@@ -406,7 +415,7 @@ export const productService = {
           }
         }
 
-        if (updates.descriptionHindi || updates.name) {
+        if (updates.descriptionHindi !== undefined || updates.name) {
           const { data: existingHi } = await supabase
             .from('product_translations')
             .select('id')
@@ -415,13 +424,16 @@ export const productService = {
             .maybeSingle();
 
           if (existingHi) {
-            await supabase
-              .from('product_translations')
-              .update({
-                name: updates.name || undefined,
-                description: updates.descriptionHindi || undefined,
-              })
-              .eq('id', existingHi.id);
+            const hiUpdates: Record<string, any> = {};
+            if (updates.name) hiUpdates.name = updates.name;
+            if (updates.descriptionHindi !== undefined) hiUpdates.description = updates.descriptionHindi;
+
+            if (Object.keys(hiUpdates).length > 0) {
+              await supabase
+                .from('product_translations')
+                .update(hiUpdates)
+                .eq('id', existingHi.id);
+            }
           } else if (updates.descriptionHindi) {
             await supabase
               .from('product_translations')
@@ -436,7 +448,7 @@ export const productService = {
       }
 
       // Update product_images if image changed
-      if (updates.imageUrl) {
+      if (updates.imageUrl || updates.originalImageUrl) {
         const { data: existingImg } = await supabase
           .from('product_images')
           .select('id')
@@ -448,25 +460,45 @@ export const productService = {
           await supabase
             .from('product_images')
             .update({
-              enhanced_url: updates.imageUrl,
-              original_url: updates.originalImageUrl || updates.imageUrl,
+              enhanced_url: updates.imageUrl || undefined,
+              original_url: updates.originalImageUrl || updates.imageUrl || undefined,
             })
             .eq('id', existingImg.id);
-        } else {
+        } else if (updates.imageUrl || updates.originalImageUrl) {
           await supabase
             .from('product_images')
             .insert({
               product_id: productId,
               original_url: updates.originalImageUrl || updates.imageUrl,
-              enhanced_url: updates.imageUrl,
+              enhanced_url: updates.imageUrl || null,
               is_primary: true,
             });
         }
       }
     } catch (err: any) {
-      console.warn('[ProductService] Supabase update error (non-fatal, local state updated):', err?.message || err);
+      console.warn('[ProductService] Supabase update warning:', err?.message || err);
     }
 
     return updatedProduct;
+  },
+
+  /**
+   * Deletes a product and its associated records from Supabase and in-memory cache.
+   */
+  deleteProduct: async (productId: string): Promise<void> => {
+    console.log('[ProductService] Deleting product:', productId);
+    // Remove from in-memory cache
+    inMemoryProducts = inMemoryProducts.filter(p => p.id !== productId);
+
+    // Delete from Supabase
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId);
+
+    if (error) {
+      console.error('[ProductService] Failed to delete product from Supabase:', error);
+      throw new Error(`Failed to delete product: ${error.message}`);
+    }
   },
 };

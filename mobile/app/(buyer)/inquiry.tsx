@@ -6,6 +6,7 @@ import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
+import { inquiryService } from '../../services/inquiryService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BuyerInquiryScreen() {
@@ -20,42 +21,43 @@ export default function BuyerInquiryScreen() {
   const [qty, setQty] = useState('100');
   const [deliveryDate, setDeliveryDate] = useState('2026-09-20');
   const [msgText, setMsgText] = useState('Namaste! Interested in purchasing units. Please confirm bulk rates.');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const quantityVal = parseInt(qty) || 1;
-    const newInquiryId = `inq-${Date.now()}`;
+    setIsSubmitting(true);
 
-    const newInquiry = {
-      id: newInquiryId,
-      productId: product.id,
-      productTitle: product.name,
-      productPrice: product.price || 0,
-      productImage: product.imageUrl,
-      buyerName: buyerName,
-      buyerType: buyerType,
-      buyerLocation: 'Mumbai, Maharashtra',
-      quantity: quantityVal,
-      expectedDelivery: deliveryDate,
-      message: msgText,
-      status: 'New' as const,
-      date: 'Today, Just Now'
-    };
+    try {
+      const createdInquiry = await inquiryService.createInquiry({
+        productId: product.id,
+        productTitle: product.name,
+        productPrice: product.price || 0,
+        productImage: product.imageUrl,
+        buyerName: buyerName.trim() || 'Verified Buyer',
+        buyerType: buyerType.trim() || 'Retail Distributor',
+        quantity: quantityVal,
+        expectedDelivery: deliveryDate.trim() || undefined,
+        message: msgText.trim(),
+      });
 
-    // Save inquiry to global state
-    addInquiry(newInquiry);
+      // Save inquiry to global state
+      addInquiry(createdInquiry);
 
-    // Register initial chat message
-    addMessage(newInquiryId, {
-      id: `msg-${Date.now()}`,
-      sender: 'Buyer',
-      text: msgText,
-      time: 'Just Now'
-    });
+      // Register initial chat message
+      addMessage(createdInquiry.id, {
+        id: `msg-${Date.now()}`,
+        sender: 'Buyer',
+        text: msgText,
+        time: 'Just Now',
+      });
 
-    alert('Inquiry sent successfully to the Artisan!');
-
-    // Redirect to shared chat
-    router.replace(`/chat/${newInquiryId}` as any);
+      // Redirect to shared chat
+      router.replace(`/chat/${createdInquiry.id}` as any);
+    } catch (err: any) {
+      console.error('[BuyerInquiry] Submission failed:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -133,9 +135,11 @@ export default function BuyerInquiryScreen() {
               </View>
 
               <Button
-                title="Send Inquiry"
+                title={isSubmitting ? 'Sending...' : 'Send Inquiry'}
                 onPress={handleSubmit}
                 variant="primary"
+                disabled={isSubmitting}
+                loading={isSubmitting}
                 style={styles.submitBtn}
               />
             </View>

@@ -19,6 +19,28 @@ export const authService = {
   },
 
   /**
+   * Reads the authoritative user role from public.users table.
+   */
+  fetchUserRole: async (userId: string): Promise<'artisan' | 'buyer'> => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', userId)
+        .single();
+
+      if (!error && data?.role && (data.role === 'buyer' || data.role === 'artisan')) {
+        activeRole = data.role;
+        console.log(`[AuthService] Authoritative user role loaded from database: ${activeRole}`);
+        return data.role;
+      }
+    } catch (e) {
+      console.warn('[AuthService] Could not load user role from database:', e);
+    }
+    return activeRole;
+  },
+
+  /**
    * Logs in a user using email and password, verifying their public.users metadata role and loading their profile.
    */
   login: async (email: string, password: string, role: 'artisan' | 'buyer'): Promise<boolean> => {

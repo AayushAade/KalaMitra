@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   View,
   Text,
   ScrollView,
   Alert,
+  Pressable,
   Switch,
   Platform,
 } from 'react-native';
@@ -16,10 +17,46 @@ import Header from '../../components/Header';
 import Button from '../../components/Button';
 import BottomNavigation from '../../components/BottomNavigation';
 import { authService } from '../../services/authService';
+import { supabase } from '../../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function BuyerProfileScreen() {
   const { isDarkMode, toggleDarkMode, colors } = useTheme();
+  const [buyerEmail, setBuyerEmail] = useState('');
+  const [buyerCompany, setBuyerCompany] = useState('Buyer Account');
+  const [buyerType, setBuyerType] = useState('Marketplace Buyer');
+
+  useEffect(() => {
+    const loadBuyer = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        if (user) {
+          setBuyerEmail(user.email || '');
+          const prefix = user.email?.split('@')[0] || 'Buyer';
+
+          const { data: profile } = await supabase
+            .from('buyer_profiles')
+            .select('company_name, business_type')
+            .eq('id', user.id)
+            .single();
+
+          if (profile?.company_name) {
+            setBuyerCompany(profile.company_name);
+          } else {
+            setBuyerCompany(`${prefix.charAt(0).toUpperCase() + prefix.slice(1)}'s Business`);
+          }
+
+          if (profile?.business_type) {
+            setBuyerType(profile.business_type);
+          }
+        }
+      } catch (err) {
+        console.warn('[BuyerProfile] Non-fatal error loading profile:', err);
+      }
+    };
+    loadBuyer();
+  }, []);
+
   const handleLogout = () => {
     Alert.alert(
       'Logout',
@@ -68,26 +105,32 @@ export default function BuyerProfileScreen() {
         {/* Profile Header */}
         <View style={styles.profileHeader}>
           <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
-            <Ionicons name="person-outline" size={40} color={colors.onPrimary} />
+            <Ionicons name="business-outline" size={38} color={colors.onPrimary} />
           </View>
-          <Text style={[styles.headerName, { color: colors.onBackground }]}>Buyer Account</Text>
-          <Text style={[styles.headerSub, { color: colors.textMuted }]}>Marketplace Browser</Text>
+          <Text style={[styles.headerName, { color: colors.onBackground }]}>{buyerCompany}</Text>
+          <Text style={[styles.headerSub, { color: colors.textMuted }]}>{buyerEmail || buyerType}</Text>
         </View>
 
         {/* Settings */}
         <View style={[styles.settingsCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
           <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Preferences</Text>
-          <View style={styles.settingRow}>
+          <Pressable
+            style={({ pressed }) => [styles.settingRow, pressed && styles.rowPressed]}
+            onPress={() => router.push('/(auth)/language' as any)}
+          >
             <Ionicons name="language-outline" size={20} color={colors.textMuted} />
-            <Text style={[styles.settingText, { color: colors.onBackground }]}>Language</Text>
+            <Text style={[styles.settingText, { color: colors.onBackground }]}>Language Preferences</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.border} />
-          </View>
+          </Pressable>
           <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
-          <View style={styles.settingRow}>
-            <Ionicons name="settings-outline" size={20} color={colors.textMuted} />
-            <Text style={[styles.settingText, { color: colors.onBackground }]}>Settings</Text>
+          <Pressable
+            style={({ pressed }) => [styles.settingRow, pressed && styles.rowPressed]}
+            onPress={() => Alert.alert('Buyer Protection', 'All orders placed through DIY-Nest are backed by authentic artisan verification and escrow protection.')}
+          >
+            <Ionicons name="shield-checkmark-outline" size={20} color={colors.textMuted} />
+            <Text style={[styles.settingText, { color: colors.onBackground }]}>Buyer Protection & Terms</Text>
             <Ionicons name="chevron-forward" size={18} color={colors.border} />
-          </View>
+          </Pressable>
         </View>
 
         <View style={[styles.accountCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
@@ -121,39 +164,44 @@ export default function BuyerProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.background },
-  scrollContainer: { paddingHorizontal: Spacing.marginMobile, paddingTop: Spacing.md, paddingBottom: Spacing.xl },
-
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  scrollContainer: {
+    paddingHorizontal: Spacing.marginMobile,
+    paddingVertical: Spacing.lg,
+    paddingBottom: 100,
+  },
   profileHeader: {
     alignItems: 'center',
-    paddingVertical: Spacing.lg,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.xl,
   },
   avatarCircle: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: Colors.tertiary,
+    backgroundColor: Colors.primary,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.sm,
+    ...Shadows.soft,
   },
-  headerName: { fontSize: 22, fontWeight: '800', color: Colors.onBackground },
-  headerSub: { fontSize: 14, color: Colors.textMuted, marginTop: 2 },
-
+  headerName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.onBackground,
+    marginBottom: 4,
+  },
+  headerSub: {
+    fontSize: 14,
+    color: Colors.textMuted,
+  },
   settingsCard: {
     backgroundColor: Colors.card,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
     marginBottom: Spacing.md,
-    ...Shadows.soft,
-  },
-  accountCard: {
-    backgroundColor: Colors.card,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
     borderWidth: 1,
     borderColor: Colors.borderLight,
     ...Shadows.soft,
@@ -163,18 +211,36 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.textMuted,
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: Spacing.md,
+    letterSpacing: 0.5,
+    marginBottom: Spacing.sm,
   },
   settingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    gap: Spacing.md,
+    paddingVertical: Spacing.sm,
+    gap: Spacing.sm,
   },
-  settingText: { flex: 1, fontSize: 15, color: Colors.onBackground, fontWeight: '500' },
-  divider: { height: 1, backgroundColor: Colors.borderLight },
-  logoutBtn: { width: '100%', borderColor: '#F8B4B4', borderWidth: 1 },
+  rowPressed: {
+    opacity: 0.7,
+  },
+  settingText: {
+    flex: 1,
+    fontSize: 15,
+    color: Colors.onBackground,
+    fontWeight: '500',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.borderLight,
+  },
+  accountCard: {
+    backgroundColor: Colors.card,
+    borderRadius: BorderRadius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    ...Shadows.soft,
+  },
   darkModeRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -191,5 +257,11 @@ const styles = StyleSheet.create({
   darkModeLabel: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  logoutBtn: {
+    width: '100%',
+    borderColor: '#F8B4B4',
+    borderWidth: 1,
+    marginTop: Spacing.sm,
   },
 });
