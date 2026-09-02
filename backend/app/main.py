@@ -25,10 +25,15 @@ app.add_middleware(
 )
 
 
+from backend.app.api.v1.products import router as products_router
 from backend.app.api.v1.router import api_router
 
-# Include API v1 routes
+# Include API v1 routes (/api/v1)
 app.include_router(api_router, prefix=settings.api_v1_str)
+
+# Direct root alias for /api/products
+app.include_router(products_router, prefix="/api/products", tags=["products"])
+
 
 
 @app.get("/health", tags=["health"])

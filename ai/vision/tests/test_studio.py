@@ -24,6 +24,8 @@ class TestStudioComposer(unittest.TestCase):
     """Unit test suite for Phase 3B Studio Composition Layer."""
 
     def setUp(self):
+        import cloudinary
+        cloudinary.config(cloud_name="test_cloud", api_key="123", api_secret="abc", secure=True)
         self.mock_cloudinary = MagicMock()
         self.mock_bridge = MagicMock()
         self.composer = StudioComposer(

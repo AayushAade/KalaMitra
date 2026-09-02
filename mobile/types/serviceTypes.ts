@@ -95,8 +95,27 @@ export interface StudioEnhanceResponse {
   error_code?: string | null;
 }
 
+export interface ProductImageEnhanceResponse {
+  success: boolean;
+  imageUrl?: string | null;
+  originalImageUrl?: string | null;
+  publicId?: string | null;
+  provider: string;
+  fallbackUsed: boolean;
+  category: string;
+  style: string;
+  executionTimeMs?: number;
+  telemetry?: Record<string, any>;
+  error?: string | null;
+  error_code?: string | null;
+}
+
 export interface ImageEnhanceOptions {
   category?: string;
+  productCategory?: string;
+  productName?: string;
+  productDescription?: string;
+  style?: string;
   preset?: string;
   aspect_ratio?: string;
   add_shadow?: boolean;
@@ -114,6 +133,9 @@ export interface ImageProcessingResult {
   backgroundRemoved: boolean;
   lightingAdjusted: boolean;
   provider?: string;
+  fallbackUsed?: boolean;
+  category?: string;
+  style?: string;
   metadata?: Record<string, any>;
   error?: string;
   errorCode?: string;

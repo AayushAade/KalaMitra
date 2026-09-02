@@ -1,23 +1,54 @@
-import { request } from './api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const imageService = {
-  async enhanceImage(imageData) {
+  async enhanceImage(imageInput, options = {}) {
     try {
-      return await request('/image/enhance', {
+      const formData = new FormData();
+
+      if (imageInput instanceof Blob || imageInput instanceof File) {
+        formData.append('image', imageInput, imageInput.name || 'product.jpg');
+      } else if (typeof imageInput === 'string') {
+        if (imageInput.startsWith('data:') || imageInput.startsWith('http')) {
+          const res = await fetch(imageInput);
+          const blob = await res.blob();
+          formData.append('image', blob, 'product.jpg');
+        }
+      }
+
+      const category = options.productCategory || options.category || 'GENERIC_HANDICRAFT';
+      const style = options.style || 'CLEAN_ECOMMERCE';
+
+      formData.append('productCategory', category);
+      formData.append('style', style);
+      if (options.productName) formData.append('productName', options.productName);
+      if (options.productDescription) formData.append('productDescription', options.productDescription);
+
+      const response = await fetch(`${API_BASE_URL}/api/products/image-enhance`, {
         method: 'POST',
-        body: JSON.stringify({ image: imageData }),
+        body: formData,
       });
-    } catch {
-      // Return enhanced mock image result
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || `Server returned status ${response.status}`);
+      }
+
+      const data = await response.json();
       return {
-        original: imageData || "https://lh3.googleusercontent.com/aida-public/AB6AXuCTZ9ZdYNYjwvq9BLRKmIA8lrCueU6ss5NaK7NcL4tV4_640CzTmWYawWfXIL62guK6U4_aeNsP7XEHi_XCKkdFsG-Uvz-z5jxlfa6wI8-E_xR433XGR0x6KTEbjRK_uiGbQSYAjI_VKHuDAz206-2hYYSd4fQVwHVL-kFP4xv_pWeHnOMFLjUesGEMNGw8AmVV27wnmQ61K0QrPI4Wd3z2iwGPsmqyHIZPnbctLtiY-23o1zoi5D7c",
-        enhanced: imageData || "https://lh3.googleusercontent.com/aida-public/AB6AXuD9NdqtHHuX-C3fTyPOFZyJHmhxGdmIUVFNHQnBFec-x4sM6nam9v8zGl_A50EYGmZPn11LroWhvKHY5FCPYBHMXB8smCONqVv0H_O5bW-yoFUMcCyNZrnpHOq1c5STMMu_HCBEfCqtgew-DNpDA_CpmKQ8Hqd4TNZ9Ul3u_9AuI_LdlQ_rhb5UzODrcnCCzKSeWTTtYcrI2hIt2BuU6Z06-W5UYr8AKVJJQ3n9_6C3Kg4iBz6f2QhI",
-        status: "success",
-        lightingCorrection: "100%",
-        backgroundCleaned: true
+        original: data.originalImageUrl || imageInput,
+        enhanced: data.imageUrl,
+        provider: data.provider,
+        fallbackUsed: data.fallbackUsed,
+        category: data.category,
+        style: data.style,
+        status: data.success ? 'success' : 'error',
       };
+    } catch (err) {
+      console.warn('[WebImageService] Error invoking /api/products/image-enhance:', err);
+      throw err;
     }
-  }
+  },
 };
 
 export default imageService;
+

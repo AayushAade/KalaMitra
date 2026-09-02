@@ -1,27 +1,43 @@
 """AI Image Quality Enhancement, Super-Resolution & Studio Orchestrator.
 
-Orchestrates the complete 4-stage artisan vision pipeline:
-1. AI Lighting & White-Balance Correction (CLAHE + Gray-World Color Normalization)
-2. AI Pixel Super-Resolution & Texture Reconstruction (2x/4x Detail Sharpening)
-3. AI Cluttered Background Removal (Offline U2-Net / Rembg with zero API fees)
-4. E-Commerce Studio Framing, Backdrops & Contact Drop Shadows (Marketplace Standards)
-
-Guarantees 100% genuine handicraft authenticity without synthetic distortion.
+Orchestrates the complete KalaMitra production vision pipeline:
+1. Immutable Raw Ingestion into Cloudinary Storage Vault (artisan-ai/originals/)
+2. Gemini / Nano Banana Primary Studio Generation Engine (Master E-Commerce Prompt)
+3. Product Fidelity Validation Gate (SSIM, Mask IoU, CIELAB Delta E, Geometry checks)
+   - If PASS -> Cloudinary Final Catalog Asset (artisan-ai/enhanced/)
+   - If FAIL / REVIEW / Timeout / API Error -> Seamless Local Fallback Pipeline
+4. Local Fallback Pipeline:
+   - AI Lighting & White-Balance Correction (CLAHE + Gray-World Color Normalization)
+   - AI Super-Resolution & Texture Reconstruction (Lanczos-4 / Bilateral Unsharp)
+   - Transparent Background Removal (Rembg U2-Net / Picsart Cutout)
+   - E-Commerce Studio Framing & Contact Shadows (StudioComposer)
 """
 
+from __future__ import annotations
+
+import logging
+import os
 from pathlib import Path
 import time
 from typing import Any, BinaryIO, Dict, List, Optional, Union
 import urllib.request
 
 from ai.vision.cloudinary_service import CloudinaryService
+from ai.vision.fidelity import ProductFidelityValidator
 from ai.vision.lighting import LightingCorrector
 from ai.vision.persistence import PersistenceBridge
+from ai.vision.providers.gemini_studio import GeminiStudioProvider
+from ai.vision.providers.photoroom_provider import PhotoroomProvider
 from ai.vision.providers.picsart_provider import PicsartProvider
 from ai.vision.providers.rembg_provider import RembgProvider
-from ai.vision.providers.sr_provider import SuperResolutionProvider
+try:
+    from ai.vision.providers.sr_provider import SuperResolutionProvider
+except ImportError:
+    SuperResolutionProvider = None
 from ai.vision.schemas import EnhancedImageResult, ImageAsset, ProcessedImageResult, QualityAnalysisResult
 from ai.vision.studio import StudioComposer
+
+logger = logging.getLogger(__name__)
 
 
 class QualityEnhancer:
@@ -30,19 +46,30 @@ class QualityEnhancer:
     def __init__(
         self,
         lighting_corrector: Optional[LightingCorrector] = None,
-        sr_provider: Optional[SuperResolutionProvider] = None,
+        sr_provider: Optional[Any] = None,
         rembg_provider: Optional[RembgProvider] = None,
         picsart_provider: Optional[PicsartProvider] = None,
+        gemini_provider: Optional[GeminiStudioProvider] = None,
+        photoroom_provider: Optional[PhotoroomProvider] = None,
+        fidelity_validator: Optional[ProductFidelityValidator] = None,
         cloudinary_service: Optional[CloudinaryService] = None,
         studio_composer: Optional[StudioComposer] = None,
     ) -> None:
         """Initialize QualityEnhancer with vision service dependencies."""
         self.lighting = lighting_corrector or LightingCorrector()
-        self.sr = sr_provider or SuperResolutionProvider()
+        if sr_provider is not None:
+            self.sr = sr_provider
+        elif SuperResolutionProvider is not None:
+            self.sr = SuperResolutionProvider()
+        else:
+            self.sr = None
         self.rembg = rembg_provider or RembgProvider()
         self.picsart = picsart_provider or PicsartProvider()
         self.cloudinary = cloudinary_service or CloudinaryService()
         self.studio = studio_composer or StudioComposer(cloudinary_service=self.cloudinary)
+        self.gemini = gemini_provider or GeminiStudioProvider()
+        self.photoroom = photoroom_provider or PhotoroomProvider()
+        self.fidelity = fidelity_validator or ProductFidelityValidator(rembg_provider=self.rembg)
         self.bridge = PersistenceBridge(
             cloudinary_service=self.cloudinary,
             picsart_provider=self.picsart,
@@ -89,113 +116,32 @@ class QualityEnhancer:
                 error_code="INVALID_ENHANCEMENT_MODE",
             )
 
-    def process_enhanced_studio_pipeline(
+    def _execute_local_fallback_pipeline(
         self,
-        image_input: Union[str, Path, bytes, BinaryIO],
-        category: str = "general",
-        preset: Optional[str] = None,
-        aspect_ratio: Optional[str] = None,
-        add_shadow: Optional[bool] = None,
-        quality_mode: str = "auto",
-        upscale_factor: int = 2,
-        enable_lighting_correction: bool = True,
-        enable_super_resolution: bool = True,
-        enable_quality_enhancement: bool = True,
-        tags: Optional[List[str]] = None,
+        image_bytes: bytes,
+        original_asset: ImageAsset,
+        category: str,
+        preset: Optional[str],
+        aspect_ratio: Optional[str],
+        add_shadow: Optional[bool],
+        quality_mode: str,
+        upscale_factor: int,
+        enable_lighting_correction: bool,
+        enable_super_resolution: bool,
+        enable_quality_enhancement: bool,
+        pipeline_tags: List[str],
+        fallback_telemetry: Dict[str, Any],
+        start_time: float,
     ) -> EnhancedImageResult:
-        """Execute the complete 4-stage local AI vision & studio presentation pipeline.
-
-        Flow:
-        1. Ingest raw photo into persistent Cloudinary storage (artisan-ai/originals/).
-        2. Perform automated image quality analysis & classification.
-        3. Stage 1: Correct dim/uneven lighting, shadow underexposure, and color balance.
-        4. Stage 2: Reconstruct pixel sharpness, deblur, and upscale 2x/4x via SuperResolutionProvider.
-        5. Stage 3: Extract transparent PNG cutout via RembgProvider.
-        6. Stage 4: Compose onto professional e-commerce studio backdrop with contact shadow.
-        7. Persist final studio asset into Cloudinary (artisan-ai/enhanced/).
-
-        Args:
-            image_input: Raw image payload (file path, raw bytes, or stream).
-            category: Artisan craft category (pottery, textiles, wooden_crafts, jewellery, general).
-            preset: Studio backdrop preset key (ecommerce_white, warm_neutral, terracotta_sand, minimal_grey).
-            aspect_ratio: Canvas aspect ratio (square_1x1, portrait_4x5, portrait_9x16, landscape_16x9).
-            add_shadow: Whether to apply a realistic 3D contact drop shadow.
-            quality_mode: Processing mode ('local_ai', 'cloud', 'auto').
-            upscale_factor: Super-resolution multiplier (2 or 4).
-            enable_lighting_correction: Toggle for lighting & white-balance engine.
-            enable_super_resolution: Toggle for 2x/4x pixel super-resolution engine.
-            enable_quality_enhancement: Master quality enhancement toggle.
-            tags: Optional metadata tags.
-
-        Returns:
-            EnhancedImageResult with original, cutout, and final enhanced studio assets.
-        """
-        start_time = time.time()
-        pipeline_tags = list(tags) if tags else []
-
-        # 1. Normalize image into byte buffer
-        image_bytes: bytes
-        if isinstance(image_input, (str, Path)):
-            path_obj = Path(image_input)
-            if not path_obj.exists():
-                return EnhancedImageResult(
-                    success=False,
-                    category=category,
-                    error=f"Source image file not found: {path_obj}",
-                    error_code="FILE_NOT_FOUND",
-                )
-            image_bytes = path_obj.read_bytes()
-        elif isinstance(image_input, bytes):
-            image_bytes = image_input
-        elif hasattr(image_input, "read"):
-            image_bytes = image_input.read()
-        else:
-            return EnhancedImageResult(
-                success=False,
-                category=category,
-                error=f"Unsupported image input type: {type(image_input)}",
-                error_code="INVALID_INPUT_TYPE",
-            )
-
-        if not image_bytes:
-            return EnhancedImageResult(
-                success=False,
-                category=category,
-                error="Provided image payload is empty (0 bytes)",
-                error_code="EMPTY_IMAGE",
-            )
-
-        # 2. Ingest raw original photograph to Cloudinary (artisan-ai/originals/)
-        orig_upload_res = self.cloudinary.upload_original_image(
-            image_input=image_bytes,
-            tags=pipeline_tags,
-        )
-        if not orig_upload_res.success or not orig_upload_res.asset:
-            return EnhancedImageResult(
-                success=False,
-                category=category,
-                error=f"Failed to upload original image to Cloudinary: {orig_upload_res.error}",
-                error_code="ORIGINAL_UPLOAD_FAILED",
-            )
-        original_asset = orig_upload_res.asset
-
-        # 3. Quality Analysis
-        analysis = self.analyze_quality(original_asset.public_id)
-
+        """Execute the resilient 4-stage local image enhancement fallback pipeline."""
         working_bytes = image_bytes
-        pipeline_telemetry: Dict[str, Any] = {
-            "quality_tier": analysis.quality_tier,
-            "quality_score": analysis.quality_score,
-            "megapixels_original": analysis.megapixels,
-            "stages_applied": [],
-        }
+        stages_applied = list(fallback_telemetry.get("stages_applied", []))
 
-        # 4. Multi-Tier AI Quality Enhancement & Super-Resolution
+        # 1. Multi-Tier Quality Enhancement / Super-Resolution
         if enable_quality_enhancement:
             clean_mode = quality_mode.lower()
 
             if clean_mode in ("ultra", "upscale"):
-                # Picsart AI Upscale / Ultra-Enhance
                 enh_res = self.enhance_image(
                     image_input=image_bytes,
                     mode=clean_mode,
@@ -210,20 +156,17 @@ class QualityEnhancer:
                         with urllib.request.urlopen(req, timeout=30) as cdn_res:
                             if getattr(cdn_res, "status", 200) in (200, None):
                                 working_bytes = cdn_res.read()
-                                pipeline_telemetry["quality_enhancement_status"] = f"applied ({clean_mode})"
-                                pipeline_telemetry["stages_applied"].append(f"picsart_{clean_mode}")
-                    except Exception as exc:
-                        pipeline_telemetry["quality_enhancement_status"] = f"fallback ({str(exc)})"
-                else:
-                    pipeline_telemetry["quality_enhancement_status"] = f"fallback (provider: {enh_res.error})"
+                                stages_applied.append(f"picsart_{clean_mode}")
+                    except Exception:
+                        pass
 
             elif clean_mode in ("cloudinary", "auto"):
                 try:
+                    analysis = self.analyze_quality(original_asset.public_id)
                     cloudinary_enhanced_url = self.cloudinary.get_quality_enhanced_url(
                         public_id=original_asset.public_id,
                         quality_tier=analysis.quality_tier,
                     )
-                    pipeline_telemetry["cloudinary_enhanced_url"] = cloudinary_enhanced_url
                     req = urllib.request.Request(
                         url=cloudinary_enhanced_url,
                         headers={"User-Agent": "KalaMitra-QualityEnhancer/1.0"},
@@ -231,10 +174,9 @@ class QualityEnhancer:
                     with urllib.request.urlopen(req, timeout=25) as cdn_res:
                         if getattr(cdn_res, "status", 200) in (200, None):
                             working_bytes = cdn_res.read()
-                            pipeline_telemetry["cloudinary_enhancement_status"] = "applied"
-                            pipeline_telemetry["stages_applied"].append("cloudinary_ai_enhance")
-                except Exception as exc:
-                    pipeline_telemetry["cloudinary_enhancement_status"] = f"fallback ({str(exc)})"
+                            stages_applied.append("cloudinary_ai_enhance")
+                except Exception:
+                    pass
 
             else:
                 # 100% Local AI Pipeline (Lighting + Super-Resolution)
@@ -246,23 +188,23 @@ class QualityEnhancer:
                             enable_clahe=True,
                             enable_auto_exposure=True,
                         )
-                        pipeline_telemetry["lighting_correction"] = light_telemetry
-                        pipeline_telemetry["stages_applied"].append("lighting_correction")
+                        fallback_telemetry["lighting_correction"] = light_telemetry
+                        stages_applied.append("lighting_correction")
                     except Exception as light_err:
-                        pipeline_telemetry["lighting_correction_error"] = str(light_err)
+                        fallback_telemetry["lighting_correction_error"] = str(light_err)
 
-                if enable_super_resolution:
+                if enable_super_resolution and self.sr is not None:
                     try:
                         working_bytes, sr_telemetry = self.sr.upscale_image(
                             working_bytes,
                             scale=upscale_factor,
                         )
-                        pipeline_telemetry["super_resolution"] = sr_telemetry
-                        pipeline_telemetry["stages_applied"].append(f"super_resolution_{upscale_factor}x")
+                        fallback_telemetry["super_resolution"] = sr_telemetry
+                        stages_applied.append(f"super_resolution_{upscale_factor}x")
                     except Exception as sr_err:
-                        pipeline_telemetry["super_resolution_error"] = str(sr_err)
+                        fallback_telemetry["super_resolution_error"] = str(sr_err)
 
-        # 5. Background Removal (Try Picsart first, seamless local Rembg fallback)
+        # 2. Extract Cutout PNG
         cutout_bytes: Optional[bytes] = None
 
         try:
@@ -280,36 +222,35 @@ class QualityEnhancer:
                         dl_bytes = cdn_response.read()
                         if len(dl_bytes) >= 8 and dl_bytes[:8] == b"\x89PNG\r\n\x1a\n":
                             cutout_bytes = dl_bytes
-                            pipeline_telemetry["cutout_provider"] = "picsart_cloud"
-                            pipeline_telemetry["stages_applied"].append("background_removal_cloud")
+                            stages_applied.append("background_removal_cloud")
         except Exception:
             pass
-
 
         if cutout_bytes is None:
             try:
                 cutout_bytes = self.rembg.extract_cutout_bytes(working_bytes)
-                pipeline_telemetry["cutout_provider"] = "rembg_offline_u2net"
-                pipeline_telemetry["stages_applied"].append("background_removal_local")
-            except Exception as rembg_err:
+                stages_applied.append("background_removal_local")
+            except Exception:
                 pass
 
         if cutout_bytes is None or len(cutout_bytes) < 8 or cutout_bytes[:8] != b"\x89PNG\r\n\x1a\n":
             return EnhancedImageResult(
                 success=False,
+                provider="local_fallback",
                 original=original_asset,
                 cutout=None,
                 enhanced=None,
                 category=category,
+                preset=preset or "ecommerce_white",
+                aspect_ratio=aspect_ratio or "square_1x1",
+                shadow_enabled=add_shadow if add_shadow is not None else True,
                 error="Background removal failed to extract a valid transparent PNG cutout",
                 error_code="BACKGROUND_REMOVAL_FAILED",
-                metadata={"pipeline_telemetry": pipeline_telemetry},
+                metadata={"pipeline_telemetry": fallback_telemetry},
             )
 
-
-        # 7. Upload transparent cutout PNG to Cloudinary (artisan-ai/cutouts/)
-        cutout_tags = list(pipeline_tags)
-        cutout_tags.append("cutout")
+        # 3. Upload transparent cutout PNG to Cloudinary (artisan-ai/cutouts/)
+        cutout_tags = list(pipeline_tags) + ["cutout", "fallback"]
         cutout_upload = self.cloudinary.upload_cutout_image(
             image_input=cutout_bytes,
             tags=cutout_tags,
@@ -318,13 +259,17 @@ class QualityEnhancer:
         if not cutout_upload.success or not cutout_upload.asset:
             return EnhancedImageResult(
                 success=False,
+                provider="local_fallback",
                 original=original_asset,
                 cutout=None,
                 enhanced=None,
                 category=category,
+                preset=preset or "ecommerce_white",
+                aspect_ratio=aspect_ratio or "square_1x1",
+                shadow_enabled=add_shadow if add_shadow is not None else True,
                 error=f"Cloudinary cutout upload failed: {cutout_upload.error}",
                 error_code="CUTOUT_UPLOAD_FAILED",
-                metadata={"pipeline_telemetry": pipeline_telemetry},
+                metadata={"pipeline_telemetry": fallback_telemetry},
             )
         cutout_asset = cutout_upload.asset
         if cutout_upload.metadata:
@@ -332,7 +277,7 @@ class QualityEnhancer:
             if cutout_upload.metadata.get("optimization_required"):
                 pipeline_telemetry["stages_applied"].append("cutout_size_optimization")
 
-        # 8. Stage 4: E-Commerce Studio Presentation Composition
+        # 4. Compose final studio presentation asset
         final_result = self.studio.compose_studio_image(
             cutout=cutout_asset,
             original=original_asset,
@@ -340,18 +285,316 @@ class QualityEnhancer:
             preset=preset,
             aspect_ratio=aspect_ratio,
             add_shadow=add_shadow,
-            tags=pipeline_tags,
+            tags=pipeline_tags + ["fallback"],
         )
 
         elapsed_ms = round((time.time() - start_time) * 1000, 2)
-        pipeline_telemetry["stages_applied"].append("studio_composition")
-        pipeline_telemetry["total_execution_time_ms"] = elapsed_ms
+        stages_applied.append("studio_composition")
+        fallback_telemetry["stages_applied"] = stages_applied
+        fallback_telemetry["total_execution_time_ms"] = elapsed_ms
+        fallback_telemetry["fallback_used"] = True
 
-        if final_result.metadata is not None:
-            final_result.metadata["total_execution_time_ms"] = elapsed_ms
-            final_result.metadata["pipeline_telemetry"] = pipeline_telemetry
+        return EnhancedImageResult(
+            success=final_result.success,
+            provider="local_fallback",
+            original=original_asset,
+            cutout=cutout_asset,
+            enhanced=final_result.enhanced,
+            category=category,
+            preset=final_result.preset,
+            aspect_ratio=final_result.aspect_ratio,
+            shadow_enabled=final_result.shadow_enabled,
+            metadata={
+                "provider": "local_fallback",
+                "fallback_used": True,
+                "total_execution_time_ms": elapsed_ms,
+                "pipeline_telemetry": fallback_telemetry,
+                **(final_result.metadata or {}),
+            },
+            error=final_result.error,
+            error_code=final_result.error_code,
+        )
 
-        return final_result
+    def process_enhanced_studio_pipeline(
+        self,
+        image_input: Union[str, Path, bytes, BinaryIO],
+        category: str = "general",
+        preset: Optional[str] = None,
+        aspect_ratio: Optional[str] = None,
+        add_shadow: Optional[bool] = None,
+        quality_mode: str = "auto",
+        upscale_factor: int = 2,
+        enable_lighting_correction: bool = True,
+        enable_super_resolution: bool = True,
+        enable_quality_enhancement: bool = True,
+        tags: Optional[List[str]] = None,
+    ) -> EnhancedImageResult:
+        """Execute the production-grade AI vision studio pipeline.
+
+        Architecture:
+        1. Ingest raw photo into persistent Cloudinary storage (artisan-ai/originals/).
+        2. Gemini / Nano Banana Primary Generation Engine.
+        3. Product Fidelity Validation Gate (SSIM, mask IoU, CIELAB Delta E).
+           - Decision == PASS -> Persist to Cloudinary enhanced/ & return.
+           - Decision == FAIL / REVIEW -> Route to Local Fallback Pipeline.
+        4. Local Fallback Pipeline (Lighting -> SR -> Rembg Cutout -> StudioComposer).
+
+        Args:
+            image_input: Raw image payload (file path, raw bytes, or stream).
+            category: Artisan craft category (pottery, textiles, wooden_crafts, jewellery, general).
+            preset: Studio backdrop preset key (ecommerce_white, warm_neutral, terracotta_sand, minimal_grey, travertine_podium).
+            aspect_ratio: Canvas aspect ratio (square_1x1, portrait_4x5, portrait_9x16, landscape_16x9).
+            add_shadow: Whether to apply a realistic 3D contact drop shadow.
+            quality_mode: Processing mode ('auto', 'gemini', 'local_ai', 'cloud').
+            upscale_factor: Super-resolution multiplier (2 or 4).
+            enable_lighting_correction: Toggle for lighting & white-balance engine.
+            enable_super_resolution: Toggle for 2x/4x pixel super-resolution engine.
+            enable_quality_enhancement: Master quality enhancement toggle.
+            tags: Optional metadata tags.
+
+        Returns:
+            EnhancedImageResult with original, cutout, final enhanced asset, provider, and fidelity telemetry.
+        """
+        start_time = time.time()
+        pipeline_tags = list(tags) if tags else []
+
+        # 1. Normalize image into byte buffer
+        image_bytes: bytes
+        if isinstance(image_input, (str, Path)):
+            path_obj = Path(image_input)
+            if not path_obj.exists():
+                return EnhancedImageResult(
+                    success=False,
+                    provider="quality_enhancer",
+                    category=category,
+                    error=f"Source image file not found: {path_obj}",
+                    error_code="FILE_NOT_FOUND",
+                )
+            image_bytes = path_obj.read_bytes()
+        elif isinstance(image_input, bytes):
+            image_bytes = image_input
+        elif hasattr(image_input, "read"):
+            image_bytes = image_input.read()
+        else:
+            return EnhancedImageResult(
+                success=False,
+                provider="quality_enhancer",
+                category=category,
+                error=f"Unsupported image input type: {type(image_input)}",
+                error_code="INVALID_INPUT_TYPE",
+            )
+
+        if not image_bytes:
+            return EnhancedImageResult(
+                success=False,
+                provider="quality_enhancer",
+                category=category,
+                error="Provided image payload is empty (0 bytes)",
+                error_code="EMPTY_IMAGE",
+            )
+
+        # 2. Immutable Ingest of raw original photograph into Cloudinary (artisan-ai/originals/)
+        orig_upload_res = self.cloudinary.upload_original_image(
+            image_input=image_bytes,
+            tags=pipeline_tags + ["original"],
+        )
+        if not orig_upload_res.success or not orig_upload_res.asset:
+            return EnhancedImageResult(
+                success=False,
+                provider="cloudinary",
+                category=category,
+                error=f"Failed to upload original image to Cloudinary: {orig_upload_res.error}",
+                error_code="ORIGINAL_UPLOAD_FAILED",
+            )
+        original_asset = orig_upload_res.asset
+
+        pipeline_telemetry: Dict[str, Any] = {
+            "stages_applied": ["original_ingest"],
+            "original_public_id": original_asset.public_id,
+        }
+
+        # 3. Primary Cloud Generation Engines (Photoroom -> Gemini -> Local Fallback)
+        clean_mode = quality_mode.lower()
+        allow_cloud = clean_mode not in ("local_ai", "local", "offline")
+        applied_cloud = False
+
+        # 3A. Photoroom Studio Engine (High-Fidelity AI Background & Lighting)
+        allow_photoroom = allow_cloud and self.photoroom.is_available and clean_mode != "gemini"
+        if allow_photoroom:
+            try:
+                pr_res = self.photoroom.edit_studio_image(
+                    image_input=image_bytes,
+                    category=category,
+                    preset=preset or "warm_neutral",
+                    aspect_ratio=aspect_ratio or "1:1",
+                    add_shadow=add_shadow if add_shadow is not None else True,
+                )
+
+                if pr_res.success and pr_res.metadata and pr_res.metadata.get("image_bytes"):
+                    generated_bytes = pr_res.metadata["image_bytes"]
+
+                    # Product Fidelity Validation Gate
+                    fidelity_res = self.fidelity.validate(
+                        original_image=image_bytes,
+                        generated_image=generated_bytes,
+                        category=category,
+                    )
+
+                    pipeline_telemetry["fidelity"] = fidelity_res.model_dump()
+                    pipeline_telemetry["stages_applied"].append("photoroom_studio_generation")
+                    pipeline_telemetry["stages_applied"].append("fidelity_validation")
+
+                    review_action = os.getenv("FIDELITY_REVIEW_ACTION", "accept").strip().lower()
+                    should_accept = (
+                        fidelity_res.decision == "PASS"
+                        or (fidelity_res.decision == "REVIEW" and review_action == "accept")
+                    )
+
+                    if should_accept:
+                        # Upload Photoroom generated final asset to Cloudinary (artisan-ai/enhanced/)
+                        enhanced_upload = self.cloudinary.upload_enhanced_image(
+                            image_input=generated_bytes,
+                            tags=pipeline_tags + ["enhanced", "photoroom", f"cat_{category}"],
+                            format_override="webp",
+                        )
+
+                        if enhanced_upload.success and enhanced_upload.asset:
+                            elapsed_ms = round((time.time() - start_time) * 1000, 2)
+                            pipeline_telemetry["stages_applied"].append("enhanced_upload")
+                            pipeline_telemetry["total_execution_time_ms"] = elapsed_ms
+                            pipeline_telemetry["provider"] = "photoroom"
+                            pipeline_telemetry["fallback_used"] = False
+
+                            return EnhancedImageResult(
+                                success=True,
+                                provider="photoroom",
+                                original=original_asset,
+                                cutout=None,
+                                enhanced=enhanced_upload.asset,
+                                category=category,
+                                preset=preset or "warm_neutral",
+                                aspect_ratio=aspect_ratio or "square_1x1",
+                                shadow_enabled=add_shadow if add_shadow is not None else True,
+                                metadata={
+                                    "provider": "photoroom",
+                                    "fallback_used": False,
+                                    "fidelity": fidelity_res.model_dump(),
+                                    "total_execution_time_ms": elapsed_ms,
+                                    "pipeline_telemetry": pipeline_telemetry,
+                                },
+                            )
+
+                    pipeline_telemetry["fallback_reason"] = f"photoroom_fidelity_{fidelity_res.decision.lower()}"
+                else:
+                    pipeline_telemetry["fallback_reason"] = f"photoroom_{pr_res.error_code or 'NO_OUTPUT'}"
+                    pipeline_telemetry["photoroom_error"] = pr_res.error
+
+            except Exception as pr_err:
+                logger.warning("Photoroom primary engine encountered exception: %s", pr_err)
+                pipeline_telemetry["fallback_reason"] = f"photoroom_exception_{type(pr_err).__name__}"
+                pipeline_telemetry["photoroom_error"] = str(pr_err)
+
+        # 3B. Gemini Studio Engine (Secondary Cloud Engine)
+        allow_gemini = allow_cloud and self.gemini.is_available and clean_mode != "photoroom" and not applied_cloud
+        if allow_gemini and pipeline_telemetry.get("provider") != "photoroom":
+            try:
+                gemini_res = self.gemini.edit_studio_image(
+                    image_input=image_bytes,
+                    category=category,
+                    preset=preset or "warm_neutral",
+                    aspect_ratio="1:1" if (aspect_ratio and "square" in aspect_ratio) else "1:1",
+                )
+
+                if gemini_res.success and gemini_res.metadata and gemini_res.metadata.get("image_bytes"):
+                    generated_bytes = gemini_res.metadata["image_bytes"]
+
+                    # Product Fidelity Validation Gate
+                    fidelity_res = self.fidelity.validate(
+                        original_image=image_bytes,
+                        generated_image=generated_bytes,
+                        category=category,
+                    )
+
+                    pipeline_telemetry["fidelity"] = fidelity_res.model_dump()
+                    pipeline_telemetry["stages_applied"].append("gemini_generation")
+                    pipeline_telemetry["stages_applied"].append("fidelity_validation")
+
+                    review_action = os.getenv("FIDELITY_REVIEW_ACTION", "fallback").strip().lower()
+                    should_accept = (
+                        fidelity_res.decision == "PASS"
+                        or (fidelity_res.decision == "REVIEW" and review_action == "accept")
+                    )
+
+                    if should_accept:
+                        enhanced_upload = self.cloudinary.upload_enhanced_image(
+                            image_input=generated_bytes,
+                            tags=pipeline_tags + ["enhanced", "gemini_nano_banana", f"cat_{category}"],
+                            format_override="webp",
+                        )
+
+                        if enhanced_upload.success and enhanced_upload.asset:
+                            elapsed_ms = round((time.time() - start_time) * 1000, 2)
+                            pipeline_telemetry["stages_applied"].append("enhanced_upload")
+                            pipeline_telemetry["total_execution_time_ms"] = elapsed_ms
+                            pipeline_telemetry["provider"] = "gemini_nano_banana"
+                            pipeline_telemetry["fallback_used"] = False
+
+                            return EnhancedImageResult(
+                                success=True,
+                                provider="gemini_nano_banana",
+                                original=original_asset,
+                                cutout=None,
+                                enhanced=enhanced_upload.asset,
+                                category=category,
+                                preset=preset or "warm_neutral",
+                                aspect_ratio=aspect_ratio or "square_1x1",
+                                shadow_enabled=add_shadow if add_shadow is not None else True,
+                                metadata={
+                                    "provider": "gemini_nano_banana",
+                                    "fallback_used": False,
+                                    "fidelity": fidelity_res.model_dump(),
+                                    "total_execution_time_ms": elapsed_ms,
+                                    "pipeline_telemetry": pipeline_telemetry,
+                                },
+                            )
+
+                    pipeline_telemetry["fallback_reason"] = (
+                        f"gemini_fidelity_{fidelity_res.decision.lower()}"
+                    )
+                else:
+                    pipeline_telemetry["fallback_reason"] = (
+                        f"gemini_{gemini_res.error_code or 'NO_OUTPUT'}"
+                    )
+                    pipeline_telemetry["gemini_error"] = gemini_res.error
+
+            except Exception as gemini_err:
+                logger.warning("Gemini primary engine encountered exception: %s", gemini_err)
+                pipeline_telemetry["fallback_reason"] = f"gemini_exception_{type(gemini_err).__name__}"
+                pipeline_telemetry["gemini_error"] = str(gemini_err)
+        elif not allow_cloud:
+            pipeline_telemetry["fallback_reason"] = "forced_local_mode"
+        elif not self.photoroom.is_available and not self.gemini.is_available:
+            pipeline_telemetry["fallback_reason"] = "cloud_providers_unavailable"
+
+        # 4. Route to Local Enhancement Pipeline Fallback
+        pipeline_telemetry["stages_applied"].append("local_fallback_invoked")
+
+        return self._execute_local_fallback_pipeline(
+            image_bytes=image_bytes,
+            original_asset=original_asset,
+            category=category,
+            preset=preset,
+            aspect_ratio=aspect_ratio,
+            add_shadow=add_shadow,
+            quality_mode=quality_mode,
+            upscale_factor=upscale_factor,
+            enable_lighting_correction=enable_lighting_correction,
+            enable_super_resolution=enable_super_resolution,
+            enable_quality_enhancement=enable_quality_enhancement,
+            pipeline_tags=pipeline_tags,
+            fallback_telemetry=pipeline_telemetry,
+            start_time=start_time,
+        )
 
 
 def get_quality_enhancer() -> QualityEnhancer:

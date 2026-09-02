@@ -86,3 +86,26 @@ class AssetDeleteResult(BaseModel):
     success: bool = Field(..., description="Whether deletion was successful")
     public_id: str = Field(..., description="Target asset public ID")
     result: str = Field(..., description="Provider response status (e.g., 'ok' or 'not found')")
+
+
+class FidelityMetrics(BaseModel):
+    """Fine-grained product preservation metrics."""
+    mask_iou: float = Field(..., description="Intersection-over-Union of product masks (0.0 - 1.0)")
+    silhouette_similarity: float = Field(..., description="Silhouette contour/shape similarity (0.0 - 1.0)")
+    ssim: float = Field(..., description="Structural Similarity Index on aligned product region (0.0 - 1.0)")
+    color_delta_e: float = Field(..., description="CIELAB Color difference Delta E on product region")
+    aspect_ratio_delta: float = Field(..., description="Bounding box aspect ratio deviation (0.0 - 1.0)")
+    area_coverage_ratio: float = Field(..., description="Ratio of generated product area to original product area")
+
+
+class FidelityValidationResult(BaseModel):
+    """Structured decision contract for product-fidelity verification."""
+    decision: str = Field(..., description="Fidelity decision: 'PASS', 'REVIEW', or 'FAIL'")
+    score: float = Field(..., description="Composite confidence score between 0.0 and 1.0")
+    category: str = Field("general", description="Applied craft category")
+    metrics: FidelityMetrics = Field(..., description="Computed metric values")
+    warnings: List[str] = Field(default_factory=list, description="Specific fidelity warnings or anomalies")
+    execution_time_ms: float = Field(..., description="Verification execution time in milliseconds")
+    details: Dict[str, Any] = Field(default_factory=dict, description="Diagnostic and bounding box details")
+    error: Optional[str] = Field(None, description="Error message if validation failed to execute")
+

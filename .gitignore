@@ -1,7 +1,12 @@
-# Environment variables
+# Environment variables & secrets
 .env
 .env.*
 !.env.example
+*.json.secret
+*credentials*.json
+*service-account*.json
+gcp-service-account.json
+
 
 # Python
 __pycache__/

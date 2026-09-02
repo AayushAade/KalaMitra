@@ -118,35 +118,60 @@ export const imageService = {
       }
     }
 
-    // 2. Set enhancement parameters matching backend QualityEnhancer defaults
-    formData.append('category', options?.category || 'general');
+    // 2. Set enhancement parameters matching product studio API
+    const category = options?.productCategory || options?.category || 'GENERIC_HANDICRAFT';
+    const style = options?.style || 'CLEAN_ECOMMERCE';
+
+    formData.append('productCategory', category);
+    formData.append('category', category);
+    formData.append('style', style);
+    if (options?.productName) {
+      formData.append('productName', options.productName);
+    }
+    if (options?.productDescription) {
+      formData.append('productDescription', options.productDescription);
+    }
+
     formData.append('preset', options?.preset || 'warm_neutral');
     formData.append('aspect_ratio', options?.aspect_ratio || 'square_1x1');
     formData.append('add_shadow', String(options?.add_shadow !== undefined ? options.add_shadow : true));
-    formData.append('quality_mode', options?.quality_mode || 'local_ai');
+    formData.append('quality_mode', options?.quality_mode || 'auto');
     formData.append('upscale_factor', String(options?.upscale_factor || 2));
-    formData.append('enable_lighting_correction', String(options?.enable_lighting_correction !== false));
-    formData.append('enable_super_resolution', String(options?.enable_super_resolution !== false));
-    formData.append('enable_quality_enhancement', String(options?.enable_quality_enhancement !== false));
 
-    // 3. Send request to FastAPI endpoint
-    const response = await api.post<StudioEnhanceResponse>('/api/v1/studio/enhance', formData);
-
-    // 4. Validate backend result
-    if (!response.success || !response.enhanced?.secure_url) {
-      const errorMsg = response.error || 'AI vision enhancement failed to produce an enhanced asset.';
-      console.error('[ImageService] Backend enhancement error:', response);
-      throw new Error(errorMsg);
+    // 3. Send request to FastAPI endpoint (/api/products/image-enhance with fallback to /api/v1/studio/enhance)
+    try {
+      const response = await api.post<ProductImageEnhanceResponse>('/api/products/image-enhance', formData);
+      if (response.success && response.imageUrl) {
+        return {
+          originalUrl: response.originalImageUrl || imageUri,
+          enhancedUrl: response.imageUrl,
+          backgroundRemoved: true,
+          lightingAdjusted: true,
+          provider: response.provider,
+          fallbackUsed: response.fallbackUsed,
+          category: response.category,
+          style: response.style,
+          metadata: response.telemetry || {},
+        };
+      }
+    } catch (apiErr: any) {
+      console.warn('[ImageService] /api/products/image-enhance returned error, attempting /api/v1/studio/enhance fallback:', apiErr);
+      const studioRes = await api.post<StudioEnhanceResponse>('/api/v1/studio/enhance', formData);
+      if (studioRes.success && studioRes.enhanced?.secure_url) {
+        return {
+          originalUrl: studioRes.original?.secure_url || imageUri,
+          enhancedUrl: studioRes.enhanced.secure_url,
+          cutoutUrl: studioRes.cutout?.secure_url,
+          backgroundRemoved: true,
+          lightingAdjusted: true,
+          provider: studioRes.provider,
+          metadata: studioRes.metadata || {},
+        };
+      }
+      throw new Error(studioRes.error || apiErr.message || 'AI vision enhancement failed.');
     }
 
-    return {
-      originalUrl: response.original?.secure_url || imageUri,
-      enhancedUrl: response.enhanced.secure_url,
-      cutoutUrl: response.cutout?.secure_url,
-      backgroundRemoved: true,
-      lightingAdjusted: true,
-      provider: response.provider,
-      metadata: response.metadata || {},
-    };
+    throw new Error('AI vision enhancement failed to produce an enhanced asset.');
   }
 };
+

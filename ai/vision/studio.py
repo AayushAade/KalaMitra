@@ -40,6 +40,12 @@ STUDIO_PRESETS: Dict[str, Dict[str, Any]] = {
         "format": "auto",
         "description": "Warm earthy clay tone complementary to wood, brass, and terracotta",
     },
+    "travertine_podium": {
+        "name": "Travertine Podium",
+        "background": "rgb:F6F3EC",
+        "format": "auto",
+        "description": "Refined limestone travertine podium with subtle warm ambient tones",
+    },
     "transparent_png": {
         "name": "Transparent Cutout",
         "background": None,
