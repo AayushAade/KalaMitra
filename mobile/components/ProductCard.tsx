@@ -48,29 +48,29 @@ export default function ProductCard({ product, onPress }: ProductCardProps) {
           <Text style={styles.categoryText}>{category}</Text>
         </View>
         <View style={styles.ratingBadge}>
-          <Text style={styles.ratingText}>★ 4.9</Text>
+          <Text style={styles.ratingText}>★ 5.0</Text>
         </View>
       </View>
       <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={1}>
+        <Text style={styles.name} numberOfLines={2}>
           {product.name}
         </Text>
-        {product.material && (
+        {product.material ? (
           <Text style={styles.material} numberOfLines={1}>
             {product.material}
           </Text>
-        )}
+        ) : null}
         <View style={styles.footer}>
           {product.price !== undefined && (
             <Text style={styles.price}>
               ₹{product.price.toLocaleString('en-IN')}
             </Text>
           )}
-          {product.artisanName && (
+          {product.artisanName ? (
             <Text style={styles.artisan} numberOfLines={1}>
               {product.artisanName}
             </Text>
-          )}
+          ) : null}
         </View>
       </View>
     </Pressable>
@@ -79,6 +79,8 @@ export default function ProductCard({ product, onPress }: ProductCardProps) {
 
 const styles = StyleSheet.create({
   card: {
+    flex: 1,
+    maxWidth: '48.5%',
     backgroundColor: Colors.card,
     borderRadius: BorderRadius.md,
     overflow: 'hidden',
@@ -94,7 +96,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     position: 'relative',
     width: '100%',
-    height: 180,
+    height: 135,
     backgroundColor: Colors.borderLight,
   },
   image: {
@@ -103,63 +105,66 @@ const styles = StyleSheet.create({
   },
   categoryBadge: {
     position: 'absolute',
-    top: Spacing.sm,
-    left: Spacing.sm,
-    backgroundColor: 'rgba(252,249,246,0.9)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    top: 6,
+    left: 6,
+    backgroundColor: 'rgba(252,249,246,0.92)',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
     borderRadius: BorderRadius.full,
     borderWidth: 1,
     borderColor: Colors.borderLight,
   },
   categoryText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     color: Colors.primary,
   },
   ratingBadge: {
     position: 'absolute',
-    top: Spacing.sm,
-    right: Spacing.sm,
-    backgroundColor: 'rgba(0,97,149,0.9)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    top: 6,
+    right: 6,
+    backgroundColor: 'rgba(0,97,149,0.92)',
+    paddingHorizontal: 7,
+    paddingVertical: 2,
     borderRadius: BorderRadius.full,
   },
   ratingText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     color: Colors.textLight,
   },
   info: {
-    padding: Spacing.md,
+    padding: Spacing.sm,
+    paddingBottom: Spacing.sm,
   },
   name: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
     color: Colors.onBackground,
-    marginBottom: Spacing.xs,
+    height: 34,
+    lineHeight: 17,
+    marginBottom: 2,
   },
   material: {
-    fontSize: 13,
+    fontSize: 11,
     color: Colors.textMuted,
-    marginBottom: Spacing.sm,
+    marginBottom: 4,
   },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: Spacing.xs,
+    marginTop: 2,
   },
   price: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '800',
     color: Colors.primary,
   },
   artisan: {
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.secondary,
-    maxWidth: '60%',
+    maxWidth: '55%',
     textAlign: 'right',
   },
 });

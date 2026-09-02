@@ -26,6 +26,8 @@ export default function PublicStoreScreen() {
       <FlatList
         data={myProducts}
         keyExtractor={item => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.columnWrapper}
         renderItem={({ item }) => (
           <ProductCard
             product={item}
@@ -58,7 +60,7 @@ export default function PublicStoreScreen() {
               
               <View style={styles.metaRow}>
                 <Text style={styles.metaText}>📍 {artisan.location}</Text>
-                <Text style={styles.metaText}>⭐ {artisan.rating} (Verified)</Text>
+                <Text style={styles.metaText}>⭐ {Number(artisan.rating || 5.0).toFixed(1)} (Verified)</Text>
               </View>
 
               <Text style={styles.bioText}>{artisan.bio}</Text>
@@ -91,6 +93,10 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: Spacing.marginMobile,
     paddingBottom: Spacing.xl,
+  },
+  columnWrapper: {
+    gap: Spacing.md,
+    justifyContent: 'space-between',
   },
   headerSection: {
     paddingBottom: Spacing.md,

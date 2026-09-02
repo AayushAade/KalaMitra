@@ -34,6 +34,8 @@ export default function BuyerSellerProfileScreen() {
       <FlatList
         data={sellerProducts}
         keyExtractor={item => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.columnWrapper}
         renderItem={({ item }) => (
           <ProductCard
             product={item}
@@ -93,6 +95,10 @@ const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: Spacing.marginMobile,
     paddingBottom: Spacing.xl,
+  },
+  columnWrapper: {
+    gap: Spacing.md,
+    justifyContent: 'space-between',
   },
   headerSection: {
     paddingBottom: Spacing.md,

@@ -114,6 +114,8 @@ export default function MarketplaceScreen() {
         <FlatList
           data={filteredProducts}
           keyExtractor={item => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
           refreshing={refreshing}
           onRefresh={handleRefresh}
           renderItem={({ item }) => (
@@ -187,6 +189,7 @@ const styles = StyleSheet.create({
   categoryTabTextActive: { color: Colors.textLight },
 
   listContent: { paddingHorizontal: Spacing.marginMobile, paddingBottom: Spacing.xl },
+  columnWrapper: { gap: Spacing.md, justifyContent: 'space-between' },
   listHeader: { paddingVertical: Spacing.md },
   title: { fontSize: 22, fontWeight: '800', color: Colors.onBackground },
   subtitle: { fontSize: 14, color: Colors.textMuted, marginTop: 4, lineHeight: 18 },

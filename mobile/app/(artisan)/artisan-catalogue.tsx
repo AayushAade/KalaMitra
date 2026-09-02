@@ -28,9 +28,6 @@ export default function ArtisanCatalogueScreen() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [toast, setToast] = useState<{ message: string; isError: boolean } | null>(null);
 
-  const published = myProducts.filter(p => p.isPublished !== false);
-  const drafts = myProducts.filter(p => p.isPublished === false);
-
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     await refreshMyProducts();
@@ -158,33 +155,17 @@ export default function ArtisanCatalogueScreen() {
         <Text style={styles.addButtonText}>+ Add Product</Text>
       </Pressable>
 
-      {/* Section title: Published */}
-      {published.length > 0 && (
+      {myProducts.length > 0 && (
         <View style={styles.groupHeader}>
           <View style={styles.groupDot} />
-          <Text style={styles.groupTitle}>Published ({published.length})</Text>
+          <Text style={styles.groupTitle}>My Catalog ({myProducts.length})</Text>
         </View>
       )}
     </View>
   );
 
   const ListFooter = () => (
-    <>
-      {drafts.length > 0 && (
-        <>
-          <View style={styles.groupHeader}>
-            <View style={[styles.groupDot, styles.groupDotDraft]} />
-            <Text style={styles.groupTitle}>Drafts ({drafts.length})</Text>
-          </View>
-          {drafts.map((item) => (
-            <React.Fragment key={item.id}>
-              {renderProductCard({ item })}
-            </React.Fragment>
-          ))}
-        </>
-      )}
-      <View style={{ height: Spacing.xl }} />
-    </>
+    <View style={{ height: Spacing.xl }} />
   );
 
   return (
@@ -211,9 +192,11 @@ export default function ArtisanCatalogueScreen() {
         </View>
       ) : (
         <FlatList
-          data={published}
+          data={myProducts}
           keyExtractor={item => item.id}
           renderItem={renderProductCard}
+          numColumns={2}
+          columnWrapperStyle={styles.columnWrapper}
           contentContainerStyle={styles.listContent}
           refreshControl={
             <RefreshControl
@@ -226,15 +209,13 @@ export default function ArtisanCatalogueScreen() {
           ListHeaderComponent={<ListHeader />}
           ListFooterComponent={<ListFooter />}
           ListEmptyComponent={
-            drafts.length === 0 ? (
-              <EmptyState
-                icon="albums-outline"
-                title="No products yet"
-                message="Create your first product and start building your digital catalogue."
-                actionLabel="+ Add Product"
-                onAction={() => router.push('/(artisan)/add-product' as any)}
-              />
-            ) : null
+            <EmptyState
+              icon="albums-outline"
+              title="No products yet"
+              message="Create your first product and start building your digital catalogue."
+              actionLabel="+ Add Product"
+              onAction={() => router.push('/(artisan)/add-product' as any)}
+            />
           }
           showsVerticalScrollIndicator={false}
         />
@@ -259,6 +240,7 @@ const styles = StyleSheet.create({
   loadingContainer: { flex: 1, paddingHorizontal: Spacing.marginMobile, paddingTop: Spacing.md },
 
   listContent: { paddingHorizontal: Spacing.marginMobile, paddingBottom: Spacing.xl },
+  columnWrapper: { gap: Spacing.md, justifyContent: 'space-between' },
   listHeader: { paddingVertical: Spacing.md },
 
   addButton: {
@@ -290,6 +272,8 @@ const styles = StyleSheet.create({
   groupTitle: { fontSize: 14, fontWeight: '700', color: Colors.onBackground },
 
   productCard: {
+    flex: 1,
+    maxWidth: '48.5%',
     backgroundColor: Colors.card,
     borderRadius: BorderRadius.md,
     marginBottom: Spacing.md,
@@ -299,9 +283,10 @@ const styles = StyleSheet.create({
     ...Shadows.soft,
   },
   productImageContainer: {
-    height: 160,
+    height: 135,
     backgroundColor: Colors.borderLight,
     position: 'relative',
+    width: '100%',
   },
   productImage: { width: '100%', height: '100%', resizeMode: 'cover' },
   imagePlaceholder: {
@@ -312,43 +297,45 @@ const styles = StyleSheet.create({
   },
   statusBadge: {
     position: 'absolute',
-    top: Spacing.sm,
-    right: Spacing.sm,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+    top: 6,
+    right: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
     borderRadius: BorderRadius.full,
   },
-  badgePublished: { backgroundColor: 'rgba(0,180,100,0.9)' },
-  badgeDraft: { backgroundColor: 'rgba(148,68,46,0.85)' },
-  statusBadgeText: { fontSize: 10, fontWeight: '700' },
+  badgePublished: { backgroundColor: 'rgba(0,180,100,0.92)' },
+  badgeDraft: { backgroundColor: 'rgba(148,68,46,0.92)' },
+  statusBadgeText: { fontSize: 9, fontWeight: '800' },
   badgeTextPublished: { color: '#fff' },
   badgeTextDraft: { color: '#fff' },
 
-  productInfo: { padding: Spacing.md, paddingBottom: Spacing.sm },
+  productInfo: { padding: Spacing.sm, paddingBottom: 4 },
   productName: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
     color: Colors.onBackground,
-    marginBottom: Spacing.xs,
+    height: 34,
+    lineHeight: 17,
   },
-  productPrice: { fontSize: 16, fontWeight: '800', color: Colors.primary },
-  productMaterial: { fontSize: 12, color: Colors.textMuted, marginTop: 2 },
+  productPrice: { fontSize: 14, fontWeight: '800', color: Colors.primary, marginTop: 2 },
+  productMaterial: { fontSize: 11, color: Colors.textMuted, marginTop: 2 },
 
   actionRow: {
     flexDirection: 'row',
-    gap: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    paddingBottom: Spacing.md,
+    gap: 6,
+    paddingHorizontal: Spacing.sm,
+    paddingBottom: Spacing.sm,
+    paddingTop: 4,
   },
   editButton: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: BorderRadius.sm,
+    paddingVertical: 7,
+    borderRadius: BorderRadius.xs,
     backgroundColor: 'rgba(0,97,149,0.08)',
-    gap: 4,
+    gap: 3,
     borderWidth: 1,
     borderColor: 'rgba(0,97,149,0.2)',
   },
@@ -357,15 +344,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
-    borderRadius: BorderRadius.sm,
+    paddingVertical: 7,
+    borderRadius: BorderRadius.xs,
     backgroundColor: Colors.errorContainer,
-    gap: 4,
+    gap: 3,
     borderWidth: 1,
     borderColor: 'rgba(186,26,26,0.2)',
   },
-  editText: { fontSize: 13, fontWeight: '700', color: Colors.tertiary },
-  deleteText: { fontSize: 13, fontWeight: '700', color: Colors.error },
+  editText: { fontSize: 11, fontWeight: '700', color: Colors.tertiary },
+  deleteText: { fontSize: 11, fontWeight: '700', color: Colors.error },
   buttonPressed: { opacity: 0.8, transform: [{ scale: 0.98 }] },
 
   toast: {

@@ -6,6 +6,7 @@ import {
   ScrollView,
   Pressable,
   RefreshControl,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -80,9 +81,13 @@ export default function ArtisanHome() {
           style={({ pressed }) => [styles.welcomeCard, pressed && styles.pressedCard]}
         >
           <View style={styles.avatarCircle}>
-            <Text style={styles.avatarLetter}>
-              {(artisan.ownerName || artisan.name || 'A').charAt(0).toUpperCase()}
-            </Text>
+            {artisan.avatar ? (
+              <Image source={{ uri: artisan.avatar }} style={styles.avatarImage} />
+            ) : (
+              <Text style={styles.avatarLetter}>
+                {(artisan.ownerName || artisan.name || 'A').charAt(0).toUpperCase()}
+              </Text>
+            )}
           </View>
           <View style={styles.welcomeText}>
             <Text style={styles.namaste}>Namaste, {artisan.ownerName || artisan.name} 👋</Text>
@@ -113,15 +118,18 @@ export default function ArtisanHome() {
             <Text style={styles.statNumber}>{inquiries.length}</Text>
             <Text style={styles.statLabel}>Inquiries</Text>
           </Pressable>
-          <View style={styles.statBox}>
+          <Pressable
+            onPress={() => router.push('/(artisan)/artisan-review' as any)}
+            style={({ pressed }) => [styles.statBox, pressed && styles.pressedCard]}
+          >
             <View style={styles.ratingRow}>
               <Ionicons name="star" size={14} color="#F59E0B" />
               <Text style={styles.statNumber}>
-                {myProducts.length > 0 ? '4.8' : '—'}
+                {Number(artisan.rating || 5.0).toFixed(1)}
               </Text>
             </View>
             <Text style={styles.statLabel}>Rating</Text>
-          </View>
+          </Pressable>
         </View>
 
         {/* Quick Action Tiles */}
@@ -256,6 +264,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: Spacing.md,
+    overflow: 'hidden',
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   avatarLetter: { fontSize: 22, fontWeight: '800', color: Colors.textLight },
   welcomeText: { flex: 1 },

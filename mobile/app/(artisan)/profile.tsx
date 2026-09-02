@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TextInput, Alert, KeyboardAvoidingView, Platform, Image, Pressable } from 'react-native';
 import { router } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
@@ -17,6 +18,7 @@ export default function ArtisanProfileScreen() {
   const [location, setLocation] = useState(current.location);
   const [bio, setBio] = useState(current.bio || '');
   const [phone, setPhone] = useState(current.phone || '');
+  const [avatar, setAvatar] = useState<string | undefined>(current.avatar);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -27,6 +29,7 @@ export default function ArtisanProfileScreen() {
       setLocation(updated.location);
       setBio(updated.bio || '');
       setPhone(updated.phone || '');
+      setAvatar(updated.avatar);
     });
     const fresh = artisanService.getCurrentArtisan();
     setCurrent(fresh);
@@ -35,8 +38,65 @@ export default function ArtisanProfileScreen() {
     setLocation(fresh.location);
     setBio(fresh.bio || '');
     setPhone(fresh.phone || '');
+    setAvatar(fresh.avatar);
     return unsubscribe;
   }, []);
+
+  const handlePickImage = () => {
+    Alert.alert(
+      'Profile Photo',
+      'Update your artisan storefront image',
+      [
+        {
+          text: 'Take Photo',
+          onPress: async () => {
+            try {
+              const { status } = await ImagePicker.requestCameraPermissionsAsync();
+              if (status !== 'granted') {
+                Alert.alert('Permission Denied', 'Camera permission is required to take a photo.');
+                return;
+              }
+              const result = await ImagePicker.launchCameraAsync({
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.85,
+              });
+              if (!result.canceled && result.assets && result.assets.length > 0) {
+                const pickedUri = result.assets[0].uri;
+                setAvatar(pickedUri);
+                artisanService.updateProfile({ avatar: pickedUri });
+              }
+            } catch (err) {
+              console.error('[Profile] Camera error:', err);
+              Alert.alert('Camera Error', 'Could not open camera.');
+            }
+          },
+        },
+        {
+          text: 'Choose from Gallery',
+          onPress: async () => {
+            try {
+              const result = await ImagePicker.launchImageLibraryAsync({
+                mediaTypes: ['images'],
+                allowsEditing: true,
+                aspect: [1, 1],
+                quality: 0.85,
+              });
+              if (!result.canceled && result.assets && result.assets.length > 0) {
+                const pickedUri = result.assets[0].uri;
+                setAvatar(pickedUri);
+                artisanService.updateProfile({ avatar: pickedUri });
+              }
+            } catch (err) {
+              console.error('[Profile] Gallery error:', err);
+              Alert.alert('Gallery Error', 'Could not select photo from gallery.');
+            }
+          },
+        },
+        { text: 'Cancel', style: 'cancel' },
+      ]
+    );
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -112,11 +172,34 @@ export default function ArtisanProfileScreen() {
         >
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <View style={styles.avatarCircle}>
-            <Text style={styles.avatarLetter}>
-              {(artisanName || shopName || 'A').charAt(0).toUpperCase()}
-            </Text>
+          <View style={styles.avatarWrapper}>
+            <View style={styles.avatarCircle}>
+              {avatar ? (
+                <Image source={{ uri: avatar }} style={styles.avatarImage} />
+              ) : (
+                <Text style={styles.avatarLetter}>
+                  {(artisanName || shopName || 'A').charAt(0).toUpperCase()}
+                </Text>
+              )}
+            </View>
+            <Pressable
+              style={({ pressed }) => [styles.avatarBadge, pressed && styles.badgePressed]}
+              onPress={handlePickImage}
+              accessibilityLabel="Change profile photo"
+              accessibilityRole="button"
+            >
+              <Ionicons name="camera" size={16} color={Colors.textLight} />
+            </Pressable>
           </View>
+
+          <Pressable
+            onPress={handlePickImage}
+            style={({ pressed }) => [styles.changePhotoBtn, pressed && styles.badgePressed]}
+          >
+            <Ionicons name="image-outline" size={14} color={Colors.tertiary} />
+            <Text style={styles.changePhotoText}>{avatar ? 'Change Photo' : '+ Add Photo'}</Text>
+          </Pressable>
+
           <Text style={styles.headerName}>{shopName || 'Your Shop'}</Text>
           <Text style={styles.headerSub}>{artisanName || 'Artisan'}</Text>
           {location ? (
@@ -228,16 +311,64 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.lg,
     marginBottom: Spacing.md,
   },
+  avatarWrapper: {
+    position: 'relative',
+    marginBottom: Spacing.xs,
+  },
   avatarCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 88,
+    height: 88,
+    borderRadius: 44,
     backgroundColor: Colors.primaryContainer,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: Spacing.md,
+    overflow: 'hidden',
+    borderWidth: 3,
+    borderColor: Colors.card,
+    ...Shadows.soft,
   },
-  avatarLetter: { fontSize: 36, fontWeight: '800', color: Colors.textLight },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  avatarLetter: { fontSize: 38, fontWeight: '800', color: Colors.textLight },
+  avatarBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: Colors.primary,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: Colors.card,
+    ...Shadows.soft,
+  },
+  badgePressed: {
+    opacity: 0.8,
+    transform: [{ scale: 0.95 }],
+  },
+  changePhotoBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(0,97,149,0.08)',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: 'rgba(0,97,149,0.2)',
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.sm,
+  },
+  changePhotoText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: Colors.tertiary,
+  },
   headerName: { fontSize: 22, fontWeight: '800', color: Colors.onBackground },
   headerSub: { fontSize: 14, color: Colors.textMuted, marginTop: 2 },
   locationRow: {

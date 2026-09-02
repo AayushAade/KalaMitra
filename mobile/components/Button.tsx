@@ -52,11 +52,12 @@ export default function Button({
 
 const styles = StyleSheet.create({
   button: {
-    height: Spacing.touchTarget,
+    minHeight: Spacing.touchTarget,
     borderRadius: BorderRadius.md,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
     flexDirection: 'row',
   },
   primaryButton: {
@@ -78,6 +79,8 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
+    lineHeight: 22,
   },
   primaryText: {
     color: Colors.textLight,

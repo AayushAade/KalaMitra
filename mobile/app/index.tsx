@@ -1,26 +1,70 @@
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, View, Text, ScrollView, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
 import Button from '../components/Button';
 
 export default function LandingScreen() {
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(20)).current;
+  const scaleAnim = useRef(new Animated.Value(0.94)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 800,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 800,
+        easing: Easing.out(Easing.back(1.1)),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim, scaleAnim]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} bounces={false}>
         <View style={styles.heroSection}>
-          <View style={styles.logoContainer}>
+          <Animated.View
+            style={[
+              styles.logoContainer,
+              {
+                opacity: fadeAnim,
+                transform: [
+                  { translateY: slideAnim },
+                  { scale: scaleAnim },
+                ],
+              },
+            ]}
+          >
             <Text style={styles.logoKala}>कला</Text>
             <Text style={styles.logoMitra}>Mitra</Text>
-          </View>
-          <Text style={styles.tagline}>
-            Empowering Heritage, Linking Markets
-          </Text>
-          <Text style={styles.description}>
-            A digital marketplace and smart AI cataloging assistant designed to bridge the gap between traditional craftsmen and modern commerce.
-          </Text>
+          </Animated.View>
+
+          <Animated.View
+            style={[
+              styles.subtitleBadge,
+              {
+                opacity: fadeAnim,
+                transform: [{ translateY: slideAnim }],
+              },
+            ]}
+          >
+            <View style={styles.badgeDot} />
+            <Text style={styles.subtitleBadgeText}>HERITAGE CRAFT MARKETPLACE</Text>
+          </Animated.View>
         </View>
 
         <View style={styles.cardContainer}>
@@ -62,37 +106,54 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: 'center',
+    justifyContent: 'center',
     marginTop: Spacing.xxl,
     marginBottom: Spacing.xl,
   },
   logoContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'baseline',
+    justifyContent: 'center',
     marginBottom: Spacing.sm,
   },
   logoKala: {
-    fontSize: 48,
+    fontSize: 58,
     fontWeight: '900',
     color: Colors.primary,
+    letterSpacing: -0.5,
+    textShadowColor: 'rgba(148,68,46,0.12)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 8,
   },
   logoMitra: {
-    fontSize: 48,
+    fontSize: 58,
     fontWeight: '700',
     color: Colors.secondary,
+    letterSpacing: 0.5,
   },
-  tagline: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.tertiary,
-    textAlign: 'center',
-    marginBottom: Spacing.md,
+  subtitleBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(148,68,46,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(148,68,46,0.18)',
+    borderRadius: BorderRadius.full,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 6,
+    gap: 6,
+    marginTop: Spacing.xs,
   },
-  description: {
-    fontSize: 14,
-    color: Colors.textMuted,
-    textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: Spacing.sm,
+  badgeDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.primary,
+  },
+  subtitleBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.primary,
+    letterSpacing: 1.1,
   },
   cardContainer: {
     backgroundColor: Colors.card,
@@ -113,8 +174,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   actionButton: {
-    marginBottom: Spacing.md,
     width: '100%',
+    minHeight: 56,
+    marginBottom: Spacing.md,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   footer: {
     alignItems: 'center',
