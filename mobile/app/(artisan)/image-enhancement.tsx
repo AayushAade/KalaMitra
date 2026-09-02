@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, ScrollView, Image, ActivityIndicator } from 're
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCreation } from '../../context/ProductCreationContext';
@@ -10,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { imageService } from '../../services/imageService';
 
 export default function ImageEnhancementScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { productData, updateProductData } = useProductCreation();
   const [loading, setLoading] = useState(true);
   const [showEnhanced, setShowEnhanced] = useState(false);
@@ -51,32 +53,32 @@ export default function ImageEnhancementScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="AI Image Studio" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}>
         {/* Wizard Progress */}
-        <View style={styles.wizard}>
-          <Text style={styles.wizardLabel}>Step 2 of 5: AI Image Enhancement</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressIndicator, { width: '40%' }]} />
+        <View style={[styles.wizard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.wizardLabel, { color: colors.primary }]}>Step 2 of 5: AI Image Enhancement</Text>
+          <View style={[styles.progressBar, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
+            <View style={[styles.progressIndicator, { width: '40%', backgroundColor: colors.primary }]} />
           </View>
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>AI Image Enhancement</Text>
-          <Text style={styles.subtitle}>Our AI adjusts lighting, colors, and removes background clutter.</Text>
+          <Text style={[styles.title, { color: colors.onBackground }]}>AI Image Enhancement</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>Our AI adjusts lighting, colors, and removes background clutter.</Text>
 
           {loading ? (
-            <View style={styles.loaderContainer}>
-              <ActivityIndicator size="large" color={Colors.primary} />
-              <Text style={styles.loaderText}>Cleaning background clutter...</Text>
-              <Text style={styles.loaderSub}>Optimizing lighting parameters for e-commerce via FastAPI AI Vision</Text>
+            <View style={[styles.loaderContainer, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+              <ActivityIndicator size="large" color={colors.primary} />
+              <Text style={[styles.loaderText, { color: colors.onBackground }]}>Cleaning background clutter...</Text>
+              <Text style={[styles.loaderSub, { color: colors.textMuted }]}>Optimizing lighting parameters for e-commerce via FastAPI AI Vision</Text>
             </View>
           ) : error ? (
-            <View style={styles.errorContainer}>
-              <Ionicons name="alert-circle" size={44} color={Colors.error} />
-              <Text style={styles.errorTitle}>Enhancement Failed</Text>
-              <Text style={styles.errorText}>{error}</Text>
+            <View style={[styles.errorContainer, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+              <Ionicons name="alert-circle" size={44} color={colors.error} />
+              <Text style={[styles.errorTitle, { color: colors.onBackground }]}>Enhancement Failed</Text>
+              <Text style={[styles.errorText, { color: colors.textMuted }]}>{error}</Text>
               <Button
                 title="Retry Enhancement"
                 onPress={triggerEnhancement}
@@ -85,15 +87,15 @@ export default function ImageEnhancementScreen() {
               />
             </View>
           ) : (
-            <View style={styles.previewContainer}>
+            <View style={[styles.previewContainer, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
               {/* Image Frame */}
-              <View style={styles.imageFrame}>
+              <View style={[styles.imageFrame, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
                 <Image
                   source={{ uri: showEnhanced ? productData.enhancedImage : productData.image }}
                   style={styles.image}
                 />
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>
+                <View style={[styles.badge, isDarkMode && { backgroundColor: 'rgba(29,114,184,0.9)' }]}>
+                  <Text style={[styles.badgeText, { color: colors.onPrimary }]}>
                     {showEnhanced ? '✨ AI ENHANCED' : 'ORIGINAL'}
                   </Text>
                 </View>
@@ -116,9 +118,9 @@ export default function ImageEnhancementScreen() {
                 />
               </View>
 
-              <View style={styles.benefitContainer}>
-                <Text style={styles.benefitTitle}>👍 Enhancement Complete!</Text>
-                <Text style={styles.benefitText}>
+              <View style={[styles.benefitContainer, { backgroundColor: isDarkMode ? '#172230' : '#EBF5FB', borderColor: isDarkMode ? colors.borderLight : '#D4E6F1' }]}>
+                <Text style={[styles.benefitTitle, { color: colors.primary }]}>👍 Enhancement Complete!</Text>
+                <Text style={[styles.benefitText, { color: colors.textMuted }]}>
                   Isolated foreground subject, neutralized workshop shadows, and added soft ambient lighting to increase buyer trust by 40%.
                 </Text>
               </View>

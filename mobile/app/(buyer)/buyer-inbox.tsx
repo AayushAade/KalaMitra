@@ -9,6 +9,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import BottomNavigation from '../../components/BottomNavigation';
 import EmptyState from '../../components/EmptyState';
@@ -17,6 +18,7 @@ import SkeletonCard from '../../components/SkeletonCard';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 
 export default function BuyerInboxScreen() {
+  const { colors } = useTheme();
   const { inquiries, refreshProducts, isLoading } = useProductCatalog();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -43,7 +45,7 @@ export default function BuyerInboxScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Inbox" />
 
       {isLoading && !refreshing ? (
@@ -61,19 +63,19 @@ export default function BuyerInboxScreen() {
               onPress={() => router.push(`/chat/${item.id}` as any)}
             />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { backgroundColor: colors.background }]}
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
               onRefresh={handleRefresh}
-              tintColor={Colors.primary}
-              colors={[Colors.primary]}
+              tintColor={colors.primary}
+              colors={[colors.primary]}
             />
           }
           ListHeaderComponent={
             <View style={styles.listHeader}>
-              <Text style={styles.title}>My Messages</Text>
-              <Text style={styles.subtitle}>Conversations with artisans</Text>
+              <Text style={[styles.title, { color: colors.onBackground }]}>My Messages</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>Conversations with artisans</Text>
             </View>
           }
           ListEmptyComponent={

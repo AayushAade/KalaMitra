@@ -330,4 +330,143 @@ export const productService = {
     inMemoryProducts = [createdProduct, ...inMemoryProducts.filter(p => p.id !== createdProduct.id)];
     return createdProduct;
   },
+
+  /**
+   * Updates an existing product in Supabase and in-memory cache.
+   */
+  updateProduct: async (
+    productId: string,
+    updates: Partial<Product>
+  ): Promise<Product> => {
+    console.log('[ProductService] Updating product listing:', productId);
+
+    // 1. Update in-memory product
+    const existingIndex = inMemoryProducts.findIndex(p => p.id === productId);
+    const existing = existingIndex !== -1 ? inMemoryProducts[existingIndex] : undefined;
+
+    const updatedProduct: Product = {
+      ...(existing || { id: productId, name: 'Handcrafted Product', price: 0 }),
+      ...updates,
+      id: productId,
+    };
+
+    if (existingIndex !== -1) {
+      inMemoryProducts[existingIndex] = updatedProduct;
+    } else {
+      inMemoryProducts = [updatedProduct, ...inMemoryProducts];
+    }
+
+    // 2. Try persisting to Supabase if connected
+    try {
+      // Update core products table
+      const productRowUpdates: Record<string, any> = {};
+      if (updates.price !== undefined) productRowUpdates.price = updates.price;
+      if (updates.material !== undefined) productRowUpdates.material = updates.material;
+      if (updates.productionTime !== undefined) productRowUpdates.production_time = updates.productionTime;
+      if (updates.craft !== undefined) productRowUpdates.craft = updates.craft;
+      if (updates.stock !== undefined) productRowUpdates.stock = updates.stock;
+      if (updates.minOrderQuantity !== undefined) productRowUpdates.min_order_quantity = updates.minOrderQuantity;
+
+      if (Object.keys(productRowUpdates).length > 0) {
+        await supabase
+          .from('products')
+          .update(productRowUpdates)
+          .eq('id', productId);
+      }
+
+      // Update product_translations if name or description changed
+      if (updates.name || updates.descriptionEnglish || updates.descriptionHindi || updates.voiceTranscript) {
+        if (updates.name || updates.descriptionEnglish || updates.voiceTranscript) {
+          const { data: existingEn } = await supabase
+            .from('product_translations')
+            .select('id')
+            .eq('product_id', productId)
+            .eq('language', 'en')
+            .maybeSingle();
+
+          if (existingEn) {
+            await supabase
+              .from('product_translations')
+              .update({
+                name: updates.name || undefined,
+                description: updates.descriptionEnglish || undefined,
+                voice_transcript: updates.voiceTranscript || undefined,
+              })
+              .eq('id', existingEn.id);
+          } else if (updates.name) {
+            await supabase
+              .from('product_translations')
+              .insert({
+                product_id: productId,
+                language: 'en',
+                name: updates.name,
+                description: updates.descriptionEnglish || null,
+                voice_transcript: updates.voiceTranscript || null,
+              });
+          }
+        }
+
+        if (updates.descriptionHindi || updates.name) {
+          const { data: existingHi } = await supabase
+            .from('product_translations')
+            .select('id')
+            .eq('product_id', productId)
+            .eq('language', 'hi')
+            .maybeSingle();
+
+          if (existingHi) {
+            await supabase
+              .from('product_translations')
+              .update({
+                name: updates.name || undefined,
+                description: updates.descriptionHindi || undefined,
+              })
+              .eq('id', existingHi.id);
+          } else if (updates.descriptionHindi) {
+            await supabase
+              .from('product_translations')
+              .insert({
+                product_id: productId,
+                language: 'hi',
+                name: updates.name || 'Handcrafted Product',
+                description: updates.descriptionHindi,
+              });
+          }
+        }
+      }
+
+      // Update product_images if image changed
+      if (updates.imageUrl) {
+        const { data: existingImg } = await supabase
+          .from('product_images')
+          .select('id')
+          .eq('product_id', productId)
+          .eq('is_primary', true)
+          .maybeSingle();
+
+        if (existingImg) {
+          await supabase
+            .from('product_images')
+            .update({
+              enhanced_url: updates.imageUrl,
+              original_url: updates.originalImageUrl || updates.imageUrl,
+            })
+            .eq('id', existingImg.id);
+        } else {
+          await supabase
+            .from('product_images')
+            .insert({
+              product_id: productId,
+              original_url: updates.originalImageUrl || updates.imageUrl,
+              enhanced_url: updates.imageUrl,
+              is_primary: true,
+            });
+        }
+      }
+    } catch (err: any) {
+      console.warn('[ProductService] Supabase update error (non-fatal, local state updated):', err?.message || err);
+    }
+
+    return updatedProduct;
+  },
 };

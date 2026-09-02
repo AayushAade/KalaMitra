@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Image } from 'expo-image';
 import { Product } from '../types';
 import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface ProductCardProps {
   product: Product;
@@ -10,6 +11,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onPress }: ProductCardProps) {
+  const { colors, isDarkMode } = useTheme();
+
   const getProductCategory = (p: Product) => {
     const name = (p.name || '').toLowerCase();
     const mat = (p.material || '').toLowerCase();
@@ -32,10 +35,11 @@ export default function ProductCard({ product, onPress }: ProductCardProps) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
+        { backgroundColor: colors.card, borderColor: colors.borderLight },
         pressed && styles.pressed,
       ]}
     >
-      <View style={styles.imageContainer}>
+      <View style={[styles.imageContainer, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
         {product.imageUrl && (
           <Image
             source={{ uri: product.imageUrl }}
@@ -44,30 +48,30 @@ export default function ProductCard({ product, onPress }: ProductCardProps) {
             transition={200}
           />
         )}
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryText}>{category}</Text>
+        <View style={[styles.categoryBadge, { backgroundColor: isDarkMode ? 'rgba(26,32,42,0.95)' : 'rgba(252,249,246,0.92)', borderColor: colors.borderLight }]}>
+          <Text style={[styles.categoryText, { color: colors.primary }]}>{category}</Text>
         </View>
         <View style={styles.ratingBadge}>
           <Text style={styles.ratingText}>★ 5.0</Text>
         </View>
       </View>
       <View style={styles.info}>
-        <Text style={styles.name} numberOfLines={2}>
+        <Text style={[styles.name, { color: colors.onBackground }]} numberOfLines={2}>
           {product.name}
         </Text>
         {product.material ? (
-          <Text style={styles.material} numberOfLines={1}>
+          <Text style={[styles.material, { color: colors.textMuted }]} numberOfLines={1}>
             {product.material}
           </Text>
         ) : null}
         <View style={styles.footer}>
           {product.price !== undefined && (
-            <Text style={styles.price}>
+            <Text style={[styles.price, { color: colors.primary }]}>
               ₹{product.price.toLocaleString('en-IN')}
             </Text>
           )}
           {product.artisanName ? (
-            <Text style={styles.artisan} numberOfLines={1}>
+            <Text style={[styles.artisan, { color: isDarkMode ? colors.secondary : colors.secondary }]} numberOfLines={1}>
               {product.artisanName}
             </Text>
           ) : null}

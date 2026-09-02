@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BuyerInquiryScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { productId } = useLocalSearchParams<{ productId?: string }>();
   const { products, addInquiry, addMessage } = useProductCatalog();
 
@@ -57,74 +59,74 @@ export default function BuyerInquiryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Send Inquiry" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        style={[styles.keyboardView, { backgroundColor: colors.background }]}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}>
           <View style={styles.content}>
-            <Text style={styles.title}>Bulk Inquiry</Text>
-            <Text style={styles.subtitle}>
-              Submit inquiry for <Text style={styles.highlight}>{product.name}</Text>. The artisan will receive it on their dashboard.
+            <Text style={[styles.title, { color: colors.onBackground }]}>Bulk Inquiry</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+              Submit inquiry for <Text style={[styles.highlight, { color: colors.primary }]}>{product.name}</Text>. The artisan will receive it on their dashboard.
             </Text>
 
-            <View style={styles.form}>
+            <View style={[styles.form, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Buyer Name / Store Name</Text>
+                <Text style={[styles.label, { color: colors.onBackground }]}>Buyer Name / Store Name</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                   value={buyerName}
                   onChangeText={setBuyerName}
                   placeholder="e.g. Raj Traders"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                 />
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Business Type</Text>
+                <Text style={[styles.label, { color: colors.onBackground }]}>Business Type</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                   value={buyerType}
                   onChangeText={setBuyerType}
                   placeholder="e.g. Boutique, Retail Distributor"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                 />
               </View>
 
               <View style={styles.inputRow}>
                 <View style={styles.inputCol}>
-                  <Text style={styles.label}>Quantity</Text>
+                  <Text style={[styles.label, { color: colors.onBackground }]}>Quantity</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                     value={qty}
                     onChangeText={setQty}
                     placeholder="100"
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                     keyboardType="numeric"
                   />
                 </View>
                 <View style={styles.inputCol}>
-                  <Text style={styles.label}>Delivery Date</Text>
+                  <Text style={[styles.label, { color: colors.onBackground }]}>Delivery Date</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                     value={deliveryDate}
                     onChangeText={setDeliveryDate}
                     placeholder="YYYY-MM-DD"
-                    placeholderTextColor={Colors.textMuted}
+                    placeholderTextColor={colors.textMuted}
                   />
                 </View>
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Custom Message</Text>
+                <Text style={[styles.label, { color: colors.onBackground }]}>Custom Message</Text>
                 <TextInput
-                  style={[styles.input, styles.textArea]}
+                  style={[styles.input, styles.textArea, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                   value={msgText}
                   onChangeText={setMsgText}
                   placeholder="Describe your requirements"
-                  placeholderTextColor={Colors.textMuted}
+                  placeholderTextColor={colors.textMuted}
                   multiline
                   numberOfLines={4}
                 />

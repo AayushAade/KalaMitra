@@ -2,12 +2,14 @@ import React, { useMemo } from 'react';
 import { StyleSheet, View, Text, FlatList } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import ProductCard from '../../components/ProductCard';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BuyerSellerProfileScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { artisanId, artisanName } = useLocalSearchParams<{ artisanId?: string; artisanName?: string }>();
   const { products } = useProductCatalog();
 
@@ -29,7 +31,7 @@ export default function BuyerSellerProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Artisan Profile" />
       <FlatList
         data={sellerProducts}
@@ -42,44 +44,44 @@ export default function BuyerSellerProfileScreen() {
             onPress={() => handleProductPress(item.id)}
           />
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { backgroundColor: colors.background }]}
         ListHeaderComponent={
           <View style={styles.headerSection}>
             {/* Store Cover Banner */}
-            <View style={styles.banner} />
+            <View style={[styles.banner, { backgroundColor: isDarkMode ? '#1D3B5C' : colors.primaryContainer }]} />
 
             {/* Store Details Card */}
-            <View style={styles.detailsCard}>
+            <View style={[styles.detailsCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
               <View style={styles.avatarContainer}>
-                <View style={styles.avatarPlaceholder}>
-                  <Text style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
+                <View style={[styles.avatarPlaceholder, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.avatarText, { color: colors.onPrimary }]}>{displayName.charAt(0).toUpperCase()}</Text>
                 </View>
               </View>
 
-              <Text style={styles.storeName}>{displayName}</Text>
-              <Text style={styles.ownerText}>Master Craftsperson Storefront</Text>
+              <Text style={[styles.storeName, { color: colors.onBackground }]}>{displayName}</Text>
+              <Text style={[styles.ownerText, { color: colors.textMuted }]}>Master Craftsperson Storefront</Text>
 
               <View style={styles.metaRow}>
-                <Text style={styles.metaText}>📍 Verified Heritage Craft</Text>
-                <Text style={styles.metaText}>⭐ 5.0 Rating</Text>
+                <Text style={[styles.metaText, { color: colors.textMuted }]}>📍 Verified Heritage Craft</Text>
+                <Text style={[styles.metaText, { color: colors.textMuted }]}>⭐ 5.0 Rating</Text>
               </View>
 
-              <Text style={styles.bioText}>
+              <Text style={[styles.bioText, { color: colors.onBackground }]}>
                 Authentic handcrafted creations made with traditional artisan methods and heritage skills.
               </Text>
 
-              <View style={styles.tagContainer}>
-                <Text style={styles.tag}>{displayCraft}</Text>
-                <Text style={styles.tag}>Authentic Handcrafted</Text>
+              <View style={[styles.tagContainer, { backgroundColor: isDarkMode ? 'rgba(29,114,184,0.15)' : 'rgba(0,97,149,0.08)', borderColor: isDarkMode ? 'rgba(29,114,184,0.3)' : 'rgba(0,97,149,0.2)' }]}>
+                <Text style={[styles.tag, { color: colors.primary }]}>{displayCraft}</Text>
+                <Text style={[styles.tag, { color: colors.primary }]}>Authentic Handcrafted</Text>
               </View>
             </View>
 
-            <Text style={styles.sectionTitle}>Artisan Creations ({sellerProducts.length})</Text>
+            <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>Artisan Creations ({sellerProducts.length})</Text>
           </View>
         }
         ListEmptyComponent={
           <View style={{ padding: Spacing.xl, alignItems: 'center' }}>
-            <Text style={{ color: Colors.textMuted, fontSize: 14 }}>No products listed by this artisan yet.</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14 }}>No products listed by this artisan yet.</Text>
           </View>
         }
       />

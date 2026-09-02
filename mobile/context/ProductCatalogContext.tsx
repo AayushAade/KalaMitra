@@ -9,6 +9,7 @@ interface ProductCatalogContextType {
   products: Product[];
   myProducts: Product[];
   addProduct: (product: Partial<Product> & { name: string; price: number }) => Promise<Product>;
+  updateProduct: (id: string, updates: Partial<Product>) => Promise<Product>;
   refreshProducts: () => Promise<void>;
   refreshMyProducts: () => Promise<void>;
   resetCatalog: () => void;
@@ -91,6 +92,13 @@ export const ProductCatalogProvider: React.FC<{ children: React.ReactNode }> = (
     return createdProduct;
   };
 
+  const updateProduct = async (id: string, updates: Partial<Product>): Promise<Product> => {
+    const updated = await productService.updateProduct(id, updates);
+    setMyProducts(prev => prev.map(p => (p.id === id ? { ...p, ...updated } : p)));
+    setProducts(prev => prev.map(p => (p.id === id ? { ...p, ...updated } : p)));
+    return updated;
+  };
+
   const resetCatalog = useCallback(() => {
     productService.reset();
     setProducts(productService.getProducts());
@@ -132,6 +140,7 @@ export const ProductCatalogProvider: React.FC<{ children: React.ReactNode }> = (
         products,
         myProducts,
         addProduct,
+        updateProduct,
         refreshProducts,
         refreshMyProducts,
         resetCatalog,

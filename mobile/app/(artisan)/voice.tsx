@@ -3,6 +3,7 @@ import { StyleSheet, View, Text, ScrollView, Pressable, ActivityIndicator, Alert
 import { router } from 'expo-router';
 import { Audio } from 'expo-av';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCreation } from '../../context/ProductCreationContext';
@@ -12,6 +13,7 @@ import { voiceService } from '../../services/voiceService';
 import { VoiceExtractionMetadata } from '../../types';
 
 export default function VoiceScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { productData, updateProductData } = useProductCreation();
 
   const [permissionResponse, setPermissionResponse] = useState<Audio.PermissionResponse | null>(null);
@@ -192,20 +194,20 @@ export default function VoiceScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header showBack={true} title="AI Voice Cataloger" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <Header showBack={true} title="AI Voice Studio" />
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}>
         {/* Wizard Progress */}
-        <View style={styles.wizard}>
-          <Text style={styles.wizardLabel}>Step 3 of 5: Voice Description</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressIndicator, { width: '60%' }]} />
+        <View style={[styles.wizard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.wizardLabel, { color: colors.primary }]}>Step 3 of 5: Voice Description</Text>
+          <View style={[styles.progressBar, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
+            <View style={[styles.progressIndicator, { width: '60%', backgroundColor: colors.primary }]} />
           </View>
         </View>
 
-        <View style={styles.content}>
-          <Text style={styles.title}>Speak in your Language</Text>
-          <Text style={styles.subtitle}>
+        <View style={[styles.content, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.title, { color: colors.onBackground }]}>Speak in your Language</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
             Describe the materials, weaving or crafting technique, and the story of your creation.
           </Text>
 
@@ -215,9 +217,13 @@ export default function VoiceScreen() {
               <Pressable
                 key={l}
                 onPress={() => setSelectedHintLang(l)}
-                style={[styles.langBadge, selectedHintLang === l && styles.langBadgeSelected]}
+                style={[
+                  styles.langBadge,
+                  { backgroundColor: colors.card, borderColor: colors.borderLight },
+                  selectedHintLang === l && { backgroundColor: colors.primary, borderColor: colors.primary },
+                ]}
               >
-                <Text style={[styles.langText, selectedHintLang === l && styles.langTextSelected]}>
+                <Text style={[styles.langText, { color: selectedHintLang === l ? colors.onPrimary : colors.textMuted }]}>
                   {l === 'Hindi' ? 'हिंदी' : l === 'Marathi' ? 'मराठी' : 'English'}
                 </Text>
               </Pressable>
@@ -225,8 +231,8 @@ export default function VoiceScreen() {
           </View>
 
           {/* Recording interface */}
-          <View style={styles.recorderBox}>
-            <Text style={styles.timerText}>
+          <View style={[styles.recorderBox, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+            <Text style={[styles.timerText, { color: colors.onBackground }]}>
               {isRecording ? formatTime(recordingSeconds) : '0:00'}
             </Text>
 
@@ -235,6 +241,7 @@ export default function VoiceScreen() {
               disabled={isProcessing}
               style={[
                 styles.micButton,
+                { backgroundColor: colors.primary },
                 isRecording && styles.micButtonActive,
                 styles.glowBorder,
               ]}
@@ -242,11 +249,11 @@ export default function VoiceScreen() {
               <Ionicons
                 name={isRecording ? 'stop' : 'mic'}
                 size={38}
-                color={Colors.textLight}
+                color={colors.onPrimary}
               />
             </Pressable>
 
-            <Text style={styles.recordStatus}>
+            <Text style={[styles.recordStatus, { color: colors.textMuted }]}>
               {isRecording
                 ? 'Listening... Tap to stop'
                 : isProcessing
@@ -268,10 +275,10 @@ export default function VoiceScreen() {
 
           {/* AI Extract Progress Loader */}
           {isProcessing && (
-            <View style={styles.processingCard}>
-              <ActivityIndicator color={Colors.primary} size="large" />
-              <Text style={styles.processingTitle}>AI Analyzing Voice & Cataloging...</Text>
-              <Text style={styles.processingSub}>
+            <View style={[styles.processingCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+              <ActivityIndicator color={colors.primary} size="large" />
+              <Text style={[styles.processingTitle, { color: colors.onBackground }]}>AI Analyzing Voice & Cataloging...</Text>
+              <Text style={[styles.processingSub, { color: colors.textMuted }]}>
                 Detecting language, extracting materials, craft tradition, and drafting multilingual listings.
               </Text>
             </View>
@@ -279,30 +286,37 @@ export default function VoiceScreen() {
 
           {/* Results Transcript Box */}
           {transcript !== '' && !isProcessing && (
-            <View style={styles.resultCard}>
+            <View style={[styles.resultCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
               <View style={styles.resultHeader}>
-                <Ionicons name="sparkles" size={18} color={Colors.primary} />
-                <Text style={styles.resultLabel}>
+                <Ionicons name="sparkles" size={18} color={colors.primary} />
+                <Text style={[styles.resultLabel, { color: colors.primary }]}>
                   Captured Speech ({detectedLang})
                 </Text>
               </View>
-              <Text style={styles.resultBody}>{transcript}</Text>
+              <Text style={[styles.resultBody, { color: colors.onBackground }]}>{transcript}</Text>
 
               {extractedData && (
                 <View style={styles.extractedSummary}>
-                  <Text style={styles.summaryTitle}>AI Extracted Highlights:</Text>
-                  <Text style={styles.summaryRow}>🏷️ <Text style={styles.bold}>Title:</Text> {extractedData.product_name}</Text>
-                  <Text style={styles.summaryRow}>🧵 <Text style={styles.bold}>Material:</Text> {extractedData.material || 'Handcrafted'}</Text>
-                  <Text style={styles.summaryRow}>🎨 <Text style={styles.bold}>Craft:</Text> {extractedData.craft_type || 'Traditional Art'}</Text>
+                  <Text style={[styles.summaryTitle, { color: colors.onBackground }]}>AI Extracted Highlights:</Text>
+                  <Text style={[styles.summaryRow, { color: colors.textMuted }]}>🏷️ <Text style={[styles.bold, { color: colors.onBackground }]}>Title:</Text> {extractedData.product_name}</Text>
+                  <Text style={[styles.summaryRow, { color: colors.textMuted }]}>🧵 <Text style={[styles.bold, { color: colors.onBackground }]}>Material:</Text> {extractedData.material || 'Handcrafted'}</Text>
+                  <Text style={[styles.summaryRow, { color: colors.textMuted }]}>🎨 <Text style={[styles.bold, { color: colors.onBackground }]}>Craft:</Text> {extractedData.craft_type || 'Traditional Art'}</Text>
                   {extractedData.production_time_days && (
-                    <Text style={styles.summaryRow}>⏱️ <Text style={styles.bold}>Time:</Text> {extractedData.production_time_days} days</Text>
+                    <Text style={[styles.summaryRow, { color: colors.textMuted }]}>⏱️ <Text style={[styles.bold, { color: colors.onBackground }]}>Time:</Text> {extractedData.production_time_days} days</Text>
                   )}
                 </View>
               )}
 
-              <View style={styles.extractedAlert}>
-                <Ionicons name="checkmark-circle" size={20} color="#2e7d32" />
-                <Text style={styles.alertText}>
+              <View style={[
+                styles.extractedAlert,
+                {
+                  backgroundColor: isDarkMode ? 'rgba(46,125,50,0.2)' : '#e8f5e9',
+                  borderColor: isDarkMode ? 'rgba(74,222,128,0.3)' : 'transparent',
+                  borderWidth: isDarkMode ? 1 : 0,
+                },
+              ]}>
+                <Ionicons name="checkmark-circle" size={20} color={isDarkMode ? '#4ADE80' : '#2e7d32'} />
+                <Text style={[styles.alertText, { color: isDarkMode ? '#4ADE80' : '#2e7d32' }]}>
                   AI successfully generated English & Hindi catalog drafts!
                 </Text>
               </View>
@@ -315,19 +329,26 @@ export default function VoiceScreen() {
               onPress={() => setShowManualFallback(prev => !prev)}
               style={styles.manualToggle}
             >
-              <Text style={styles.manualToggleText}>
+              <Text style={[styles.manualToggleText, { color: colors.primary }]}>
                 {showManualFallback ? 'Hide manual text entry' : 'Or type description manually'}
               </Text>
             </Pressable>
           )}
 
           {showManualFallback && (
-            <View style={styles.manualBox}>
-              <Text style={styles.manualLabel}>Enter Craft Story Manually:</Text>
+            <View style={[styles.manualBox, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+              <Text style={[styles.manualLabel, { color: colors.onBackground }]}>Enter Craft Story Manually:</Text>
               <TextInput
-                style={styles.manualInput}
+                style={[
+                  styles.manualInput,
+                  {
+                    backgroundColor: isDarkMode ? '#13171F' : colors.background,
+                    color: colors.onBackground,
+                    borderColor: colors.borderLight,
+                  },
+                ]}
                 placeholder="Describe materials, process, size, and tradition..."
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 value={manualText}
                 onChangeText={setManualText}
                 multiline

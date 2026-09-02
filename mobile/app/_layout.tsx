@@ -1,16 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ThemeProvider as NavigationThemeProvider, DefaultTheme, DarkTheme } from '@react-navigation/native';
+import * as SystemUI from 'expo-system-ui';
+import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { ProductCatalogProvider } from '../context/ProductCatalogContext';
 import { authService } from '../services/authService';
 import { artisanService } from '../services/artisanService';
 import { productService } from '../services/productService';
 import { supabase } from '../lib/supabase';
+import { LightColors } from '../constants/theme';
+
+// Pre-initialize native Android window background to prevent startup white flash
+SystemUI.setBackgroundColorAsync(LightColors.background).catch(() => {});
 
 function RootLayoutNav() {
   const segments = useSegments();
   const router = useRouter();
+  const { colors } = useTheme();
   const [isSessionLoaded, setIsSessionLoaded] = useState(false);
   const [hasUser, setHasUser] = useState<boolean | null>(null);
 
@@ -84,7 +92,13 @@ function RootLayoutNav() {
   }, [hasUser, segments, isSessionLoaded, router]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: colors.background },
+        animation: 'default',
+      }}
+    >
       <Stack.Screen name="index" />
       <Stack.Screen name="(auth)" />
       <Stack.Screen name="(artisan)" />
@@ -94,13 +108,47 @@ function RootLayoutNav() {
   );
 }
 
+function RootLayoutContent() {
+  const { colors, isDarkMode } = useTheme();
+
+  useEffect(() => {
+    // Keep native Android Activity window background strictly matched with active theme
+    SystemUI.setBackgroundColorAsync(colors.background).catch(() => {});
+  }, [colors.background]);
+
+  const navTheme = useMemo(() => {
+    const baseTheme = isDarkMode ? DarkTheme : DefaultTheme;
+    return {
+      ...baseTheme,
+      dark: isDarkMode,
+      colors: {
+        ...baseTheme.colors,
+        primary: colors.primary,
+        background: colors.background,
+        card: colors.card,
+        text: colors.onBackground,
+        border: colors.borderLight,
+        notification: colors.primary,
+      },
+    };
+  }, [isDarkMode, colors]);
+
+  return (
+    <NavigationThemeProvider value={navTheme}>
+      <RootLayoutNav />
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+    </NavigationThemeProvider>
+  );
+}
+
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <ProductCatalogProvider>
-        <RootLayoutNav />
-      </ProductCatalogProvider>
-      <StatusBar style="dark" />
+      <ThemeProvider>
+        <ProductCatalogProvider>
+          <RootLayoutContent />
+        </ProductCatalogProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

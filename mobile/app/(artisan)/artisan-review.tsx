@@ -3,12 +3,14 @@ import { StyleSheet, View, Text, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import BottomNavigation from '../../components/BottomNavigation';
 import { Ionicons } from '@expo/vector-icons';
 import { artisanService } from '../../services/artisanService';
 
 export default function ArtisanReviewScreen() {
+  const { colors } = useTheme();
   const artisan = artisanService.getCurrentArtisan();
 
   const handleNav = (tab: string) => {
@@ -16,14 +18,14 @@ export default function ArtisanReviewScreen() {
       case 'home':
         router.replace('/(artisan)/dashboard' as any);
         break;
-      case 'products':
-        router.push('/(artisan)/artisan-catalogue' as any);
-        break;
       case 'marketplace':
         router.push('/(buyer)/marketplace' as any);
         break;
-      case 'inbox':
-        router.push('/(artisan)/inquiries' as any);
+      case 'add':
+        router.push('/(artisan)/add-product' as any);
+        break;
+      case 'chat':
+        router.push('/(artisan)/chat' as any);
         break;
       case 'profile':
         router.push('/(artisan)/profile' as any);
@@ -32,35 +34,35 @@ export default function ArtisanReviewScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Artisan Review" />
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]} showsVerticalScrollIndicator={false}>
         {/* Rating Summary */}
-        <View style={styles.ratingCard}>
-          <Text style={styles.ratingTitle}>Your Rating</Text>
+        <View style={[styles.ratingCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.ratingTitle, { color: colors.textMuted }]}>Your Rating</Text>
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={36} color="#F59E0B" />
-            <Text style={styles.ratingValue}>
+            <Text style={[styles.ratingValue, { color: colors.onBackground }]}>
               {Number(artisan.rating || 5.0).toFixed(1)}
             </Text>
           </View>
-          <Text style={styles.noReviews}>
+          <Text style={[styles.noReviews, { color: colors.textMuted }]}>
             {artisan.reviewsCount && artisan.reviewsCount > 0
               ? `⭐ Based on ${artisan.reviewsCount} customer reviews`
               : '⭐ Verified Artisan Quality Rating'}
           </Text>
-          <Text style={styles.noReviewsHint}>
+          <Text style={[styles.noReviewsHint, { color: colors.textMuted }]}>
             Ratings update as verified buyers leave feedback on your products.
           </Text>
         </View>
 
         {/* Empty Reviews */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Customer Reviews</Text>
-          <View style={styles.emptyCard}>
-            <Ionicons name="chatbox-outline" size={48} color={Colors.primaryContainer} />
-            <Text style={styles.emptyTitle}>No reviews yet</Text>
-            <Text style={styles.emptyMessage}>
+          <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>Customer Reviews</Text>
+          <View style={[styles.emptyCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+            <Ionicons name="chatbox-outline" size={48} color={colors.primary} />
+            <Text style={[styles.emptyTitle, { color: colors.onBackground }]}>No reviews yet</Text>
+            <Text style={[styles.emptyMessage, { color: colors.textMuted }]}>
               Your customer reviews will appear here once buyers provide feedback on your products.
             </Text>
           </View>

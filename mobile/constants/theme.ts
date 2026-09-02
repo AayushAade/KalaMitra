@@ -1,6 +1,23 @@
-import { Platform } from 'react-native';
+export type ThemeColors = {
+  primary: string;
+  primaryContainer: string;
+  onPrimary: string;
+  background: string;
+  surface: string;
+  onBackground: string;
+  onSurface: string;
+  tertiary: string;
+  secondary: string;
+  textMuted: string;
+  border: string;
+  borderLight: string;
+  error: string;
+  errorContainer: string;
+  card: string;
+  textLight: string;
+};
 
-export const Colors = {
+export const LightColors: ThemeColors = {
   primary: '#94442E',
   primaryContainer: '#B35C44',
   onPrimary: '#FFFFFF',
@@ -18,6 +35,40 @@ export const Colors = {
   card: '#FFFFFF',
   textLight: '#FFFFFF',
 };
+
+export const DarkColors: ThemeColors = {
+  primary: '#1D72B8', // Royal / accessible blue replacing brown/terracotta in Dark Mode!
+  primaryContainer: '#174A7C',
+  onPrimary: '#FFFFFF',
+  background: '#12151A', // Soft dark charcoal / blue-black
+  surface: '#181E26',
+  onBackground: '#F3F4F6', // Crisp light readable text
+  onSurface: '#F3F4F6',
+  tertiary: '#38BDF8', // Sky/accent blue
+  secondary: '#94A3B8', // Muted slate blue secondary text
+  textMuted: '#9CA3AF', // Muted light gray text
+  border: '#374151', // Dark slate border
+  borderLight: '#262F3C', // Subtle divider border
+  error: '#EF4444',
+  errorContainer: '#451A1A',
+  card: '#1A202A', // Dark charcoal card surface
+  textLight: '#FFFFFF',
+};
+
+let currentMode: 'light' | 'dark' = 'light';
+
+export const getThemeMode = () => currentMode;
+
+export const setThemeMode = (mode: 'light' | 'dark') => {
+  currentMode = mode;
+};
+
+export const Colors: ThemeColors = new Proxy(LightColors, {
+  get(target, prop: string) {
+    const active = currentMode === 'dark' ? DarkColors : LightColors;
+    return (active as any)[prop] ?? (target as any)[prop];
+  },
+});
 
 export const Spacing = {
   xs: 4,

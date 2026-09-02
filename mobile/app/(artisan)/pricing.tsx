@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCreation } from '../../context/ProductCreationContext';
@@ -11,6 +12,7 @@ import { artisanService } from '../../services/artisanService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PricingScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { productData, resetProductData } = useProductCreation();
   const { addProduct } = useProductCatalog();
 
@@ -79,32 +81,32 @@ export default function PricingScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="AI Pricing Studio" />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]} keyboardShouldPersistTaps="handled">
           {/* Wizard Progress */}
-          <View style={styles.wizard}>
-            <Text style={styles.wizardLabel}>Step 5 of 5: AI Pricing Assistant</Text>
-            <View style={styles.progressBar}>
-              <View style={[styles.progressIndicator, { width: '100%' }]} />
+          <View style={[styles.wizard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+            <Text style={[styles.wizardLabel, { color: colors.primary }]}>Step 5 of 5: AI Pricing Assistant</Text>
+            <View style={[styles.progressBar, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
+              <View style={[styles.progressIndicator, { width: '100%', backgroundColor: colors.primary }]} />
             </View>
           </View>
 
           <View style={styles.content}>
-            <Text style={styles.title}>Calculate Fair Value</Text>
-            <Text style={styles.subtitle}>Enter your material and time inputs. AI calculates market rates.</Text>
+            <Text style={[styles.title, { color: colors.onBackground }]}>Calculate Fair Value</Text>
+            <Text style={[styles.subtitle, { color: colors.textMuted }]}>Enter your material and time inputs. AI calculates market rates.</Text>
 
-            <View style={styles.card}>
+            <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
               {/* Input Row */}
               <View style={styles.inputRow}>
                 <View style={styles.inputCol}>
-                  <Text style={styles.inputLabel}>Material Cost (₹)</Text>
+                  <Text style={[styles.inputLabel, { color: colors.onBackground }]}>Material Cost (₹)</Text>
                   <TextInput
-                    style={styles.textInput}
+                    style={[styles.textInput, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                     keyboardType="decimal-pad"
                     value={matCost}
                     onChangeText={(val) => {
@@ -115,9 +117,9 @@ export default function PricingScreen() {
                   />
                 </View>
                 <View style={styles.inputCol}>
-                  <Text style={styles.inputLabel}>Labor Cost (₹)</Text>
+                  <Text style={[styles.inputLabel, { color: colors.onBackground }]}>Labor Cost (₹)</Text>
                   <TextInput
-                    style={styles.textInput}
+                    style={[styles.textInput, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                     keyboardType="decimal-pad"
                     value={labCost}
                     onChangeText={(val) => {
@@ -131,9 +133,9 @@ export default function PricingScreen() {
 
               <View style={styles.inputRow}>
                 <View style={styles.inputCol}>
-                  <Text style={styles.inputLabel}>Other Costs (₹)</Text>
+                  <Text style={[styles.inputLabel, { color: colors.onBackground }]}>Other Costs (₹)</Text>
                   <TextInput
-                    style={styles.textInput}
+                    style={[styles.textInput, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                     keyboardType="decimal-pad"
                     value={othCost}
                     onChangeText={(val) => {
@@ -144,19 +146,19 @@ export default function PricingScreen() {
                   />
                 </View>
                 <View style={styles.inputCol}>
-                  <Text style={styles.inputLabel}>Total cost: ₹{totalCost}</Text>
+                  <Text style={[styles.inputLabel, { color: colors.onBackground }]}>Total cost: ₹{totalCost}</Text>
                   <View style={styles.costBox} />
                 </View>
               </View>
 
               {/* AI Outcome */}
-              <View style={styles.aiOutputBox}>
-                <Text style={styles.suggestedLabel}>💡 Recommended Price</Text>
-                <Text style={styles.suggestedValue}>₹{recommendedPrice}</Text>
-                <Text style={styles.rangeText}>
+              <View style={[styles.aiOutputBox, { backgroundColor: isDarkMode ? '#172230' : '#EBF5FB', borderColor: isDarkMode ? colors.borderLight : '#D4E6F1' }]}>
+                <Text style={[styles.suggestedLabel, { color: colors.primary }]}>💡 Recommended Price</Text>
+                <Text style={[styles.suggestedValue, { color: colors.primary }]}>₹{recommendedPrice}</Text>
+                <Text style={[styles.rangeText, { color: colors.textMuted }]}>
                   Acceptable Range: ₹{minPrice} - ₹{maxPrice}
                 </Text>
-                <Text style={styles.explanation}>
+                <Text style={[styles.explanation, { color: colors.textMuted }]}>
                   {explanation}
                 </Text>
                 <Button
@@ -169,9 +171,9 @@ export default function PricingScreen() {
 
               {/* Final Listing Price */}
               <View style={styles.finalSection}>
-                <Text style={styles.finalLabel}>Final Listing Price (₹)</Text>
+                <Text style={[styles.finalLabel, { color: colors.onBackground }]}>Final Listing Price (₹)</Text>
                 <TextInput
-                  style={styles.finalInput}
+                  style={[styles.finalInput, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.primary, borderColor: colors.borderLight }]}
                   keyboardType="decimal-pad"
                   value={finalPrice}
                   onChangeText={setFinalPrice}

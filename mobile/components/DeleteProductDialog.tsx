@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface DeleteProductDialogProps {
   visible: boolean;
@@ -25,6 +26,8 @@ export default function DeleteProductDialog({
   onCancel,
   onConfirm,
 }: DeleteProductDialogProps) {
+  const { colors, isDarkMode } = useTheme();
+
   return (
     <Modal
       visible={visible}
@@ -34,16 +37,16 @@ export default function DeleteProductDialog({
       onRequestClose={onCancel}
     >
       <View style={styles.overlay}>
-        <View style={styles.dialog}>
+        <View style={[styles.dialog, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
           {/* Icon */}
           <View style={styles.iconContainer}>
-            <Ionicons name="trash-outline" size={32} color={Colors.error} />
+            <Ionicons name="trash-outline" size={32} color={colors.error} />
           </View>
 
-          <Text style={styles.title}>Delete Product?</Text>
-          <Text style={styles.message}>
+          <Text style={[styles.title, { color: colors.onBackground }]}>Delete Product?</Text>
+          <Text style={[styles.message, { color: colors.textMuted }]}>
             Are you sure you want to delete{'\n'}
-            <Text style={styles.productName}>{productName}</Text>?
+            <Text style={[styles.productName, { color: colors.onBackground }]}>{productName}</Text>?
           </Text>
           <Text style={styles.warning}>This action cannot be undone.</Text>
 
@@ -51,12 +54,13 @@ export default function DeleteProductDialog({
             <Pressable
               style={({ pressed }) => [
                 styles.cancelButton,
+                { backgroundColor: isDarkMode ? '#222A36' : '#FAF6F2', borderColor: colors.borderLight },
                 pressed && styles.buttonPressed,
               ]}
               onPress={onCancel}
               disabled={isDeleting}
             >
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={[styles.cancelText, { color: colors.onBackground }]}>Cancel</Text>
             </Pressable>
 
             <Pressable

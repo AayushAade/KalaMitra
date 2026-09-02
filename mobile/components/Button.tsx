@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface ButtonProps {
   title: string;
@@ -19,6 +20,7 @@ export default function Button({
   loading = false,
   style,
 }: ButtonProps) {
+  const { colors, isDarkMode } = useTheme();
   const isPrimary = variant === 'primary';
 
   return (
@@ -27,20 +29,31 @@ export default function Button({
       disabled={disabled || loading}
       style={({ pressed }) => [
         styles.button,
-        isPrimary ? styles.primaryButton : styles.secondaryButton,
-        disabled && styles.disabledButton,
+        isPrimary
+          ? { backgroundColor: colors.primary }
+          : {
+              backgroundColor: isDarkMode ? colors.card : colors.background,
+              borderWidth: 1,
+              borderColor: isDarkMode ? colors.border : colors.border,
+            },
+        disabled && {
+          backgroundColor: isDarkMode ? '#222A36' : colors.borderLight,
+          borderColor: isDarkMode ? '#222A36' : colors.borderLight,
+        },
         pressed && !disabled && styles.pressed,
         style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={isPrimary ? Colors.textLight : Colors.primary} size="small" />
+        <ActivityIndicator color={isPrimary ? colors.onPrimary : colors.primary} size="small" />
       ) : (
         <Text
           style={[
             styles.text,
-            isPrimary ? styles.primaryText : styles.secondaryText,
-            disabled && styles.disabledText,
+            isPrimary
+              ? { color: colors.onPrimary }
+              : { color: isDarkMode ? colors.onBackground : colors.primary },
+            disabled && { color: isDarkMode ? '#6B7280' : colors.textMuted },
           ]}
         >
           {title}

@@ -148,6 +148,60 @@ export const authService = {
   },
 
   /**
+   * Registers a new buyer account.
+   */
+  registerBuyer: async (
+    buyerData: { name?: string; phone?: string },
+    email: string,
+    password: string
+  ): Promise<AuthResult> => {
+    console.log(`[AuthService] Registering new buyer identity for: ${email}`);
+
+    const namePrefix = email.split('@')[0] || 'Buyer';
+    const cleanName = buyerData.name?.trim() || namePrefix;
+
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          role: 'buyer',
+          full_name: cleanName,
+          name: cleanName,
+          phone: buyerData.phone?.trim() || '',
+        },
+      },
+    });
+
+    if (error) {
+      if (error.message.includes('already registered')) {
+        throw new Error('This email is already registered. Please sign in instead.');
+      }
+      throw new Error(error.message);
+    }
+
+    if (!data.user) {
+      throw new Error('Failed to create the buyer account.');
+    }
+
+    const emailConfirmationRequired = !data.session;
+
+    if (!emailConfirmationRequired && data.session) {
+      console.log('[AuthService] Active buyer session detected.');
+      artisanService.setAuthenticatedUser({
+        id: data.user.id,
+        email: data.user.email || '',
+      });
+    }
+
+    return {
+      user: data.user,
+      session: data.session,
+      emailConfirmationRequired,
+    };
+  },
+
+  /**
    * Sign out the active user session and purge all in-memory user caches.
    */
   logout: async (): Promise<void> => {

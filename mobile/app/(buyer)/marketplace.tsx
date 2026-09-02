@@ -7,11 +7,11 @@ import {
   TextInput,
   ScrollView,
   Pressable,
-  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import ProductCard from '../../components/ProductCard';
 import EmptyState from '../../components/EmptyState';
@@ -21,6 +21,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Product } from '../../types';
 
 export default function MarketplaceScreen() {
+  const { colors } = useTheme();
   const { products, refreshProducts, isLoading } = useProductCatalog();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -61,24 +62,24 @@ export default function MarketplaceScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Marketplace" />
 
       {/* Search Bar */}
       <View style={styles.searchSection}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search-outline" size={20} color={Colors.textMuted} style={styles.searchIcon} />
+        <View style={[styles.searchBar, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Ionicons name="search-outline" size={20} color={colors.textMuted} style={styles.searchIcon} />
           <TextInput
-            style={styles.searchInput}
+            style={[styles.searchInput, { color: colors.onBackground }]}
             placeholder="Search silk, pottery, bamboo..."
-            placeholderTextColor={Colors.textMuted}
+            placeholderTextColor={colors.textMuted}
             value={searchQuery}
             onChangeText={setSearchQuery}
             returnKeyType="search"
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={() => setSearchQuery('')} style={styles.clearBtn}>
-              <Ionicons name="close-circle" size={18} color={Colors.textMuted} />
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
             </Pressable>
           )}
         </View>
@@ -93,9 +94,19 @@ export default function MarketplaceScreen() {
               <Pressable
                 key={cat}
                 onPress={() => setSelectedCategory(cat)}
-                style={[styles.categoryTab, isSelected && styles.categoryTabActive]}
+                style={[
+                  styles.categoryTab,
+                  { backgroundColor: colors.card, borderColor: colors.borderLight },
+                  isSelected && { backgroundColor: colors.primary, borderColor: colors.primary },
+                ]}
               >
-                <Text style={[styles.categoryTabText, isSelected && styles.categoryTabTextActive]}>
+                <Text
+                  style={[
+                    styles.categoryTabText,
+                    { color: isSelected ? colors.onPrimary : colors.textMuted },
+                    isSelected && styles.categoryTabTextActive,
+                  ]}
+                >
                   {cat}
                 </Text>
               </Pressable>
@@ -124,11 +135,11 @@ export default function MarketplaceScreen() {
               onPress={() => handleProductPress(item.id)}
             />
           )}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { backgroundColor: colors.background }]}
           ListHeaderComponent={
             <View style={styles.listHeader}>
-              <Text style={styles.title}>Artisan Creations</Text>
-              <Text style={styles.subtitle}>
+              <Text style={[styles.title, { color: colors.onBackground }]}>Artisan Creations</Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
                 Discover handmade treasures direct from heritage workshops.
               </Text>
             </View>

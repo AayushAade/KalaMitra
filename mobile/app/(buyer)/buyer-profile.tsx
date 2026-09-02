@@ -5,10 +5,13 @@ import {
   Text,
   ScrollView,
   Alert,
+  Switch,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import BottomNavigation from '../../components/BottomNavigation';
@@ -16,6 +19,7 @@ import { authService } from '../../services/authService';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function BuyerProfileScreen() {
+  const { isDarkMode, toggleDarkMode, colors } = useTheme();
   const handleLogout = () => {
     Alert.alert(
       'Logout',
@@ -55,39 +59,54 @@ export default function BuyerProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Profile" />
       <ScrollView
-        contentContainerStyle={styles.scrollContainer}
+        contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Profile Header */}
         <View style={styles.profileHeader}>
-          <View style={styles.avatarCircle}>
-            <Ionicons name="person-outline" size={40} color={Colors.textLight} />
+          <View style={[styles.avatarCircle, { backgroundColor: colors.primary }]}>
+            <Ionicons name="person-outline" size={40} color={colors.onPrimary} />
           </View>
-          <Text style={styles.headerName}>Buyer Account</Text>
-          <Text style={styles.headerSub}>Marketplace Browser</Text>
+          <Text style={[styles.headerName, { color: colors.onBackground }]}>Buyer Account</Text>
+          <Text style={[styles.headerSub, { color: colors.textMuted }]}>Marketplace Browser</Text>
         </View>
 
         {/* Settings */}
-        <View style={styles.settingsCard}>
-          <Text style={styles.sectionLabel}>Preferences</Text>
+        <View style={[styles.settingsCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Preferences</Text>
           <View style={styles.settingRow}>
-            <Ionicons name="language-outline" size={20} color={Colors.textMuted} />
-            <Text style={styles.settingText}>Language</Text>
-            <Ionicons name="chevron-forward" size={18} color={Colors.border} />
+            <Ionicons name="language-outline" size={20} color={colors.textMuted} />
+            <Text style={[styles.settingText, { color: colors.onBackground }]}>Language</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.border} />
           </View>
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
           <View style={styles.settingRow}>
-            <Ionicons name="settings-outline" size={20} color={Colors.textMuted} />
-            <Text style={styles.settingText}>Settings</Text>
-            <Ionicons name="chevron-forward" size={18} color={Colors.border} />
+            <Ionicons name="settings-outline" size={20} color={colors.textMuted} />
+            <Text style={[styles.settingText, { color: colors.onBackground }]}>Settings</Text>
+            <Ionicons name="chevron-forward" size={18} color={colors.border} />
           </View>
         </View>
 
-        <View style={styles.accountCard}>
-          <Text style={styles.sectionLabel}>Account</Text>
+        <View style={[styles.accountCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>Account</Text>
+
+          {/* Dark Mode Switch - Immediately Above Logout */}
+          <View style={[styles.darkModeRow, { borderBottomColor: colors.borderLight }]}>
+            <View style={styles.darkModeLeft}>
+              <Ionicons name="moon-outline" size={20} color={colors.primary} />
+              <Text style={[styles.darkModeLabel, { color: colors.onBackground }]}>Dark Mode</Text>
+            </View>
+            <Switch
+              value={isDarkMode}
+              onValueChange={toggleDarkMode}
+              trackColor={{ false: isDarkMode ? '#374151' : '#DBC1BA', true: colors.primary }}
+              thumbColor={Platform.OS === 'android' ? (isDarkMode ? colors.onPrimary : '#FFFFFF') : undefined}
+            />
+          </View>
+
           <Button
             title="Logout"
             onPress={handleLogout}
@@ -156,4 +175,21 @@ const styles = StyleSheet.create({
   settingText: { flex: 1, fontSize: 15, color: Colors.onBackground, fontWeight: '500' },
   divider: { height: 1, backgroundColor: Colors.borderLight },
   logoutBtn: { width: '100%', borderColor: '#F8B4B4', borderWidth: 1 },
+  darkModeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    marginBottom: Spacing.md,
+  },
+  darkModeLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  darkModeLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
 });

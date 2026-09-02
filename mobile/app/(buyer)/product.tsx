@@ -2,6 +2,7 @@ import React from 'react';
 import { StyleSheet, View, Text, ScrollView, Image, Pressable } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
@@ -9,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function ProductDetailsScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { productId } = useLocalSearchParams<{ productId?: string }>();
   const { products } = useProductCatalog();
 
@@ -33,72 +35,76 @@ export default function ProductDetailsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Product Details" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}>
         {/* Large Product Image */}
         {product.imageUrl && (
-          <View style={styles.imageContainer}>
+          <View style={[styles.imageContainer, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight, borderBottomColor: colors.borderLight }]}>
             <Image source={{ uri: product.imageUrl }} style={styles.image} />
           </View>
         )}
 
         <View style={styles.infoCard}>
-          <Text style={styles.category}>{product.craft || 'Handcrafted Heritage'}</Text>
-          <Text style={styles.name}>{product.name}</Text>
+          <Text style={[styles.category, { color: colors.primary }]}>{product.craft || 'Handcrafted Heritage'}</Text>
+          <Text style={[styles.name, { color: colors.onBackground }]}>{product.name}</Text>
           
           <View style={styles.priceRow}>
             {product.price && (
-              <Text style={styles.price}>
+              <Text style={[styles.price, { color: colors.primary }]}>
                 ₹{product.price.toLocaleString('en-IN')}
               </Text>
             )}
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>In Stock</Text>
+            <View style={[styles.badge, isDarkMode && { backgroundColor: 'rgba(29,114,184,0.15)', borderColor: 'rgba(29,114,184,0.3)' }]}>
+              <Text style={[styles.badgeText, isDarkMode && { color: colors.primary }]}>In Stock</Text>
             </View>
           </View>
 
           {/* Details list */}
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
           
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Material:</Text>
-            <Text style={styles.detailVal}>{product.material || 'Natural Materials'}</Text>
+            <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Material:</Text>
+            <Text style={[styles.detailVal, { color: colors.onBackground }]}>{product.material || 'Natural Materials'}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Craft Type:</Text>
-            <Text style={styles.detailVal}>{product.craft || 'Traditional Handcraft'}</Text>
+            <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Craft Type:</Text>
+            <Text style={[styles.detailVal, { color: colors.onBackground }]}>{product.craft || 'Traditional Handcraft'}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Production Time:</Text>
-            <Text style={styles.detailVal}>{product.productionTime || '3–5 days'}</Text>
+            <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Production Time:</Text>
+            <Text style={[styles.detailVal, { color: colors.onBackground }]}>{product.productionTime || '3–5 days'}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Min Order Qty:</Text>
-            <Text style={styles.detailVal}>{product.minOrderQuantity || 1} units</Text>
+            <Text style={[styles.detailLabel, { color: colors.textMuted }]}>Min Order Qty:</Text>
+            <Text style={[styles.detailVal, { color: colors.onBackground }]}>{product.minOrderQuantity || 1} units</Text>
           </View>
 
-          <View style={styles.divider} />
+          <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
 
-          <Text style={styles.descriptionTitle}>Product Story & Description</Text>
-          <Text style={styles.descriptionText}>
+          <Text style={[styles.descriptionTitle, { color: colors.onBackground }]}>Product Story & Description</Text>
+          <Text style={[styles.descriptionText, { color: colors.textMuted }]}>
             {product.descriptionEnglish || product.descriptionHindi || 'Authentic handcrafted heritage creation made with traditional artisan expertise.'}
           </Text>
 
           {/* Seller details card */}
           <Pressable
-            style={({ pressed }) => [styles.pressCard, pressed && styles.pressed]}
+            style={({ pressed }) => [
+              styles.pressCard,
+              { backgroundColor: colors.card, borderColor: colors.borderLight },
+              pressed && styles.pressed,
+            ]}
             onPress={handleViewSeller}
           >
             <View style={styles.sellerCard}>
-              <View style={styles.sellerAvatar}>
-                <Text style={styles.sellerText}>{(product.artisanName || 'A').charAt(0).toUpperCase()}</Text>
+              <View style={[styles.sellerAvatar, { backgroundColor: colors.primary }]}>
+                <Text style={[styles.sellerText, { color: colors.onPrimary }]}>{(product.artisanName || 'A').charAt(0).toUpperCase()}</Text>
               </View>
               <View style={styles.sellerInfo}>
-                <Text style={styles.sellerTitle}>{product.artisanName || 'Artisan Store'}</Text>
-                <Text style={styles.sellerSub}>Verified Artisan Seller</Text>
+                <Text style={[styles.sellerTitle, { color: colors.onBackground }]}>{product.artisanName || 'Artisan Store'}</Text>
+                <Text style={[styles.sellerSub, { color: colors.textMuted }]}>Verified Artisan Seller</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={Colors.border} />
+              <Ionicons name="chevron-forward" size={18} color={isDarkMode ? colors.primary : colors.border} />
             </View>
           </Pressable>
 

@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function LanguageScreen() {
+  const { colors } = useTheme();
   const [selectedLanguage, setSelectedLanguage] = useState<'Hindi' | 'Marathi' | 'English'>('English');
 
   const languages = [
@@ -21,12 +23,12 @@ export default function LanguageScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}>
         <View style={styles.content}>
-          <Text style={styles.title}>Language Preferences</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: colors.onBackground }]}>Language Preferences</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>
             Select your preferred language. AI cataloging helper tools will accept descriptions in this language.
           </Text>
 
@@ -39,17 +41,18 @@ export default function LanguageScreen() {
                   onPress={() => setSelectedLanguage(lang.code)}
                   style={[
                     styles.item,
+                    { backgroundColor: colors.card, borderColor: isSelected ? colors.primary : colors.borderLight },
                     isSelected && styles.itemSelected,
                   ]}
                 >
                   <View style={styles.itemInfo}>
-                    <Text style={[styles.itemLabel, isSelected && styles.textSelected]}>
+                    <Text style={[styles.itemLabel, { color: isSelected ? colors.primary : colors.onBackground }]}>
                       {lang.label}
                     </Text>
-                    <Text style={styles.itemSub}>{lang.sub}</Text>
+                    <Text style={[styles.itemSub, { color: colors.textMuted }]}>{lang.sub}</Text>
                   </View>
                   {isSelected && (
-                    <Ionicons name="checkmark-circle" size={24} color={Colors.primary} />
+                    <Ionicons name="checkmark-circle" size={24} color={colors.primary} />
                   )}
                 </Pressable>
               );

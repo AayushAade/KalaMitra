@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import BottomNavigation from '../../components/BottomNavigation';
 import DeleteProductDialog from '../../components/DeleteProductDialog';
@@ -22,6 +23,7 @@ import { Product } from '../../types';
 import { supabase } from '../../lib/supabase';
 
 export default function ArtisanCatalogueScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { myProducts, refreshMyProducts, isLoading } = useProductCatalog();
   const [refreshing, setRefreshing] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
@@ -39,13 +41,14 @@ export default function ArtisanCatalogueScreen() {
       case 'home':
         router.replace('/(artisan)/dashboard' as any);
         break;
-      case 'products':
-        break;
       case 'marketplace':
         router.push('/(buyer)/marketplace' as any);
         break;
-      case 'inbox':
-        router.push('/(artisan)/inquiries' as any);
+      case 'add':
+        router.push('/(artisan)/add-product' as any);
+        break;
+      case 'chat':
+        router.push('/(artisan)/chat' as any);
         break;
       case 'profile':
         router.push('/(artisan)/profile' as any);
@@ -77,7 +80,7 @@ export default function ArtisanCatalogueScreen() {
       await refreshMyProducts();
       setDeleteTarget(null);
       showToast('Product deleted successfully.', false);
-    } catch (err: any) {
+    } catch {
       setDeleteTarget(null);
       showToast('Unable to delete product. Please try again.', true);
     } finally {
@@ -86,23 +89,23 @@ export default function ArtisanCatalogueScreen() {
   };
 
   const renderProductCard = ({ item }: { item: Product }) => (
-    <View style={styles.productCard}>
+    <View style={[styles.productCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
       {/* Image */}
-      <View style={styles.productImageContainer}>
+      <View style={[styles.productImageContainer, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
         {item.imageUrl ? (
           <Image source={{ uri: item.imageUrl }} style={styles.productImage} />
         ) : (
           <View style={styles.imagePlaceholder}>
-            <Ionicons name="image-outline" size={32} color={Colors.border} />
+            <Ionicons name="image-outline" size={32} color={colors.border} />
           </View>
         )}
         <View style={[
           styles.statusBadge,
-          item.isPublished !== false ? styles.badgePublished : styles.badgeDraft
+          item.isPublished !== false ? (isDarkMode ? { backgroundColor: 'rgba(29,114,184,0.2)' } : styles.badgePublished) : styles.badgeDraft
         ]}>
           <Text style={[
             styles.statusBadgeText,
-            item.isPublished !== false ? styles.badgeTextPublished : styles.badgeTextDraft
+            item.isPublished !== false ? (isDarkMode ? { color: colors.primary } : styles.badgeTextPublished) : styles.badgeTextDraft
           ]}>
             {item.isPublished !== false ? 'Published' : 'Draft'}
           </Text>
@@ -111,65 +114,61 @@ export default function ArtisanCatalogueScreen() {
 
       {/* Info */}
       <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
+        <Text style={[styles.productName, { color: colors.onBackground }]} numberOfLines={2}>{item.name}</Text>
         {item.price !== undefined && (
-          <Text style={styles.productPrice}>₹{item.price.toLocaleString('en-IN')}</Text>
+          <Text style={[styles.productPrice, { color: colors.primary }]}>₹{item.price.toLocaleString('en-IN')}</Text>
         )}
         {item.material && (
-          <Text style={styles.productMaterial} numberOfLines={1}>{item.material}</Text>
+          <Text style={[styles.productMaterial, { color: colors.textMuted }]} numberOfLines={1}>{item.material}</Text>
         )}
       </View>
 
       {/* Actions */}
       <View style={styles.actionRow}>
         <Pressable
-          style={({ pressed }) => [styles.editButton, pressed && styles.buttonPressed]}
+          style={({ pressed }) => [
+            styles.editButton,
+            { backgroundColor: isDarkMode ? 'rgba(29,114,184,0.15)' : 'rgba(0,97,149,0.08)', borderColor: isDarkMode ? 'rgba(29,114,184,0.3)' : 'rgba(0,97,149,0.2)' },
+            pressed && styles.buttonPressed,
+          ]}
           onPress={() => router.push({
-            pathname: '/(buyer)/product',
+            pathname: '/(artisan)/edit-product',
             params: { productId: item.id }
           } as any)}
         >
-          <Ionicons name="create-outline" size={16} color={Colors.tertiary} />
-          <Text style={styles.editText}>Edit</Text>
+          <Ionicons name="create-outline" size={16} color={colors.primary} />
+          <Text style={[styles.editText, { color: colors.primary }]}>Edit</Text>
         </Pressable>
 
         <Pressable
           style={({ pressed }) => [styles.deleteButton, pressed && styles.buttonPressed]}
           onPress={() => setDeleteTarget(item)}
         >
-          <Ionicons name="trash-outline" size={16} color={Colors.error} />
+          <Ionicons name="trash-outline" size={16} color={colors.error} />
           <Text style={styles.deleteText}>Delete</Text>
         </Pressable>
       </View>
     </View>
   );
 
-  const ListHeader = () => (
-    <View style={styles.listHeader}>
-      {/* Add Product CTA */}
-      <Pressable
-        onPress={() => router.push('/(artisan)/add-product' as any)}
-        style={({ pressed }) => [styles.addButton, pressed && styles.buttonPressed]}
-      >
-        <Ionicons name="add-circle-outline" size={20} color={Colors.textLight} />
-        <Text style={styles.addButtonText}>+ Add Product</Text>
-      </Pressable>
-
-      {myProducts.length > 0 && (
+  const ListHeader = () => {
+    if (myProducts.length === 0) return null;
+    return (
+      <View style={styles.listHeader}>
         <View style={styles.groupHeader}>
-          <View style={styles.groupDot} />
-          <Text style={styles.groupTitle}>My Catalog ({myProducts.length})</Text>
+          <View style={[styles.groupDot, { backgroundColor: colors.primary }]} />
+          <Text style={[styles.groupTitle, { color: colors.onBackground }]}>My Catalog ({myProducts.length})</Text>
         </View>
-      )}
-    </View>
-  );
+      </View>
+    );
+  };
 
   const ListFooter = () => (
     <View style={{ height: Spacing.xl }} />
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Artisan Catalogue" />
 
       {/* Toast Notification */}
@@ -230,7 +229,7 @@ export default function ArtisanCatalogueScreen() {
         onConfirm={handleDeleteConfirm}
       />
 
-      <BottomNavigation role="artisan" active="products" onPress={handleNav} />
+      <BottomNavigation role="artisan" active="home" onPress={handleNav} />
     </SafeAreaView>
   );
 }
@@ -241,19 +240,7 @@ const styles = StyleSheet.create({
 
   listContent: { paddingHorizontal: Spacing.marginMobile, paddingBottom: Spacing.xl },
   columnWrapper: { gap: Spacing.md, justifyContent: 'space-between' },
-  listHeader: { paddingVertical: Spacing.md },
-
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.md,
-    paddingVertical: 14,
-    gap: Spacing.xs,
-    marginBottom: Spacing.md,
-  },
-  addButtonText: { fontSize: 15, fontWeight: '700', color: Colors.textLight },
+  listHeader: { paddingTop: Spacing.sm, paddingBottom: Spacing.xs },
 
   groupHeader: {
     flexDirection: 'row',

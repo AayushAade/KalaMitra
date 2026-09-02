@@ -3,9 +3,12 @@ import { StyleSheet, View, Text, ScrollView, Animated, Easing } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 import Button from '../components/Button';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function LandingScreen() {
+  const { colors, isDarkMode } = useTheme();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(20)).current;
   const scaleAnim = useRef(new Animated.Value(0.94)).current;
@@ -34,12 +37,12 @@ export default function LandingScreen() {
   }, [fadeAnim, slideAnim, scaleAnim]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer} bounces={false}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]} bounces={false}>
         <View style={styles.heroSection}>
           <Animated.View
             style={[
-              styles.logoContainer,
+              styles.logoCard,
               {
                 opacity: fadeAnim,
                 transform: [
@@ -49,26 +52,32 @@ export default function LandingScreen() {
               },
             ]}
           >
-            <Text style={styles.logoKala}>कला</Text>
-            <Text style={styles.logoMitra}>Mitra</Text>
-          </Animated.View>
+            {/* Heritage Emblem */}
+            <View style={styles.emblemContainer}>
+              <View style={[styles.emblemRing, isDarkMode && { backgroundColor: 'rgba(29,114,184,0.15)', borderColor: 'rgba(29,114,184,0.35)' }]}>
+                <Ionicons name="flower-outline" size={26} color={isDarkMode ? colors.primary : '#94442E'} />
+              </View>
+            </View>
 
-          <Animated.View
-            style={[
-              styles.subtitleBadge,
-              {
-                opacity: fadeAnim,
-                transform: [{ translateY: slideAnim }],
-              },
-            ]}
-          >
-            <View style={styles.badgeDot} />
-            <Text style={styles.subtitleBadgeText}>HERITAGE CRAFT MARKETPLACE</Text>
+            {/* Brand Logo: कला (Brown/Terracotta) + Mitra (Complementary Blue) */}
+            <View style={styles.logoContainer}>
+              <Text style={[styles.logoKala, isDarkMode && { color: '#E07A5F', textShadowColor: 'rgba(224,122,95,0.2)' }]}>कला</Text>
+              <Text style={[styles.logoMitra, isDarkMode && { color: '#38BDF8', textShadowColor: 'rgba(56,189,248,0.2)' }]}>Mitra</Text>
+            </View>
+
+            {/* Handcrafted Indian Heritage Flourish */}
+            <View style={styles.flourishRow}>
+              <View style={[styles.flourishLine, isDarkMode && { backgroundColor: 'rgba(56,189,248,0.3)' }]} />
+              <Text style={[styles.flourishDot, isDarkMode && { color: colors.primary }]}>✦</Text>
+              <View style={[styles.flourishLine, isDarkMode && { backgroundColor: 'rgba(56,189,248,0.3)' }]} />
+            </View>
+
+            <Text style={[styles.heritageSubtitle, isDarkMode && { color: colors.tertiary }]}>INDIAN HANDICRAFTS PLATFORM</Text>
           </Animated.View>
         </View>
 
-        <View style={styles.cardContainer}>
-          <Text style={styles.promptText}>Choose your profile to begin</Text>
+        <View style={[styles.cardContainer, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.promptText, { color: colors.onBackground }]}>Choose your profile to begin</Text>
           
           <Button
             title="Artisan Login / Start Selling"
@@ -84,10 +93,6 @@ export default function LandingScreen() {
             style={styles.actionButton}
           />
         </View>
-        
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>SIH 2026 Project • KalaMitra</Text>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -101,59 +106,81 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingHorizontal: Spacing.marginMobile,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingVertical: Spacing.xl,
   },
   heroSection: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: Spacing.xxl,
-    marginBottom: Spacing.xl,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.lg,
+  },
+  logoCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    paddingVertical: Spacing.md,
+  },
+  emblemContainer: {
+    marginBottom: Spacing.sm,
+  },
+  emblemRing: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(148,68,46,0.08)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(148,68,46,0.25)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...Shadows.soft,
   },
   logoContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'center',
-    marginBottom: Spacing.sm,
   },
   logoKala: {
-    fontSize: 58,
+    fontSize: 64,
     fontWeight: '900',
-    color: Colors.primary,
+    color: '#94442E',
     letterSpacing: -0.5,
-    textShadowColor: 'rgba(148,68,46,0.12)',
+    textShadowColor: 'rgba(148,68,46,0.18)',
     textShadowOffset: { width: 0, height: 4 },
     textShadowRadius: 8,
   },
   logoMitra: {
-    fontSize: 58,
-    fontWeight: '700',
-    color: Colors.secondary,
-    letterSpacing: 0.5,
+    fontSize: 62,
+    fontWeight: '800',
+    color: '#006195',
+    letterSpacing: 0.8,
+    textShadowColor: 'rgba(0,97,149,0.18)',
+    textShadowOffset: { width: 0, height: 4 },
+    textShadowRadius: 8,
   },
-  subtitleBadge: {
+  flourishRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(148,68,46,0.08)',
-    borderWidth: 1,
-    borderColor: 'rgba(148,68,46,0.18)',
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
-    gap: 6,
-    marginTop: Spacing.xs,
+    justifyContent: 'center',
+    gap: 8,
+    marginTop: 2,
+    marginBottom: 8,
   },
-  badgeDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: Colors.primary,
+  flourishLine: {
+    width: 36,
+    height: 1,
+    backgroundColor: 'rgba(148,68,46,0.3)',
   },
-  subtitleBadgeText: {
+  flourishDot: {
+    fontSize: 10,
+    color: '#94442E',
+  },
+  heritageSubtitle: {
     fontSize: 11,
     fontWeight: '800',
-    color: Colors.primary,
-    letterSpacing: 1.1,
+    color: '#94442E',
+    letterSpacing: 2,
+    opacity: 0.85,
   },
   cardContainer: {
     backgroundColor: Colors.card,
@@ -164,7 +191,7 @@ const styles = StyleSheet.create({
     ...Shadows.soft,
     width: '100%',
     alignSelf: 'center',
-    marginVertical: Spacing.lg,
+    marginVertical: Spacing.md,
   },
   promptText: {
     fontSize: 16,
@@ -179,14 +206,5 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  footer: {
-    alignItems: 'center',
-    marginTop: 'auto',
-    paddingVertical: Spacing.md,
-  },
-  footerText: {
-    fontSize: 12,
-    color: Colors.textMuted,
   },
 });

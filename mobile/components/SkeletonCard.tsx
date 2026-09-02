@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface SkeletonCardProps {
   height?: number;
@@ -8,6 +9,7 @@ interface SkeletonCardProps {
 }
 
 export default function SkeletonCard({ height = 220, style }: SkeletonCardProps) {
+  const { colors, isDarkMode } = useTheme();
   const shimmer = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -32,13 +34,15 @@ export default function SkeletonCard({ height = 220, style }: SkeletonCardProps)
     outputRange: [0.4, 0.85],
   });
 
+  const blockBg = isDarkMode ? '#262F3C' : colors.borderLight;
+
   return (
-    <Animated.View style={[styles.card, { height, opacity }, style]}>
-      <View style={styles.imageBlock} />
+    <Animated.View style={[styles.card, { height, opacity, backgroundColor: colors.card, borderColor: colors.borderLight }, style]}>
+      <View style={[styles.imageBlock, { backgroundColor: blockBg }]} />
       <View style={styles.body}>
-        <View style={[styles.line, { width: '70%' }]} />
-        <View style={[styles.line, { width: '45%', marginTop: 8 }]} />
-        <View style={[styles.lineShort, { marginTop: 12 }]} />
+        <View style={[styles.line, { width: '70%', backgroundColor: blockBg }]} />
+        <View style={[styles.line, { width: '45%', marginTop: 8, backgroundColor: blockBg }]} />
+        <View style={[styles.lineShort, { marginTop: 12, backgroundColor: blockBg }]} />
       </View>
     </Animated.View>
   );

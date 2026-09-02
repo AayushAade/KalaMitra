@@ -4,6 +4,7 @@ import { router } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCreation } from '../../context/ProductCreationContext';
@@ -12,6 +13,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { productService } from '../../services/productService';
 
 export default function AddProductScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { productData, updateProductData } = useProductCreation();
   const [permission, requestPermission] = useCameraPermissions();
   const cameraRef = useRef<CameraView | null>(null);
@@ -97,20 +99,20 @@ export default function AddProductScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Add Product" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}>
         {/* Wizard Progress */}
-        <View style={styles.wizard}>
-          <Text style={styles.wizardLabel}>Step 1 of 5: Photo Capture</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressIndicator, { width: '20%' }]} />
+        <View style={[styles.wizard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.wizardLabel, { color: colors.primary }]}>Step 1 of 5: Photo Capture</Text>
+          <View style={[styles.progressBar, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
+            <View style={[styles.progressIndicator, { width: '20%', backgroundColor: colors.primary }]} />
           </View>
         </View>
 
-        <View style={styles.content}>
-          <Text style={styles.sectionTitle}>1. Snap Product Photo</Text>
-          <Text style={styles.sectionSub}>Take a clear picture of your creation right on your workbench.</Text>
+        <View style={[styles.content, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>1. Snap Product Photo</Text>
+          <Text style={[styles.sectionSub, { color: colors.textMuted }]}>Take a clear picture of your creation right on your workbench.</Text>
 
           {/* Real Native Camera / Preview Container */}
           <View style={styles.cameraFrame}>
@@ -118,9 +120,16 @@ export default function AddProductScreen() {
               // Captured Photo Preview
               <View style={styles.previewWrapper}>
                 <Image source={{ uri: capturedUri }} style={styles.cameraImage} />
-                <View style={styles.previewBadge}>
-                  <Ionicons name="checkmark-circle" size={18} color="#2e7d32" />
-                  <Text style={styles.previewBadgeText}>
+                <View style={[
+                  styles.previewBadge,
+                  {
+                    backgroundColor: isDarkMode ? 'rgba(20,27,38,0.92)' : 'rgba(255,255,255,0.92)',
+                    borderColor: isDarkMode ? colors.borderLight : 'transparent',
+                    borderWidth: isDarkMode ? 1 : 0,
+                  },
+                ]}>
+                  <Ionicons name="checkmark-circle" size={18} color={isDarkMode ? '#4ADE80' : '#2e7d32'} />
+                  <Text style={[styles.previewBadgeText, { color: isDarkMode ? '#4ADE80' : '#2e7d32' }]}>
                     {selectedPresetName ? `Sample: ${selectedPresetName}` : 'Photo Captured'}
                   </Text>
                 </View>
@@ -132,23 +141,23 @@ export default function AddProductScreen() {
             ) : !permission ? (
               // Loading permission state
               <View style={styles.permissionBox}>
-                <ActivityIndicator size="small" color={Colors.primary} />
-                <Text style={styles.permissionText}>Checking camera access...</Text>
+                <ActivityIndicator size="small" color={colors.primary} />
+                <Text style={[styles.permissionText, { color: colors.textMuted }]}>Checking camera access...</Text>
               </View>
             ) : !permission.granted ? (
               // Permission Denied State
               <View style={styles.permissionBox}>
-                <Ionicons name="camera-outline" size={48} color={Colors.textMuted} />
-                <Text style={styles.permissionTitle}>Camera Access Needed</Text>
-                <Text style={styles.permissionSub}>
+                <Ionicons name="camera-outline" size={48} color={colors.textMuted} />
+                <Text style={[styles.permissionTitle, { color: colors.onBackground }]}>Camera Access Needed</Text>
+                <Text style={[styles.permissionSub, { color: colors.textMuted }]}>
                   Please allow camera permissions so you can take live photos of your handcrafted products.
                 </Text>
-                <Pressable onPress={requestPermission} style={styles.grantButton}>
-                  <Text style={styles.grantButtonText}>Enable Camera</Text>
+                <Pressable onPress={requestPermission} style={[styles.grantButton, { backgroundColor: colors.primary }]}>
+                  <Text style={[styles.grantButtonText, { color: colors.onPrimary }]}>Enable Camera</Text>
                 </Pressable>
                 <Pressable onPress={handlePickFromGallery} style={styles.galleryFallbackButton}>
-                  <Ionicons name="images-outline" size={18} color={Colors.primary} />
-                  <Text style={styles.galleryFallbackText}>Or choose from Gallery</Text>
+                  <Ionicons name="images-outline" size={18} color={colors.primary} />
+                  <Text style={[styles.galleryFallbackText, { color: colors.primary }]}>Or choose from Gallery</Text>
                 </Pressable>
               </View>
             ) : (
@@ -162,8 +171,8 @@ export default function AddProductScreen() {
                   />
                 ) : (
                   <View style={styles.webFallbackContainer}>
-                    <Ionicons name="camera-outline" size={48} color={Colors.primary} />
-                    <Text style={styles.webFallbackText}>Web Preview - Use Gallery or Preset</Text>
+                    <Ionicons name="camera-outline" size={48} color={colors.primary} />
+                    <Text style={[styles.webFallbackText, { color: colors.textMuted }]}>Web Preview - Use Gallery or Preset</Text>
                   </View>
                 )}
 
@@ -191,7 +200,7 @@ export default function AddProductScreen() {
                     ]}
                   >
                     {isCapturing ? (
-                      <ActivityIndicator size="small" color={Colors.primary} />
+                      <ActivityIndicator size="small" color={colors.primary} />
                     ) : (
                       <View style={styles.shutterInner} />
                     )}
@@ -208,8 +217,8 @@ export default function AddProductScreen() {
           {/* Preset / Sample Craft Photos (For rapid demo and testing) */}
           <View style={styles.presetSection}>
             <View style={styles.presetHeaderRow}>
-              <Ionicons name="sparkles-outline" size={16} color={Colors.primary} />
-              <Text style={styles.presetLabel}>Or choose a sample craft photo:</Text>
+              <Ionicons name="sparkles-outline" size={16} color={colors.primary} />
+              <Text style={[styles.presetLabel, { color: colors.onBackground }]}>Or choose a sample craft photo:</Text>
             </View>
             <View style={styles.presetGrid}>
               {presets.map((p, idx) => {
@@ -220,16 +229,31 @@ export default function AddProductScreen() {
                     onPress={() => selectPreset(p.raw, p.enhanced, p.name)}
                     style={[
                       styles.presetItem,
-                      isSelected && styles.presetItemSelected,
+                      {
+                        backgroundColor: isDarkMode ? '#13171F' : colors.background,
+                        borderColor: colors.borderLight,
+                      },
+                      isSelected && {
+                        borderColor: colors.primary,
+                        borderWidth: 2,
+                        backgroundColor: colors.card,
+                      },
                     ]}
                   >
                     <Image source={{ uri: p.raw }} style={styles.presetImage} />
                     {isSelected && (
-                      <View style={styles.presetCheckmark}>
-                        <Ionicons name="checkmark" size={14} color={Colors.textLight} />
+                      <View style={[styles.presetCheckmark, { backgroundColor: colors.primary }]}>
+                        <Ionicons name="checkmark" size={14} color={colors.onPrimary} />
                       </View>
                     )}
-                    <Text style={[styles.presetName, isSelected && styles.presetNameSelected]} numberOfLines={1}>
+                    <Text
+                      style={[
+                        styles.presetName,
+                        { color: colors.onBackground },
+                        isSelected && { color: colors.primary, fontWeight: '700' },
+                      ]}
+                      numberOfLines={1}
+                    >
                       {p.name}
                     </Text>
                   </Pressable>

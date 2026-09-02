@@ -4,11 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Button from '../../components/Button';
 import Header from '../../components/Header';
 import { authService } from '../../services/authService';
 
 export default function LoginScreen() {
+  const { colors, isDarkMode } = useTheme();
   const params = useLocalSearchParams<{ role?: string }>();
   const [role, setRole] = useState<'artisan' | 'buyer'>(params.role === 'buyer' ? 'buyer' : 'artisan');
   const [identifier, setIdentifier] = useState('');
@@ -55,39 +57,46 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.keyboardView}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]} keyboardShouldPersistTaps="handled">
           <View style={styles.content}>
-            <Text style={styles.title}>
-              {role === 'artisan' ? 'Artisan Login' : 'Buyer Login'}
-            </Text>
-            <Text style={styles.subtitle}>
-              {role === 'artisan' 
-                ? 'Access your digital store and AI cataloging tools.' 
-                : 'Explore handcrafted products and inquire wholesale.'}
-            </Text>
+            <View style={styles.headerSection}>
+              <View style={[styles.brandPill, isDarkMode && { backgroundColor: 'rgba(29,114,184,0.15)', borderColor: 'rgba(29,114,184,0.3)' }]}>
+                <Ionicons name="flower-outline" size={13} color={isDarkMode ? colors.primary : '#94442E'} />
+                <Text style={[styles.brandPillText, isDarkMode && { color: colors.primary }]}>कलाMitra</Text>
+              </View>
+              <Text style={styles.title}>
+                <Text style={[styles.titlePrefix, { color: colors.primary }]}>{role === 'artisan' ? 'Artisan' : 'Buyer'}</Text>
+                <Text style={[styles.titleSuffix, isDarkMode && { color: colors.onBackground }]}> Login</Text>
+              </Text>
+              <Text style={[styles.subtitle, { color: colors.textMuted }]}>
+                {role === 'artisan' 
+                  ? 'Access your digital store and AI cataloging tools.' 
+                  : 'Explore handcrafted products and inquire wholesale.'}
+              </Text>
+            </View>
 
-            <View style={styles.form}>
+            <View style={[styles.form, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
               {/* Role Toggle Selector */}
-              <View style={styles.roleToggleContainer}>
+              <View style={[styles.roleToggleContainer, { backgroundColor: isDarkMode ? '#13171F' : '#F4ECE6', borderColor: colors.borderLight }]}>
                 <Pressable
                   onPress={() => handleRoleSelect('artisan')}
-                  style={[styles.roleTab, role === 'artisan' && styles.roleTabActive]}
+                  style={[styles.roleTab, role === 'artisan' && [styles.roleTabActive, { backgroundColor: colors.card }]]}
                 >
-                  <Text style={[styles.roleTabText, role === 'artisan' && styles.roleTabTextActive]}>
+                  <Text style={[styles.roleTabText, { color: colors.textMuted }, role === 'artisan' && [styles.roleTabTextActive, { color: colors.primary }]]}>
                     Artisan Login
                   </Text>
                 </Pressable>
                 <Pressable
                   onPress={() => handleRoleSelect('buyer')}
-                  style={[styles.roleTab, role === 'buyer' && styles.roleTabActive]}
+                  style={[styles.roleTab, role === 'buyer' && [styles.roleTabActive, { backgroundColor: colors.card }]]}
                 >
-                  <Text style={[styles.roleTabText, role === 'buyer' && styles.roleTabTextActive]}>
+                  <Text style={[styles.roleTabText, { color: colors.textMuted }, role === 'buyer' && [styles.roleTabTextActive, { color: colors.primary }]]}>
                     Buyer Login
                   </Text>
                 </Pressable>
@@ -95,11 +104,11 @@ export default function LoginScreen() {
 
               {/* Input Form Fields */}
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Mobile Number or Email</Text>
+                <Text style={[styles.label, { color: colors.onBackground }]}>Mobile Number or Email</Text>
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                   placeholder="e.g. +91 98765 43210"
-                  placeholderTextColor={Colors.border}
+                  placeholderTextColor={colors.textMuted}
                   value={identifier}
                   onChangeText={setIdentifier}
                   keyboardType="email-address"
@@ -109,12 +118,12 @@ export default function LoginScreen() {
               </View>
 
               <View style={styles.inputContainer}>
-                <Text style={styles.label}>Password</Text>
-                <View style={styles.passwordContainer}>
+                <Text style={[styles.label, { color: colors.onBackground }]}>Password</Text>
+                <View style={[styles.passwordContainer, { backgroundColor: isDarkMode ? '#13171F' : colors.background, borderColor: colors.borderLight }]}>
                   <TextInput
-                    style={styles.passwordInput}
+                    style={[styles.passwordInput, { color: colors.onBackground }]}
                     placeholder="Enter your password"
-                    placeholderTextColor={Colors.border}
+                    placeholderTextColor={colors.textMuted}
                     secureTextEntry={!showPassword}
                     value={password}
                     onChangeText={setPassword}
@@ -132,7 +141,7 @@ export default function LoginScreen() {
                     <Ionicons
                       name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                       size={22}
-                      color={Colors.textMuted}
+                      color={colors.textMuted}
                     />
                   </Pressable>
                 </View>
@@ -144,12 +153,6 @@ export default function LoginScreen() {
                 </View>
               )}
 
-              <View style={styles.warningContainer}>
-                <Text style={styles.warningText}>
-                  ℹ️ Dev mode: Sign in using your registered Supabase email credentials.
-                </Text>
-              </View>
-
               <Button
                 title="Login"
                 onPress={handleLogin}
@@ -158,12 +161,12 @@ export default function LoginScreen() {
               />
 
               <Pressable
-                onPress={() => router.push('/(auth)/register' as any)}
+                onPress={() => router.push({ pathname: '/(auth)/register', params: { role } } as any)}
                 style={styles.registerLink}
               >
-                <Text style={styles.registerLinkText}>
+                <Text style={[styles.registerLinkText, { color: colors.textMuted }]}>
                   {"Don't have an account? "}
-                  <Text style={styles.registerLinkHighlight}>Register</Text>
+                  <Text style={[styles.registerLinkHighlight, { color: colors.primary }]}>Register</Text>
                 </Text>
               </Pressable>
             </View>
@@ -190,16 +193,44 @@ const styles = StyleSheet.create({
   content: {
     paddingVertical: Spacing.xl,
   },
-  title: {
-    fontSize: 28,
+  headerSection: {
+    marginBottom: Spacing.xl,
+  },
+  brandPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(148,68,46,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(148,68,46,0.22)',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: BorderRadius.full,
+    alignSelf: 'flex-start',
+    marginBottom: Spacing.sm,
+  },
+  brandPillText: {
+    fontSize: 12,
     fontWeight: '800',
-    color: Colors.onBackground,
+    color: '#94442E',
+    letterSpacing: 0.8,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: '900',
     marginBottom: Spacing.xs,
+    letterSpacing: -0.5,
+  },
+  titlePrefix: {
+    color: '#94442E',
+  },
+  titleSuffix: {
+    color: '#006195',
   },
   subtitle: {
     fontSize: 15,
-    color: Colors.textMuted,
-    marginBottom: Spacing.xl,
+    color: '#6E5D53',
+    lineHeight: 22,
   },
   form: {
     backgroundColor: Colors.card,
@@ -276,19 +307,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginLeft: Spacing.xs,
-  },
-  warningContainer: {
-    backgroundColor: Colors.background,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: Colors.borderLight,
-    marginBottom: Spacing.lg,
-  },
-  warningText: {
-    fontSize: 13,
-    color: Colors.secondary,
-    lineHeight: 18,
   },
   errorContainer: {
     backgroundColor: '#FDF2F2',

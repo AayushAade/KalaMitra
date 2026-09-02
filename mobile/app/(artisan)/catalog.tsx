@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, TextInput, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { useProductCreation } from '../../context/ProductCreationContext';
@@ -9,6 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function CatalogScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { productData, updateProductData } = useProductCreation();
 
   const [titleEN, setTitleEN] = useState(productData.name || '');
@@ -29,106 +31,106 @@ export default function CatalogScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="AI Catalog Setup" />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}>
         {/* Wizard Progress */}
-        <View style={styles.wizard}>
-          <Text style={styles.wizardLabel}>Step 4 of 5: AI Catalog Preview</Text>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressIndicator, { width: '80%' }]} />
+        <View style={[styles.wizard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+          <Text style={[styles.wizardLabel, { color: colors.primary }]}>Step 4 of 5: AI Catalog Preview</Text>
+          <View style={[styles.progressBar, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
+            <View style={[styles.progressIndicator, { width: '80%', backgroundColor: colors.primary }]} />
           </View>
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>Confirm Catalog Story</Text>
-          <Text style={styles.subtitle}>AI drafted professional listings in English & Hindi. Review and adjust below.</Text>
+          <Text style={[styles.title, { color: colors.onBackground }]}>Confirm Catalog Story</Text>
+          <Text style={[styles.subtitle, { color: colors.textMuted }]}>AI drafted professional listings in English & Hindi. Review and adjust below.</Text>
 
           {/* Product Image preview */}
           {productData.enhancedImage && (
-            <View style={styles.imageBox}>
+            <View style={[styles.imageBox, { backgroundColor: isDarkMode ? '#222A36' : colors.borderLight }]}>
               <Image source={{ uri: productData.enhancedImage }} style={styles.image} />
             </View>
           )}
 
           {/* AI Extracted Craft Specs */}
           {(productData.material || productData.craft || productData.productionTime) && (
-            <View style={styles.specsCard}>
+            <View style={[styles.specsCard, { backgroundColor: isDarkMode ? '#172230' : '#EBF5FB', borderColor: isDarkMode ? colors.borderLight : '#D4E6F1' }]}>
               <View style={styles.specsHeader}>
-                <Ionicons name="information-circle-outline" size={16} color={Colors.primary} />
-                <Text style={styles.specsTitle}>AI Detected Craft Attributes</Text>
+                <Ionicons name="information-circle-outline" size={16} color={colors.primary} />
+                <Text style={[styles.specsTitle, { color: colors.primary }]}>AI Detected Craft Attributes</Text>
               </View>
               <View style={styles.specsGrid}>
                 {productData.material && (
-                  <View style={styles.specChip}>
-                    <Text style={styles.specLabel}>Material:</Text>
-                    <Text style={styles.specVal}>{productData.material}</Text>
+                  <View style={[styles.specChip, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+                    <Text style={[styles.specLabel, { color: colors.textMuted }]}>Material:</Text>
+                    <Text style={[styles.specVal, { color: colors.onBackground }]}>{productData.material}</Text>
                   </View>
                 )}
                 {productData.craft && (
-                  <View style={styles.specChip}>
-                    <Text style={styles.specLabel}>Craft:</Text>
-                    <Text style={styles.specVal}>{productData.craft}</Text>
+                  <View style={[styles.specChip, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+                    <Text style={[styles.specLabel, { color: colors.textMuted }]}>Craft:</Text>
+                    <Text style={[styles.specVal, { color: colors.onBackground }]}>{productData.craft}</Text>
                   </View>
                 )}
                 {productData.productionTime && (
-                  <View style={styles.specChip}>
-                    <Text style={styles.specLabel}>Production Time:</Text>
-                    <Text style={styles.specVal}>{productData.productionTime}</Text>
+                  <View style={[styles.specChip, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+                    <Text style={[styles.specLabel, { color: colors.textMuted }]}>Production Time:</Text>
+                    <Text style={[styles.specVal, { color: colors.onBackground }]}>{productData.productionTime}</Text>
                   </View>
                 )}
               </View>
             </View>
           )}
 
-          <View style={styles.form}>
+          <View style={[styles.form, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
             {/* English Catalog details */}
-            <Text style={styles.langHeader}>🇬🇧 English Listing</Text>
+            <Text style={[styles.langHeader, { color: colors.onBackground }]}>🇬🇧 English Listing</Text>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Product Title</Text>
+              <Text style={[styles.label, { color: colors.onBackground }]}>Product Title</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                 value={titleEN}
                 onChangeText={setTitleEN}
                 placeholder="Product title in English"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Description</Text>
+              <Text style={[styles.label, { color: colors.onBackground }]}>Description</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={[styles.input, styles.textArea, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                 value={descEN}
                 onChangeText={setDescEN}
                 placeholder="Describe your craft story in English"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={4}
               />
             </View>
 
             {/* Hindi Catalog details */}
-            <Text style={styles.langHeader}>🇮🇳 हिंदी विवरण (Hindi)</Text>
+            <Text style={[styles.langHeader, { color: colors.onBackground }]}>🇮🇳 हिंदी विवरण (Hindi)</Text>
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>उत्पाद का नाम (Title)</Text>
+              <Text style={[styles.label, { color: colors.onBackground }]}>उत्पाद का नाम (Title)</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                 value={titleHI}
                 onChangeText={setTitleHI}
                 placeholder="Product title in Hindi"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
               />
             </View>
 
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>विवरण (Description)</Text>
+              <Text style={[styles.label, { color: colors.onBackground }]}>विवरण (Description)</Text>
               <TextInput
-                style={[styles.input, styles.textArea]}
+                style={[styles.input, styles.textArea, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                 value={descHI}
                 onChangeText={setDescHI}
                 placeholder="विवरण हिंदी में दर्ज करें"
-                placeholderTextColor={Colors.textMuted}
+                placeholderTextColor={colors.textMuted}
                 multiline
                 numberOfLines={4}
               />
@@ -136,18 +138,18 @@ export default function CatalogScreen() {
 
             {/* Tags/Keywords */}
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Keywords / Tags (comma separated)</Text>
+              <Text style={[styles.label, { color: colors.onBackground }]}>Keywords / Tags (comma separated)</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
                 value={tagsInput}
                 onChangeText={setTagsInput}
-                placeholder="Silk, Handloom, Pune, Festive"
-                placeholderTextColor={Colors.textMuted}
+                placeholder="silk, saree, handloom, zari"
+                placeholderTextColor={colors.textMuted}
               />
             </View>
 
             <Button
-              title="Continue to Pricing Assistant"
+              title="Continue to Fair Pricing"
               onPress={handleNext}
               variant="primary"
               style={styles.nextButton}

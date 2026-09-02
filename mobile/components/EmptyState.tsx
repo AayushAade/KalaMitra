@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface EmptyStateProps {
   icon: string;
@@ -18,19 +19,21 @@ export default function EmptyState({
   actionLabel,
   onAction,
 }: EmptyStateProps) {
+  const { colors, isDarkMode } = useTheme();
+
   return (
     <View style={styles.container}>
-      <View style={styles.iconWrapper}>
-        <Ionicons name={icon as any} size={48} color={Colors.primaryContainer} />
+      <View style={[styles.iconWrapper, { backgroundColor: isDarkMode ? 'rgba(29,114,184,0.15)' : 'rgba(148,68,46,0.06)' }]}>
+        <Ionicons name={icon as any} size={48} color={isDarkMode ? colors.primary : colors.primaryContainer} />
       </View>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.message}>{message}</Text>
+      <Text style={[styles.title, { color: colors.onBackground }]}>{title}</Text>
+      <Text style={[styles.message, { color: colors.textMuted }]}>{message}</Text>
       {actionLabel && onAction && (
         <Pressable
-          style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+          style={({ pressed }) => [styles.button, { backgroundColor: colors.primary }, pressed && styles.pressed]}
           onPress={onAction}
         >
-          <Text style={styles.buttonText}>{actionLabel}</Text>
+          <Text style={[styles.buttonText, { color: colors.onPrimary }]}>{actionLabel}</Text>
         </Pressable>
       )}
     </View>

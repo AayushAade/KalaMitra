@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Inquiry } from '../types';
 import { Colors, Spacing, BorderRadius, Shadows } from '../constants/theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface InquiryCardProps {
   inquiry: Inquiry;
@@ -9,6 +10,7 @@ interface InquiryCardProps {
 }
 
 export default function InquiryCard({ inquiry, onPress }: InquiryCardProps) {
+  const { colors, isDarkMode } = useTheme();
   const isNew = inquiry.status === 'New';
 
   return (
@@ -16,35 +18,36 @@ export default function InquiryCard({ inquiry, onPress }: InquiryCardProps) {
       onPress={onPress}
       style={({ pressed }) => [
         styles.card,
+        { backgroundColor: colors.card, borderColor: colors.borderLight },
         pressed && styles.pressed,
       ]}
     >
       <View style={styles.header}>
-        <Text style={styles.buyerName}>{inquiry.buyerName}</Text>
-        <View style={[styles.badge, isNew ? styles.newBadge : styles.repliedBadge]}>
-          <Text style={[styles.badgeText, isNew ? styles.newBadgeText : styles.repliedBadgeText]}>
+        <Text style={[styles.buyerName, { color: colors.onBackground }]}>{inquiry.buyerName}</Text>
+        <View style={[styles.badge, isNew ? (isDarkMode ? { backgroundColor: 'rgba(29,114,184,0.2)' } : styles.newBadge) : styles.repliedBadge]}>
+          <Text style={[styles.badgeText, isNew ? (isDarkMode ? { color: colors.primary } : styles.newBadgeText) : styles.repliedBadgeText]}>
             {inquiry.status}
           </Text>
         </View>
       </View>
 
-      <Text style={styles.productTitle}>
-        Product: <Text style={styles.productHighlight}>{inquiry.productTitle}</Text>
+      <Text style={[styles.productTitle, { color: colors.textMuted }]}>
+        Product: <Text style={[styles.productHighlight, { color: colors.onBackground }]}>{inquiry.productTitle}</Text>
       </Text>
 
       {inquiry.quantity && (
-        <Text style={styles.details}>
-          Quantity: <Text style={styles.detailsHighlight}>{inquiry.quantity} units</Text>
+        <Text style={[styles.details, { color: colors.textMuted }]}>
+          Quantity: <Text style={[styles.detailsHighlight, { color: colors.onBackground }]}>{inquiry.quantity} units</Text>
         </Text>
       )}
 
-      <Text style={styles.message} numberOfLines={2}>
+      <Text style={[styles.message, { color: colors.textMuted }]} numberOfLines={2}>
         &quot;{inquiry.message}&quot;
       </Text>
 
       <View style={styles.footer}>
-        <Text style={styles.date}>{inquiry.date}</Text>
-        <Text style={styles.actionText}>Tap to Chat →</Text>
+        <Text style={[styles.date, { color: colors.textMuted }]}>{inquiry.date}</Text>
+        <Text style={[styles.actionText, { color: colors.primary }]}>Tap to Chat →</Text>
       </View>
     </Pressable>
   );

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import ProductCard from '../../components/ProductCard';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
@@ -9,6 +10,7 @@ import { artisanService } from '../../services/artisanService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PublicStoreScreen() {
+  const { colors, isDarkMode } = useTheme();
   const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
   const { myProducts } = useProductCatalog();
 
@@ -21,7 +23,7 @@ export default function PublicStoreScreen() {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title="Storefront Preview" />
       <FlatList
         data={myProducts}
@@ -37,47 +39,47 @@ export default function PublicStoreScreen() {
             } as any)}
           />
         )}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, { backgroundColor: colors.background }]}
         ListHeaderComponent={
           <View style={styles.headerSection}>
             {/* Store Cover Banner */}
-            <View style={styles.banner} />
+            <View style={[styles.banner, { backgroundColor: isDarkMode ? '#1D3B5C' : colors.primaryContainer }]} />
             
             {/* Store Details Card */}
-            <View style={styles.detailsCard}>
+            <View style={[styles.detailsCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
               <View style={styles.avatarContainer}>
                 {artisan.avatar ? (
                   <Image source={{ uri: artisan.avatar }} style={styles.avatar} />
                 ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <Text style={styles.avatarText}>{(artisan.ownerName || 'A').charAt(0).toUpperCase()}</Text>
+                  <View style={[styles.avatarPlaceholder, { backgroundColor: colors.primary }]}>
+                    <Text style={[styles.avatarText, { color: colors.onPrimary }]}>{(artisan.ownerName || 'A').charAt(0).toUpperCase()}</Text>
                   </View>
                 )}
               </View>
 
-              <Text style={styles.storeName}>{artisan.name}</Text>
-              <Text style={styles.ownerText}>Owner: {artisan.ownerName}</Text>
+              <Text style={[styles.storeName, { color: colors.onBackground }]}>{artisan.name}</Text>
+              <Text style={[styles.ownerText, { color: colors.textMuted }]}>Owner: {artisan.ownerName}</Text>
               
               <View style={styles.metaRow}>
-                <Text style={styles.metaText}>📍 {artisan.location}</Text>
-                <Text style={styles.metaText}>⭐ {Number(artisan.rating || 5.0).toFixed(1)} (Verified)</Text>
+                <Text style={[styles.metaText, { color: colors.textMuted }]}>📍 {artisan.location}</Text>
+                <Text style={[styles.metaText, { color: colors.textMuted }]}>⭐ {Number(artisan.rating || 5.0).toFixed(1)} (Verified)</Text>
               </View>
 
-              <Text style={styles.bioText}>{artisan.bio}</Text>
+              <Text style={[styles.bioText, { color: colors.onBackground }]}>{artisan.bio}</Text>
               
               {artisan.craft && (
-                <View style={styles.tagContainer}>
-                  <Text style={styles.tag}>{artisan.craft}</Text>
+                <View style={[styles.tagContainer, { backgroundColor: isDarkMode ? 'rgba(29,114,184,0.15)' : 'rgba(0,97,149,0.08)', borderColor: isDarkMode ? 'rgba(29,114,184,0.3)' : 'rgba(0,97,149,0.2)' }]}>
+                  <Text style={[styles.tag, { color: colors.primary }]}>{artisan.craft}</Text>
                 </View>
               )}
             </View>
 
-            <Text style={styles.sectionTitle}>Product Catalog ({myProducts.length})</Text>
+            <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>Product Catalog ({myProducts.length})</Text>
           </View>
         }
         ListEmptyComponent={
           <View style={{ padding: Spacing.xl, alignItems: 'center' }}>
-            <Text style={{ color: Colors.textMuted, fontSize: 14 }}>No products in your catalog yet.</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 14 }}>No products in your catalog yet.</Text>
           </View>
         }
       />

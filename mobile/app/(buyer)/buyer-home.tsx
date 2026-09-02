@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import BottomNavigation from '../../components/BottomNavigation';
 import SkeletonCard from '../../components/SkeletonCard';
@@ -17,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 
 export default function BuyerHomeScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { products, refreshProducts, isLoading } = useProductCatalog();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -45,30 +47,30 @@ export default function BuyerHomeScreen() {
   const featuredProducts = products.slice(0, 4);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header />
       <ScrollView
-        contentContainerStyle={styles.scrollContainer}
+        contentContainerStyle={[styles.scrollContainer, { backgroundColor: colors.background }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor={Colors.primary}
-            colors={[Colors.primary]}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
           />
         }
       >
         {/* Hero Banner */}
-        <View style={styles.heroBanner}>
-          <Text style={styles.heroTitle}>Discover Authentic{'\n'}Indian Handicrafts</Text>
-          <Text style={styles.heroSub}>Sourced directly from skilled artisans</Text>
+        <View style={[styles.heroBanner, { backgroundColor: colors.primary }]}>
+          <Text style={[styles.heroTitle, { color: colors.onPrimary }]}>Discover Authentic{'\n'}Indian Handicrafts</Text>
+          <Text style={[styles.heroSub, { color: colors.onPrimary }]}>Sourced directly from skilled artisans</Text>
           <Pressable
             onPress={() => router.push('/(buyer)/marketplace' as any)}
-            style={({ pressed }) => [styles.heroButton, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.heroButton, { backgroundColor: isDarkMode ? '#0D4F8B' : 'rgba(255,255,255,0.2)' }, pressed && styles.pressed]}
           >
-            <Text style={styles.heroButtonText}>Browse Marketplace</Text>
-            <Ionicons name="arrow-forward" size={16} color={Colors.textLight} />
+            <Text style={[styles.heroButtonText, { color: colors.onPrimary }]}>Browse Marketplace</Text>
+            <Ionicons name="arrow-forward" size={16} color={colors.onPrimary} />
           </Pressable>
         </View>
 
@@ -76,32 +78,32 @@ export default function BuyerHomeScreen() {
         <View style={styles.quickRow}>
           <Pressable
             onPress={() => router.push('/(buyer)/marketplace' as any)}
-            style={({ pressed }) => [styles.quickCard, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.card, borderColor: colors.borderLight }, pressed && styles.pressed]}
           >
-            <Ionicons name="storefront-outline" size={26} color={Colors.primary} />
-            <Text style={styles.quickLabel}>Marketplace</Text>
+            <Ionicons name="storefront-outline" size={26} color={colors.primary} />
+            <Text style={[styles.quickLabel, { color: colors.onBackground }]}>Marketplace</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/(buyer)/buyer-inbox' as any)}
-            style={({ pressed }) => [styles.quickCard, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.card, borderColor: colors.borderLight }, pressed && styles.pressed]}
           >
-            <Ionicons name="chatbubbles-outline" size={26} color={Colors.primary} />
-            <Text style={styles.quickLabel}>My Messages</Text>
+            <Ionicons name="chatbubbles-outline" size={26} color={colors.primary} />
+            <Text style={[styles.quickLabel, { color: colors.onBackground }]}>My Messages</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/(buyer)/buyer-profile' as any)}
-            style={({ pressed }) => [styles.quickCard, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.quickCard, { backgroundColor: colors.card, borderColor: colors.borderLight }, pressed && styles.pressed]}
           >
-            <Ionicons name="person-outline" size={26} color={Colors.primary} />
-            <Text style={styles.quickLabel}>Profile</Text>
+            <Ionicons name="person-outline" size={26} color={colors.primary} />
+            <Text style={[styles.quickLabel, { color: colors.onBackground }]}>Profile</Text>
           </Pressable>
         </View>
 
         {/* Featured Products */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Featured Crafts</Text>
+          <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>Featured Crafts</Text>
           <Pressable onPress={() => router.push('/(buyer)/marketplace' as any)}>
-            <Text style={styles.seeAll}>See All</Text>
+            <Text style={[styles.seeAll, { color: colors.primary }]}>See All</Text>
           </Pressable>
         </View>
 
@@ -114,21 +116,21 @@ export default function BuyerHomeScreen() {
           featuredProducts.map((product) => (
             <Pressable
               key={product.id}
-              style={({ pressed }) => [styles.productRow, pressed && styles.pressed]}
+              style={({ pressed }) => [styles.productRow, { backgroundColor: colors.card, borderColor: colors.borderLight }, pressed && styles.pressed]}
               onPress={() => router.push({
                 pathname: '/(buyer)/product',
                 params: { productId: product.id }
               } as any)}
             >
-              <View style={styles.productThumb}>
-                <Ionicons name="image-outline" size={22} color={Colors.border} />
+              <View style={[styles.productThumb, { backgroundColor: isDarkMode ? '#222A36' : Colors.borderLight }]}>
+                <Ionicons name="image-outline" size={22} color={colors.border} />
               </View>
               <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>{product.name}</Text>
-                <Text style={styles.productArtisan} numberOfLines={1}>{product.artisanName}</Text>
-                <Text style={styles.productPrice}>₹{product.price?.toLocaleString('en-IN')}</Text>
+                <Text style={[styles.productName, { color: colors.onBackground }]} numberOfLines={1}>{product.name}</Text>
+                <Text style={[styles.productArtisan, { color: colors.textMuted }]} numberOfLines={1}>{product.artisanName}</Text>
+                <Text style={[styles.productPrice, { color: colors.primary }]}>₹{product.price?.toLocaleString('en-IN')}</Text>
               </View>
-              <Ionicons name="chevron-forward" size={18} color={Colors.border} />
+              <Ionicons name="chevron-forward" size={18} color={colors.border} />
             </Pressable>
           ))
         )}

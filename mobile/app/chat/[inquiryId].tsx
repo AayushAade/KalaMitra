@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, FlatList, KeyboardAvoidingView, Platform, Pressable } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
+import { useTheme } from '../../context/ThemeContext';
 import Header from '../../components/Header';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -10,6 +11,7 @@ import { Message } from '../../types';
 import { chatService } from '../../services/chatService';
 
 export default function ChatScreen() {
+  const { colors, isDarkMode } = useTheme();
   const { inquiryId } = useLocalSearchParams<{ inquiryId?: string }>();
   const { inquiries, messagesMap, addMessage } = useProductCatalog();
 
@@ -42,26 +44,26 @@ export default function ChatScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
       <Header showBack={true} title={inquiry ? inquiry.buyerName : "Inquiry Chat"} />
       
       {/* Product Context Banner */}
       {inquiry && (
-        <View style={styles.productBanner}>
-          <Ionicons name="cart-outline" size={20} color={Colors.primary} style={styles.bannerIcon} />
+        <View style={[styles.productBanner, { backgroundColor: colors.card, borderBottomColor: colors.borderLight }]}>
+          <Ionicons name="cart-outline" size={20} color={colors.primary} style={styles.bannerIcon} />
           <View style={styles.bannerText}>
-            <Text style={styles.bannerTitle} numberOfLines={1}>{inquiry.productTitle}</Text>
-            <Text style={styles.bannerPrice}>₹{inquiry.productPrice.toLocaleString('en-IN')}</Text>
+            <Text style={[styles.bannerTitle, { color: colors.onBackground }]} numberOfLines={1}>{inquiry.productTitle}</Text>
+            <Text style={[styles.bannerPrice, { color: colors.primary }]}>₹{inquiry.productPrice.toLocaleString('en-IN')}</Text>
           </View>
-          <View style={styles.bannerQty}>
-            <Text style={styles.qtyLabel}>QTY: {inquiry.quantity || 1}</Text>
+          <View style={[styles.bannerQty, { backgroundColor: isDarkMode ? 'rgba(29,114,184,0.15)' : 'rgba(0,97,149,0.06)' }]}>
+            <Text style={[styles.qtyLabel, { color: colors.primary }]}>QTY: {inquiry.quantity || 1}</Text>
           </View>
         </View>
       )}
 
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardView}
+        style={[styles.keyboardView, { backgroundColor: colors.background }]}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
       >
         <FlatList
@@ -70,30 +72,47 @@ export default function ChatScreen() {
           renderItem={({ item }) => {
             const isMe = item.sender === 'Buyer';
             return (
-              <View style={[styles.messageBubble, isMe ? styles.bubbleMe : styles.bubbleOther]}>
-                <Text style={[styles.messageText, isMe ? styles.textMe : styles.textOther]}>
+              <View
+                style={[
+                  styles.messageBubble,
+                  isMe
+                    ? [styles.bubbleMe, { backgroundColor: colors.primary }]
+                    : [styles.bubbleOther, { backgroundColor: colors.card, borderColor: colors.borderLight }],
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.messageText,
+                    isMe ? [styles.textMe, { color: colors.onPrimary }] : [styles.textOther, { color: colors.onBackground }],
+                  ]}
+                >
                   {item.text}
                 </Text>
-                <Text style={[styles.timeText, isMe ? styles.timeMe : styles.timeOther]}>
+                <Text
+                  style={[
+                    styles.timeText,
+                    isMe ? styles.timeMe : [styles.timeOther, { color: colors.textMuted }],
+                  ]}
+                >
                   {item.time}
                 </Text>
               </View>
             );
           }}
-          contentContainerStyle={styles.chatContent}
+          contentContainerStyle={[styles.chatContent, { backgroundColor: colors.background }]}
         />
 
         {/* Input Bar */}
-        <View style={styles.inputBar}>
+        <View style={[styles.inputBar, { backgroundColor: colors.card, borderTopColor: colors.borderLight }]}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
             placeholder="Type your message..."
-            placeholderTextColor={Colors.textMuted}
+            placeholderTextColor={colors.textMuted}
             value={inputText}
             onChangeText={setInputText}
           />
-          <Pressable onPress={handleSend} style={styles.sendButton}>
-            <Ionicons name="send" size={20} color={Colors.textLight} />
+          <Pressable onPress={handleSend} style={[styles.sendButton, { backgroundColor: colors.primary }]}>
+            <Ionicons name="send" size={20} color={colors.onPrimary} />
           </Pressable>
         </View>
       </KeyboardAvoidingView>
