@@ -10,18 +10,23 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function MyProductsScreen() {
-  const { products } = useProductCatalog();
+  const { myProducts, refreshMyProducts, isLoading } = useProductCatalog();
 
   return (
     <SafeAreaView style={styles.container}>
       <Header showBack={true} title="My Catalog" />
       <FlatList
-        data={products}
+        data={myProducts}
         keyExtractor={item => item.id}
+        refreshing={isLoading}
+        onRefresh={refreshMyProducts}
         renderItem={({ item }) => (
           <ProductCard
             product={item}
-            onPress={() => alert(`Reviewing listing details for "${item.name}" (Mock)`)}
+            onPress={() => router.push({
+              pathname: '/(buyer)/product',
+              params: { productId: item.id }
+            } as any)}
           />
         )}
         contentContainerStyle={styles.listContent}

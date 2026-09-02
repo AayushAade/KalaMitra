@@ -2,8 +2,75 @@ import { Product } from '../types';
 import { mockProducts } from '../data/mockProducts';
 import { supabase } from '../lib/supabase';
 
-// In-memory catalog state for products initialized with mockProducts
+// In-memory catalog state for products initialized with mockProducts (for marketplace demo fallback)
 let inMemoryProducts: Product[] = [...mockProducts];
+
+const PRODUCT_SELECT_QUERY = `
+  id,
+  artisan_id,
+  price,
+  material,
+  production_time,
+  craft,
+  stock,
+  min_order_quantity,
+  is_published,
+  created_at,
+  artisan_profiles:artisan_id (
+    shop_name,
+    owner_name
+  ),
+  product_images (
+    original_url,
+    enhanced_url,
+    is_primary
+  ),
+  product_translations (
+    language,
+    name,
+    description,
+    voice_transcript
+  ),
+  product_tags (
+    tag_name
+  )
+`;
+
+const mapProductRowToProduct = (row: any): Product => {
+  const primaryImage =
+    row.product_images?.find((img: any) => img.is_primary) ||
+    row.product_images?.[0];
+  const enTrans =
+    row.product_translations?.find((t: any) => t.language === 'en') ||
+    row.product_translations?.[0];
+  const hiTrans =
+    row.product_translations?.find((t: any) => t.language === 'hi');
+
+  const artisanInfo = Array.isArray(row.artisan_profiles)
+    ? row.artisan_profiles[0]
+    : row.artisan_profiles;
+
+  return {
+    id: row.id,
+    artisanId: row.artisan_id,
+    isPublished: row.is_published !== undefined ? row.is_published : true,
+    name: enTrans?.name || hiTrans?.name || 'Handcrafted Product',
+    imageUrl: primaryImage?.enhanced_url || primaryImage?.original_url || '',
+    originalImageUrl: primaryImage?.original_url,
+    material: row.material || undefined,
+    price: Number(row.price),
+    artisanName: artisanInfo?.shop_name || artisanInfo?.owner_name || 'Artisan Store',
+    craft: row.craft || undefined,
+    productionTime: row.production_time || undefined,
+    stock: row.stock,
+    minOrderQuantity: row.min_order_quantity,
+    descriptionEnglish: enTrans?.description || undefined,
+    descriptionHindi: hiTrans?.description || undefined,
+    voiceTranscript: enTrans?.voice_transcript || hiTrans?.voice_transcript || undefined,
+    tags: row.product_tags?.map((t: any) => t.tag_name) || [],
+    createdAt: row.created_at,
+  };
+};
 
 export const productService = {
   /**
@@ -21,43 +88,39 @@ export const productService = {
   },
 
   /**
-   * Asynchronously fetches all products from Supabase, joining images,
-   * translations, and artisan profiles, and merges them with mock seed items.
+   * Demo product presets for image selection / testing.
+   */
+  getProductPresets: () => {
+    return [
+      {
+        name: 'Silk Dupatta',
+        rawImage: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80',
+        enhancedImage: 'https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=800&auto=format&fit=crop&q=80',
+      },
+      {
+        name: 'Bamboo Basket',
+        rawImage: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&auto=format&fit=crop&q=80',
+        enhancedImage: 'https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=800&auto=format&fit=crop&q=80',
+      },
+      {
+        name: 'Clay Pot',
+        rawImage: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=800&auto=format&fit=crop&q=80',
+        enhancedImage: 'https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=800&auto=format&fit=crop&q=80',
+      },
+    ];
+  },
+
+  /**
+   * Asynchronously fetches all published marketplace products from Supabase, joining images,
+   * translations, and artisan profiles, and merges them with mock seed items for marketplace demo fallback.
    */
   fetchProducts: async (): Promise<Product[]> => {
-    console.log('[ProductService] Fetching products from Supabase...');
+    console.log('[ProductService] Fetching published marketplace products from Supabase...');
     try {
       const { data, error } = await supabase
         .from('products')
-        .select(`
-          id,
-          artisan_id,
-          price,
-          material,
-          production_time,
-          craft,
-          stock,
-          min_order_quantity,
-          created_at,
-          artisan_profiles:artisan_id (
-            shop_name,
-            owner_name
-          ),
-          product_images (
-            original_url,
-            enhanced_url,
-            is_primary
-          ),
-          product_translations (
-            language,
-            name,
-            description,
-            voice_transcript
-          ),
-          product_tags (
-            tag_name
-          )
-        `)
+        .select(PRODUCT_SELECT_QUERY)
+        .eq('is_published', true)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -66,40 +129,9 @@ export const productService = {
       }
 
       if (data && data.length > 0) {
-        const liveProducts: Product[] = data.map((row: any) => {
-          const primaryImage =
-            row.product_images?.find((img: any) => img.is_primary) ||
-            row.product_images?.[0];
-          const enTrans =
-            row.product_translations?.find((t: any) => t.language === 'en') ||
-            row.product_translations?.[0];
-          const hiTrans =
-            row.product_translations?.find((t: any) => t.language === 'hi');
+        const liveProducts: Product[] = data.map(mapProductRowToProduct);
 
-          const artisanInfo = Array.isArray(row.artisan_profiles)
-            ? row.artisan_profiles[0]
-            : row.artisan_profiles;
-
-          return {
-            id: row.id,
-            name: enTrans?.name || hiTrans?.name || 'Handcrafted Product',
-            imageUrl: primaryImage?.enhanced_url || primaryImage?.original_url || '',
-            originalImageUrl: primaryImage?.original_url,
-            material: row.material || undefined,
-            price: Number(row.price),
-            artisanName: artisanInfo?.shop_name || artisanInfo?.owner_name || 'Artisan Store',
-            craft: row.craft || undefined,
-            productionTime: row.production_time || undefined,
-            stock: row.stock,
-            minOrderQuantity: row.min_order_quantity,
-            descriptionEnglish: enTrans?.description || undefined,
-            descriptionHindi: hiTrans?.description || undefined,
-            tags: row.product_tags?.map((t: any) => t.tag_name) || [],
-            createdAt: row.created_at
-          };
-        });
-
-        // Deduplicate against mock products
+        // Deduplicate against mock products for marketplace
         const liveIds = new Set(liveProducts.map(p => p.id));
         const liveNames = new Set(liveProducts.map(p => p.name.toLowerCase()));
         const seedRemaining = mockProducts.filter(
@@ -119,8 +151,48 @@ export const productService = {
   },
 
   /**
+   * Direct database query: fetches only products owned by the specified artisan ID.
+   * Never injects mock products into an artisan's private inventory.
+   */
+  fetchMyProducts: async (artisanId: string): Promise<Product[]> => {
+    if (!artisanId) return [];
+    console.log(`[ProductService] Fetching private catalog for artisan: ${artisanId}`);
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select(PRODUCT_SELECT_QUERY)
+        .eq('artisan_id', artisanId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error(`[ProductService] Failed to fetch private products for ${artisanId}:`, error.message);
+        return [];
+      }
+
+      if (data && data.length > 0) {
+        const myProducts = data.map(mapProductRowToProduct);
+        console.log(`[ProductService] Fetched ${myProducts.length} private products for artisan: ${artisanId}`);
+        return myProducts;
+      }
+
+      return [];
+    } catch (err: any) {
+      console.error('[ProductService] Exception in fetchMyProducts:', err);
+      return [];
+    }
+  },
+
+  /**
+   * Resets in-memory product cache on logout.
+   */
+  reset: () => {
+    inMemoryProducts = [...mockProducts];
+  },
+
+  /**
    * Persists a newly created product listing to Supabase (products, product_images,
    * product_translations, product_tags) using the authenticated artisan session.
+   * Explicitly marks is_published = true.
    */
   createProduct: async (productInput: Partial<Product> & { name: string; price: number }): Promise<Product> => {
     console.log('[ProductService] Creating product listing in Supabase:', productInput.name);
@@ -133,7 +205,7 @@ export const productService = {
 
     const artisanId = authData.user.id;
 
-    // 2. Insert into public.products
+    // 2. Insert into public.products with explicit is_published = true
     const { data: productRow, error: prodErr } = await supabase
       .from('products')
       .insert({
@@ -143,7 +215,8 @@ export const productService = {
         production_time: productInput.productionTime || null,
         craft: productInput.craft || null,
         stock: productInput.stock || 1,
-        min_order_quantity: productInput.minOrderQuantity || 1
+        min_order_quantity: productInput.minOrderQuantity || 1,
+        is_published: true,
       })
       .select()
       .single();
@@ -166,7 +239,7 @@ export const productService = {
           product_id: productId,
           original_url: originalUrl || enhancedUrl,
           enhanced_url: enhancedUrl,
-          is_primary: true
+          is_primary: true,
         });
 
       if (imgErr) {
@@ -185,7 +258,7 @@ export const productService = {
         language: 'en',
         name: productInput.name,
         description: productInput.descriptionEnglish || null,
-        voice_transcript: productInput.voiceTranscript || null
+        voice_transcript: productInput.voiceTranscript || null,
       });
     }
     if (productInput.descriptionHindi) {
@@ -194,14 +267,14 @@ export const productService = {
         language: 'hi',
         name: productInput.name,
         description: productInput.descriptionHindi,
-        voice_transcript: productInput.voiceTranscript || null
+        voice_transcript: productInput.voiceTranscript || null,
       });
     }
     if (translationsToInsert.length === 0) {
       translationsToInsert.push({
         product_id: productId,
         language: 'en',
-        name: productInput.name
+        name: productInput.name,
       });
     }
 
@@ -220,7 +293,7 @@ export const productService = {
     if (productInput.tags && productInput.tags.length > 0) {
       const tagsToInsert = productInput.tags.map(tag => ({
         product_id: productId,
-        tag_name: tag.slice(0, 50)
+        tag_name: tag.slice(0, 50),
       }));
       const { error: tagErr } = await supabase
         .from('product_tags')
@@ -234,6 +307,8 @@ export const productService = {
     // 6. Construct normalized Product
     const createdProduct: Product = {
       id: productId,
+      artisanId: artisanId,
+      isPublished: true,
       name: productInput.name,
       imageUrl: enhancedUrl || originalUrl,
       originalImageUrl: originalUrl,
@@ -246,36 +321,13 @@ export const productService = {
       minOrderQuantity: productRow.min_order_quantity,
       descriptionEnglish: productInput.descriptionEnglish,
       descriptionHindi: productInput.descriptionHindi,
+      voiceTranscript: productInput.voiceTranscript,
       tags: productInput.tags,
-      createdAt: productRow.created_at
+      createdAt: productRow.created_at,
     };
 
     // Update in-memory cache
     inMemoryProducts = [createdProduct, ...inMemoryProducts.filter(p => p.id !== createdProduct.id)];
-
     return createdProduct;
   },
-
-  getProductPresets: () => {
-    return [
-      {
-        id: 'preset-1',
-        name: 'Silk Dupatta',
-        rawImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD9NdqtHHuX-C3fTyPOFZyJHmhxGdmIUVFNHQnBFec-x4sM6nam9v8zGl_A50EYGmZPn11LroWhvKHY5FCPYBHMXB8smCONqVv0H_O5bW-yoFUMcCyNZrnpHOq1c5STMMu_HCBEfCqtgew-DNpDA_CpmKQ8Hqd4TNZ9Ul3u_9AuI_LdlQ_rhb5UzODrcnCCzKSeWTTtYcrI2hIt2BuU6Z06-W5UYr8AKVJJQ3n9_6C3Kg4iBz6f2QhI',
-        enhancedImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD9NdqtHHuX-C3fTyPOFZyJHmhxGdmIUVFNHQnBFec-x4sM6nam9v8zGl_A50EYGmZPn11LroWhvKHY5FCPYBHMXB8smCONqVv0H_O5bW-yoFUMcCyNZrnpHOq1c5STMMu_HCBEfCqtgew-DNpDA_CpmKQ8Hqd4TNZ9Ul3u_9AuI_LdlQ_rhb5UzODrcnCCzKSeWTTtYcrI2hIt2BuU6Z06-W5UYr8AKVJJQ3n9_6C3Kg4iBz6f2QhI',
-      },
-      {
-        id: 'preset-2',
-        name: 'Bamboo Basket',
-        rawImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCXcQG2IuC0hmcLXI_X7NLHkQS6FBTajGjmTZYlqwFRaBAchUoU9qXJYnXU85awVMUWhJLn6H8iREvMMm0LOxSqbKMT3mofJ_m9uovpzG-9Knzfv04Z_EPyVum0R5IpYVXGknClHW3hb2Y-ruGkmYBiyFRQFAP6Eg0B56uJ0abfnjTmc45ApRtHGAQFhn7toeu_imQWT1-rgMhI0iK3mklaTSDTIIQHHUHyKPtXnzS7CEQMqVR4xNud',
-        enhancedImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCXcQG2IuC0hmcLXI_X7NLHkQS6FBTajGjmTZYlqwFRaBAchUoU9qXJYnXU85awVMUWhJLn6H8iREvMMm0LOxSqbKMT3mofJ_m9uovpzG-9Knzfv04Z_EPyVum0R5IpYVXGknClHW3hb2Y-ruGkmYBiyFRQFAP6Eg0B56uJ0abfnjTmc45ApRtHGAQFhn7toeu_imQWT1-rgMhI0iK3mklaTSDTIIQHHUHyKPtXnzS7CEQMqVR4xNud',
-      },
-      {
-        id: 'preset-3',
-        name: 'Pottery Vase',
-        rawImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYDVxXiG1dMVQO05bifmAAM_MlqVdxlRfbr0Q7nWUR4dc93terX2jKdxbmNSe-axfInjZH-ReiV2UeHBUJY_eszFGNG3U-0th9I9hWDsxr6D3jNeV-Nfq-gk1-QO0WAQ56z8r8tqZWnx1oBcGYB2gOWuqMCg2SRtl5PGzHznvmQH7hUw9pLkHoIhfPEojBMtrlOoHPOncYYLAjMmewJxDfEOtITbyH3dOIFNFE0X20UVfMrJ-Cqz9E',
-        enhancedImage: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDYDVxXiG1dMVQO05bifmAAM_MlqVdxlRfbr0Q7nWUR4dc93terX2jKdxbmNSe-axfInjZH-ReiV2UeHBUJY_eszFGNG3U-0th9I9hWDsxr6D3jNeV-Nfq-gk1-QO0WAQ56z8r8tqZWnx1oBcGYB2gOWuqMCg2SRtl5PGzHznvmQH7hUw9pLkHoIhfPEojBMtrlOoHPOncYYLAjMmewJxDfEOtITbyH3dOIFNFE0X20UVfMrJ-Cqz9E',
-      }
-    ];
-  }
 };

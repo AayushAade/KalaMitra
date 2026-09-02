@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ProductCatalogProvider } from '../context/ProductCatalogContext';
 import { authService } from '../services/authService';
 import { artisanService } from '../services/artisanService';
+import { productService } from '../services/productService';
 import { supabase } from '../lib/supabase';
 
 function RootLayoutNav() {
@@ -25,33 +26,10 @@ function RootLayoutNav() {
           id: session.user.id,
           email: session.user.email || ''
         });
-
-        // Query database profile in artisan_profiles
-        try {
-          const { data: profile, error } = await supabase
-            .from('artisan_profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
-
-          if (profile && !error) {
-            console.log(`[RootLayoutNav] Synced profile details from database`);
-            artisanService.updateProfile({
-              name: profile.shop_name || `${session.user.email?.split('@')[0]}'s Store`,
-              ownerName: profile.owner_name || session.user.email?.split('@')[0],
-              location: profile.location || 'Pune, Maharashtra',
-              craft: profile.craft_specialization || 'Bamboo & Textile Crafts',
-              phone: profile.phone || '',
-              language: profile.language || 'Hindi',
-              bio: profile.bio || 'Master artisan digital storefront registered on KalaMitra.',
-              storeVerified: profile.store_verified || false
-            });
-          }
-        } catch (e) {
-          console.warn(`[RootLayoutNav] Profile check failed:`, e);
-        }
+        await artisanService.fetchProfile(session.user.id);
       } else {
-        artisanService.setAuthenticatedUser(null);
+        artisanService.reset();
+        productService.reset();
       }
     });
 
@@ -66,6 +44,10 @@ function RootLayoutNav() {
             id: user.id,
             email: user.email || ''
           });
+          await artisanService.fetchProfile(user.id);
+        } else {
+          artisanService.reset();
+          productService.reset();
         }
       } catch (err) {
         console.error(`[RootLayoutNav] Session restoration error:`, err);

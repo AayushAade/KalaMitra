@@ -1,5 +1,7 @@
 export interface Product {
   id: string;
+  artisanId?: string;
+  isPublished?: boolean;
   name: string;
   imageUrl?: string;
   originalImageUrl?: string;

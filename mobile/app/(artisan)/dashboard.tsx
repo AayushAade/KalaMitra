@@ -7,19 +7,21 @@ import Header from '../../components/Header';
 import Button from '../../components/Button';
 import { Ionicons } from '@expo/vector-icons';
 import { artisanService } from '../../services/artisanService';
+import { useProductCatalog } from '../../context/ProductCatalogContext';
 
 export default function ArtisanDashboard() {
   const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
+  const { myProducts, inquiries, refreshProducts } = useProductCatalog();
   const tips = artisanService.getDashboardRecommendations();
 
   useEffect(() => {
     const unsubscribe = artisanService.subscribe((updatedArtisan) => {
       setArtisan(updatedArtisan);
     });
-    // Ensure we capture any status changes that happened during transit
     setArtisan(artisanService.getCurrentArtisan());
+    refreshProducts();
     return unsubscribe;
-  }, []);
+  }, [refreshProducts]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -31,7 +33,7 @@ export default function ArtisanDashboard() {
           style={({ pressed }) => [styles.welcomeCard, pressed && styles.pressedCard]}
         >
           <View style={styles.avatarPlaceholder}>
-            <Text style={styles.avatarText}>{(artisan.ownerName || 'S').charAt(0).toUpperCase()}</Text>
+            <Text style={styles.avatarText}>{(artisan.ownerName || 'A').charAt(0).toUpperCase()}</Text>
           </View>
           <View style={styles.welcomeTextContainer}>
             <Text style={styles.welcomeName}>{artisan.name}</Text>
@@ -51,21 +53,21 @@ export default function ArtisanDashboard() {
             onPress={() => router.push('/(artisan)/products' as any)}
             style={({ pressed }) => [styles.statBox, pressed && styles.pressedCard]}
           >
-            <Text style={styles.statNumber}>5</Text>
+            <Text style={styles.statNumber}>{myProducts.length}</Text>
             <Text style={styles.statLabel}>Listings</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/(artisan)/inquiries' as any)}
             style={({ pressed }) => [styles.statBox, pressed && styles.pressedCard]}
           >
-            <Text style={styles.statNumber}>2</Text>
+            <Text style={styles.statNumber}>{inquiries.length}</Text>
             <Text style={styles.statLabel}>Inquiries</Text>
           </Pressable>
           <Pressable
             onPress={() => router.push('/(artisan)/store' as any)}
             style={({ pressed }) => [styles.statBox, pressed && styles.pressedCard]}
           >
-            <Text style={styles.statNumber}>4.9</Text>
+            <Text style={styles.statNumber}>5.0</Text>
             <Text style={styles.statLabel}>Rating</Text>
           </Pressable>
         </View>

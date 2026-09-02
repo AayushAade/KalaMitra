@@ -16,6 +16,7 @@ export default function ArtisanProfileScreen() {
   const [location, setLocation] = useState(current.location);
   const [bio, setBio] = useState(current.bio || '');
   const [phone, setPhone] = useState(current.phone || '');
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const unsubscribe = artisanService.subscribe((updated) => {
@@ -36,17 +37,24 @@ export default function ArtisanProfileScreen() {
     return unsubscribe;
   }, []);
 
-  const handleSave = () => {
-    artisanService.updateProfile({
-      name: shopName,
-      ownerName: artisanName,
-      location: location,
-      bio: bio,
-      phone: phone
-    });
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await artisanService.saveProfile({
+        name: shopName.trim() || current.name,
+        ownerName: artisanName.trim() || current.ownerName,
+        location: location.trim() || current.location,
+        bio: bio.trim(),
+        phone: phone.trim()
+      });
 
-    alert('Artisan profile updated successfully!');
-    router.back();
+      alert('Artisan profile updated successfully in Supabase!');
+      router.back();
+    } catch (err: any) {
+      alert('Could not save profile: ' + (err.message || 'Database error'));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -126,8 +134,10 @@ export default function ArtisanProfileScreen() {
             </View>
 
             <Button
-              title="Save Changes"
+              title={isSaving ? 'Saving...' : 'Save Changes'}
               onPress={handleSave}
+              disabled={isSaving}
+              loading={isSaving}
               variant="primary"
               style={styles.saveBtn}
             />

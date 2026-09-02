@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Product } from '../../types';
 
 export default function MarketplaceScreen() {
-  const { products } = useProductCatalog();
+  const { products, refreshProducts, isLoading } = useProductCatalog();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
@@ -95,6 +95,8 @@ export default function MarketplaceScreen() {
       <FlatList
         data={filteredProducts}
         keyExtractor={item => item.id}
+        refreshing={isLoading}
+        onRefresh={refreshProducts}
         renderItem={({ item }) => (
           <ProductCard
             product={item}

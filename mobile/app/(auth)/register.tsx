@@ -8,13 +8,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { authService } from '../../services/authService';
 
 export default function RegisterScreen() {
-  const [storeName, setStoreName] = useState('Savita Handicrafts');
-  const [ownerName, setOwnerName] = useState('Savita Devi');
-  const [phone, setPhone] = useState('+91 98765 43210');
-  const [email, setEmail] = useState('savita@diynest.org');
-  const [password, setPassword] = useState('pass1234');
-  const [craft, setCraft] = useState('Bamboo & Textile Crafts');
-  const [location, setLocation] = useState('Pune, Maharashtra');
+  const [storeName, setStoreName] = useState('');
+  const [ownerName, setOwnerName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [craft, setCraft] = useState('');
+  const [location, setLocation] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState<'Hindi' | 'Marathi' | 'English'>('Hindi');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoMessage, setInfoMessage] = useState<string | null>(null);
@@ -22,17 +22,23 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     setErrorMessage(null);
     setInfoMessage(null);
+
+    if (!email.trim() || !password.trim()) {
+      setErrorMessage('Email and password are required.');
+      return;
+    }
+
     try {
       const result = await authService.registerStore(
         {
-          name: storeName,
-          ownerName,
-          phone,
-          craft,
-          location,
-          language: selectedLanguage
+          name: storeName.trim() || undefined,
+          ownerName: ownerName.trim() || undefined,
+          phone: phone.trim() || undefined,
+          craft: craft.trim() || undefined,
+          location: location.trim() || undefined,
+          language: selectedLanguage,
         },
-        email,
+        email.trim(),
         password
       );
 

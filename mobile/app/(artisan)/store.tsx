@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
+import { router } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
 import ProductCard from '../../components/ProductCard';
@@ -9,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PublicStoreScreen() {
   const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
-  const { products } = useProductCatalog();
+  const { myProducts } = useProductCatalog();
 
   useEffect(() => {
     const unsubscribe = artisanService.subscribe((updated) => {
@@ -23,12 +24,15 @@ export default function PublicStoreScreen() {
     <SafeAreaView style={styles.container}>
       <Header showBack={true} title="Storefront Preview" />
       <FlatList
-        data={products}
+        data={myProducts}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <ProductCard
             product={item}
-            onPress={() => alert(`Reviewing "${item.name}" details`)}
+            onPress={() => router.push({
+              pathname: '/(buyer)/product',
+              params: { productId: item.id }
+            } as any)}
           />
         )}
         contentContainerStyle={styles.listContent}
@@ -44,7 +48,7 @@ export default function PublicStoreScreen() {
                   <Image source={{ uri: artisan.avatar }} style={styles.avatar} />
                 ) : (
                   <View style={styles.avatarPlaceholder}>
-                    <Text style={styles.avatarText}>S</Text>
+                    <Text style={styles.avatarText}>{(artisan.ownerName || 'A').charAt(0).toUpperCase()}</Text>
                   </View>
                 )}
               </View>
@@ -54,18 +58,24 @@ export default function PublicStoreScreen() {
               
               <View style={styles.metaRow}>
                 <Text style={styles.metaText}>📍 {artisan.location}</Text>
-                <Text style={styles.metaText}>⭐ {artisan.rating} (38 Reviews)</Text>
+                <Text style={styles.metaText}>⭐ {artisan.rating} (Verified)</Text>
               </View>
 
               <Text style={styles.bioText}>{artisan.bio}</Text>
               
-              <View style={styles.tagContainer}>
-                <Text style={styles.tag}>Traditional Handloom</Text>
-                <Text style={styles.tag}>Eco-friendly Bamboo</Text>
-              </View>
+              {artisan.craft && (
+                <View style={styles.tagContainer}>
+                  <Text style={styles.tag}>{artisan.craft}</Text>
+                </View>
+              )}
             </View>
 
-            <Text style={styles.sectionTitle}>Product Catalog</Text>
+            <Text style={styles.sectionTitle}>Product Catalog ({myProducts.length})</Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={{ padding: Spacing.xl, alignItems: 'center' }}>
+            <Text style={{ color: Colors.textMuted, fontSize: 14 }}>No products in your catalog yet.</Text>
           </View>
         }
       />

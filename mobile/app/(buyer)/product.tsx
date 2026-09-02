@@ -23,7 +23,13 @@ export default function ProductDetailsScreen() {
   };
 
   const handleViewSeller = () => {
-    router.push('/(buyer)/seller' as any);
+    router.push({
+      pathname: '/(buyer)/seller',
+      params: {
+        artisanId: product.artisanId || '',
+        artisanName: product.artisanName || 'Artisan Store',
+      },
+    } as any);
   };
 
   return (
@@ -38,7 +44,7 @@ export default function ProductDetailsScreen() {
         )}
 
         <View style={styles.infoCard}>
-          <Text style={styles.category}>Traditional Handloom</Text>
+          <Text style={styles.category}>{product.craft || 'Handcrafted Heritage'}</Text>
           <Text style={styles.name}>{product.name}</Text>
           
           <View style={styles.priceRow}>
@@ -61,22 +67,22 @@ export default function ProductDetailsScreen() {
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Craft Type:</Text>
-            <Text style={styles.detailVal}>Traditional Handloom</Text>
+            <Text style={styles.detailVal}>{product.craft || 'Traditional Handcraft'}</Text>
           </View>
           <View style={styles.detailRow}>
             <Text style={styles.detailLabel}>Production Time:</Text>
-            <Text style={styles.detailVal}>5 days</Text>
+            <Text style={styles.detailVal}>{product.productionTime || '3–5 days'}</Text>
           </View>
           <View style={styles.detailRow}>
-            <Text style={styles.detailLabel}>Min Bulk Order:</Text>
-            <Text style={styles.detailVal}>10 units</Text>
+            <Text style={styles.detailLabel}>Min Order Qty:</Text>
+            <Text style={styles.detailVal}>{product.minOrderQuantity || 1} units</Text>
           </View>
 
           <View style={styles.divider} />
 
-          <Text style={styles.descriptionTitle}>Product Description</Text>
+          <Text style={styles.descriptionTitle}>Product Story & Description</Text>
           <Text style={styles.descriptionText}>
-            This product is crafted masterfully by skilled artisans in Maharashtra, showcasing intricate traditional handloom techniques. Durable, beautiful, and authentic.
+            {product.descriptionEnglish || product.descriptionHindi || 'Authentic handcrafted heritage creation made with traditional artisan expertise.'}
           </Text>
 
           {/* Seller details card */}
@@ -86,11 +92,11 @@ export default function ProductDetailsScreen() {
           >
             <View style={styles.sellerCard}>
               <View style={styles.sellerAvatar}>
-                <Text style={styles.sellerText}>S</Text>
+                <Text style={styles.sellerText}>{(product.artisanName || 'A').charAt(0).toUpperCase()}</Text>
               </View>
               <View style={styles.sellerInfo}>
-                <Text style={styles.sellerTitle}>{product.artisanName}</Text>
-                <Text style={styles.sellerSub}>📍 Pune, Maharashtra • Verified Seller</Text>
+                <Text style={styles.sellerTitle}>{product.artisanName || 'Artisan Store'}</Text>
+                <Text style={styles.sellerSub}>Verified Artisan Seller</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={Colors.border} />
             </View>

@@ -1,29 +1,30 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, Image } from 'react-native';
-import { router } from 'expo-router';
+import React, { useMemo } from 'react';
+import { StyleSheet, View, Text, FlatList } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import Header from '../../components/Header';
 import ProductCard from '../../components/ProductCard';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
-import { artisanService } from '../../services/artisanService';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BuyerSellerProfileScreen() {
-  const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
+  const { artisanId, artisanName } = useLocalSearchParams<{ artisanId?: string; artisanName?: string }>();
   const { products } = useProductCatalog();
 
-  useEffect(() => {
-    const unsubscribe = artisanService.subscribe((updated) => {
-      setArtisan(updated);
-    });
-    setArtisan(artisanService.getCurrentArtisan());
-    return unsubscribe;
-  }, []);
+  const sellerProducts = useMemo(() => {
+    if (!artisanId && !artisanName) return products;
+    return products.filter(
+      p => (artisanId && p.artisanId === artisanId) || (artisanName && p.artisanName === artisanName)
+    );
+  }, [products, artisanId, artisanName]);
+
+  const displayName = artisanName || sellerProducts[0]?.artisanName || 'Artisan Store';
+  const displayCraft = sellerProducts[0]?.craft || 'Traditional Handcrafts';
 
   const handleProductPress = (id: string) => {
     router.push({
       pathname: '/(buyer)/product',
-      params: { productId: id }
+      params: { productId: id },
     } as any);
   };
 
@@ -31,7 +32,7 @@ export default function BuyerSellerProfileScreen() {
     <SafeAreaView style={styles.container}>
       <Header showBack={true} title="Artisan Profile" />
       <FlatList
-        data={products}
+        data={sellerProducts}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <ProductCard
@@ -44,36 +45,39 @@ export default function BuyerSellerProfileScreen() {
           <View style={styles.headerSection}>
             {/* Store Cover Banner */}
             <View style={styles.banner} />
-            
+
             {/* Store Details Card */}
             <View style={styles.detailsCard}>
               <View style={styles.avatarContainer}>
-                {artisan.avatar ? (
-                  <Image source={{ uri: artisan.avatar }} style={styles.avatar} />
-                ) : (
-                  <View style={styles.avatarPlaceholder}>
-                    <Text style={styles.avatarText}>S</Text>
-                  </View>
-                )}
+                <View style={styles.avatarPlaceholder}>
+                  <Text style={styles.avatarText}>{displayName.charAt(0).toUpperCase()}</Text>
+                </View>
               </View>
 
-              <Text style={styles.storeName}>{artisan.name}</Text>
-              <Text style={styles.ownerText}>Owner: {artisan.ownerName}</Text>
-              
+              <Text style={styles.storeName}>{displayName}</Text>
+              <Text style={styles.ownerText}>Master Craftsperson Storefront</Text>
+
               <View style={styles.metaRow}>
-                <Text style={styles.metaText}>📍 {artisan.location}</Text>
-                <Text style={styles.metaText}>⭐ {artisan.rating} (38 Reviews)</Text>
+                <Text style={styles.metaText}>📍 Verified Heritage Craft</Text>
+                <Text style={styles.metaText}>⭐ 5.0 Rating</Text>
               </View>
 
-              <Text style={styles.bioText}>{artisan.bio}</Text>
-              
+              <Text style={styles.bioText}>
+                Authentic handcrafted creations made with traditional artisan methods and heritage skills.
+              </Text>
+
               <View style={styles.tagContainer}>
-                <Text style={styles.tag}>Traditional Handloom</Text>
-                <Text style={styles.tag}>Eco-friendly Bamboo</Text>
+                <Text style={styles.tag}>{displayCraft}</Text>
+                <Text style={styles.tag}>Authentic Handcrafted</Text>
               </View>
             </View>
 
-            <Text style={styles.sectionTitle}>Artisan Creations</Text>
+            <Text style={styles.sectionTitle}>Artisan Creations ({sellerProducts.length})</Text>
+          </View>
+        }
+        ListEmptyComponent={
+          <View style={{ padding: Spacing.xl, alignItems: 'center' }}>
+            <Text style={{ color: Colors.textMuted, fontSize: 14 }}>No products listed by this artisan yet.</Text>
           </View>
         }
       />
@@ -107,35 +111,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.borderLight,
     marginTop: -40,
-    marginHorizontal: Spacing.sm,
+    marginHorizontal: Spacing.xs,
     alignItems: 'center',
-    marginBottom: Spacing.lg,
     ...Shadows.soft,
   },
   avatarContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: BorderRadius.full,
-    borderWidth: 4,
-    borderColor: Colors.card,
-    overflow: 'hidden',
-    backgroundColor: Colors.borderLight,
     marginBottom: Spacing.sm,
   },
-  avatar: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
   avatarPlaceholder: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 3,
+    borderColor: Colors.card,
   },
   avatarText: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
     color: Colors.textLight,
   },
@@ -149,44 +143,48 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.textMuted,
     marginTop: 2,
-    fontWeight: '600',
   },
   metaRow: {
     flexDirection: 'row',
     gap: Spacing.md,
-    marginTop: Spacing.sm,
-    marginBottom: Spacing.md,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.sm,
   },
   metaText: {
     fontSize: 12,
-    fontWeight: '700',
-    color: Colors.secondary,
+    fontWeight: '600',
+    color: Colors.primary,
   },
   bioText: {
     fontSize: 13,
-    color: Colors.secondary,
+    color: Colors.onBackground,
     textAlign: 'center',
     lineHeight: 18,
-    paddingHorizontal: Spacing.xs,
     marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.sm,
   },
   tagContainer: {
     flexDirection: 'row',
     gap: Spacing.xs,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   tag: {
     fontSize: 11,
     fontWeight: '700',
-    color: Colors.tertiary,
-    backgroundColor: 'rgba(0,97,149,0.06)',
+    color: Colors.primary,
+    backgroundColor: Colors.background,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '800',
     color: Colors.onBackground,
+    marginTop: Spacing.lg,
     marginBottom: Spacing.sm,
   },
 });

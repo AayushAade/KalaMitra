@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { Artisan } from '../types';
 import { artisanService } from './artisanService';
+import { productService } from './productService';
 
 export interface AuthResult {
   user: any;
@@ -11,19 +12,17 @@ export interface AuthResult {
 
 export const authService = {
   /**
-   * Logs in a user using email and password, verifying their public.users metadata role.
+   * Logs in a user using email and password, verifying their public.users metadata role and loading their profile.
    */
   login: async (email: string, password: string, role: 'artisan' | 'buyer'): Promise<boolean> => {
     console.log(`[AuthService] Login attempt for: ${email} as role: ${role}`);
-    
-    // Sign in with password using Supabase Auth
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
-      password
+      password,
     });
 
     if (error) {
-      // Sanitize standard auth error messages
       if (error.message.includes('Invalid login credentials')) {
         throw new Error('Invalid email or password. Please try again.');
       }
@@ -42,22 +41,21 @@ export const authService = {
       .single();
 
     if (metaError) {
-      // If metadata record is missing but auth succeeded, allow it for development fallback.
-      // In production, this would be strictly enforced by the backend database triggers.
-      console.warn(`[AuthService] Metadata load failed for authenticated user:`, metaError.message);
-      return true;
-    }
-
-    if (userMeta && userMeta.role !== role) {
-      // Clean sign out if role mismatches
+      console.warn('[AuthService] Metadata load failed for authenticated user:', metaError.message);
+    } else if (userMeta && userMeta.role !== role) {
       await supabase.auth.signOut();
       throw new Error(`Account role mismatch. This account is registered as a ${userMeta.role}.`);
     }
 
+    // Initialize authenticated user context and fetch real profile from Supabase
     artisanService.setAuthenticatedUser({
       id: data.user.id,
-      email: data.user.email || ''
+      email: data.user.email || '',
     });
+
+    if (role === 'artisan') {
+      await artisanService.fetchProfile(data.user.id);
+    }
 
     return true;
   },
@@ -72,6 +70,10 @@ export const authService = {
   ): Promise<AuthResult> => {
     console.log(`[AuthService] Registering new user identity for: ${email}`);
 
+    const namePrefix = email.split('@')[0] || 'Artisan';
+    const cleanStoreName = storeData.name?.trim() || `${namePrefix}'s Store`;
+    const cleanOwnerName = storeData.ownerName?.trim() || namePrefix;
+
     // Create Supabase Auth user with role and profile metadata
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -79,14 +81,14 @@ export const authService = {
       options: {
         data: {
           role: 'artisan',
-          shop_name: storeData.name,
-          owner_name: storeData.ownerName,
-          phone: storeData.phone,
-          craft: storeData.craft,
-          location: storeData.location,
-          language: storeData.language || 'Hindi'
-        }
-      }
+          shop_name: cleanStoreName,
+          owner_name: cleanOwnerName,
+          phone: storeData.phone || '',
+          craft: storeData.craft || 'Traditional Handicrafts',
+          location: storeData.location || 'India',
+          language: storeData.language || 'Hindi',
+        },
+      },
     });
 
     if (error) {
@@ -102,62 +104,48 @@ export const authService = {
 
     const emailConfirmationRequired = !data.session;
 
-    // CASE A: Supabase returns active session (email confirmation disabled)
     if (!emailConfirmationRequired && data.session) {
-      console.log(`[AuthService] Active session detected. Inserting public.users metadata...`);
-      const { error: metaError } = await supabase
-        .from('users')
-        .insert({
-          id: data.user.id,
-          email,
-          phone: storeData.phone || '',
-          role: 'artisan'
-        });
-
-      if (metaError) {
-        console.error(`[AuthService] Failed to insert public.users metadata:`, metaError.message);
-      }
-
+      console.log('[AuthService] Active session detected. Initializing user profile...');
       artisanService.setAuthenticatedUser({
         id: data.user.id,
-        email: data.user.email || ''
+        email: data.user.email || '',
       });
+      await artisanService.fetchProfile(data.user.id);
     } else {
-      console.log(`[AuthService] Email confirmation required. Session is not active yet.`);
+      console.log('[AuthService] Email confirmation required. Session is not active yet.');
     }
 
-    // Mock Artisan Storefront response to maintain frontend UI stability,
-    // as direct client-side insert into artisan_profiles is disabled (server-controlled).
-    const mockArtisan: Artisan = {
+    const newArtisan: Artisan = {
       id: data.user.id,
-      name: storeData.name || 'Savita Handicrafts',
-      ownerName: storeData.ownerName || 'Savita Devi',
-      location: storeData.location || 'Pune, Maharashtra',
-      craft: storeData.craft || 'Traditional Bamboo Crafts',
+      name: cleanStoreName,
+      ownerName: cleanOwnerName,
+      location: storeData.location || 'India',
+      craft: storeData.craft || 'Traditional Handicrafts',
       phone: storeData.phone || '',
       email,
       language: storeData.language || 'Hindi',
-      bio: 'Master artisan digital storefront registered on KalaMitra.',
+      bio: storeData.bio || 'Master artisan digital storefront registered on KalaMitra.',
       totalProducts: 0,
       rating: 5.0,
       reviewsCount: 0,
-      storeVerified: false
+      storeVerified: false,
     };
 
     return {
       user: data.user,
       session: data.session,
       emailConfirmationRequired,
-      artisan: mockArtisan
+      artisan: newArtisan,
     };
   },
 
   /**
-   * Sign out the active user session.
+   * Sign out the active user session and purge all in-memory user caches.
    */
   logout: async (): Promise<void> => {
-    console.log(`[AuthService] Signing out active session...`);
-    artisanService.setAuthenticatedUser(null);
+    console.log('[AuthService] Signing out active session and purging cache...');
+    artisanService.reset();
+    productService.reset();
     const { error } = await supabase.auth.signOut();
     if (error) {
       throw new Error(error.message);
@@ -170,9 +158,9 @@ export const authService = {
   getCurrentUser: async (): Promise<any> => {
     const { data: { user }, error } = await supabase.auth.getUser();
     if (error) {
-      console.log(`[AuthService] No active authenticated session.`);
+      console.log('[AuthService] No active authenticated session.');
       return null;
     }
     return user;
-  }
+  },
 };
