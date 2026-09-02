@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import { api } from './api';
-import { ImageEnhanceOptions, ImageProcessingResult, StudioEnhanceResponse } from '../types';
+import { ImageEnhanceOptions, ImageProcessingResult, StudioEnhanceResponse, ProductImageEnhanceResponse } from '../types';
 
 /**
  * Converts a binary Blob to a Base64 Data URI on native React Native platforms.

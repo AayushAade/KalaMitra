@@ -273,9 +273,9 @@ class QualityEnhancer:
             )
         cutout_asset = cutout_upload.asset
         if cutout_upload.metadata:
-            pipeline_telemetry["cutout_optimization"] = cutout_upload.metadata
+            fallback_telemetry["cutout_optimization"] = cutout_upload.metadata
             if cutout_upload.metadata.get("optimization_required"):
-                pipeline_telemetry["stages_applied"].append("cutout_size_optimization")
+                stages_applied.append("cutout_size_optimization")
 
         # 4. Compose final studio presentation asset
         final_result = self.studio.compose_studio_image(

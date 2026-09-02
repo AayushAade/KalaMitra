@@ -56,14 +56,11 @@ export default function ImageEnhancementScreen() {
   const { colors, isDarkMode } = useTheme();
   const { productData, updateProductData } = useProductCreation();
   const [selectedStyle, setSelectedStyle] = useState<string>('CLEAN_ECOMMERCE');
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    productData.category || 'GENERIC_HANDICRAFT'
-  );
+  const selectedCategory = productData.category || 'GENERIC_HANDICRAFT';
   const [loading, setLoading] = useState(false);
   const [hasEnhanced, setHasEnhanced] = useState(false);
   const [activeTab, setActiveTab] = useState<'enhanced' | 'original'>('enhanced');
   const [error, setError] = useState<string | null>(null);
-  const [engineProvider, setEngineProvider] = useState<string | null>(null);
 
   const triggerEnhancement = useCallback(
     async (styleToUse?: string) => {
@@ -75,17 +72,15 @@ export default function ImageEnhancementScreen() {
       const activeStyle = styleToUse || selectedStyle;
       setLoading(true);
       setError(null);
-
       try {
         const result = await imageService.enhanceImage(productData.image, {
           productCategory: selectedCategory,
           productName: productData.name,
-          productDescription: productData.description,
+          productDescription: productData.descriptionEnglish,
           style: activeStyle,
         });
 
         updateProductData({ enhancedImage: result.enhancedUrl });
-        setEngineProvider(result.provider || (result.fallbackUsed ? 'LOCAL_FALLBACK' : 'VERTEX_AI'));
         setHasEnhanced(true);
         setActiveTab('enhanced');
       } catch (err: any) {
@@ -95,7 +90,7 @@ export default function ImageEnhancementScreen() {
         setLoading(false);
       }
     },
-    [productData.image, productData.name, productData.description, selectedCategory, selectedStyle, updateProductData]
+    [productData.image, productData.name, productData.descriptionEnglish, selectedCategory, selectedStyle, updateProductData]
   );
 
   // Run automatically on first mount if not yet enhanced
@@ -105,6 +100,7 @@ export default function ImageEnhancementScreen() {
     } else if (productData.enhancedImage) {
       setHasEnhanced(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSelectStyle = (styleId: string) => {
@@ -289,7 +285,7 @@ export default function ImageEnhancementScreen() {
                   <Button
                     title="Retake Photo"
                     onPress={handleRetake}
-                    variant="outline"
+                    variant="secondary"
                     style={styles.halfBtn}
                   />
                 </View>

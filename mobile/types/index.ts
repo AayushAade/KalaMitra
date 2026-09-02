@@ -11,6 +11,7 @@ export type {
   VoiceTranscribeResponse,
   ImageAssetResponse,
   StudioEnhanceResponse,
+  ProductImageEnhanceResponse,
   ImageEnhanceOptions,
   ImageProcessingResult,
 } from './serviceTypes';
