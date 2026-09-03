@@ -10,6 +10,7 @@ interface ProductCatalogContextType {
   myProducts: Product[];
   addProduct: (product: Partial<Product> & { name: string; price: number }) => Promise<Product>;
   updateProduct: (id: string, updates: Partial<Product>) => Promise<Product>;
+  deleteProduct: (id: string) => Promise<void>;
   refreshProducts: () => Promise<void>;
   refreshMyProducts: () => Promise<void>;
   resetCatalog: () => void;
@@ -107,6 +108,12 @@ export const ProductCatalogProvider: React.FC<{ children: React.ReactNode }> = (
     return updated;
   };
 
+  const deleteProduct = async (id: string): Promise<void> => {
+    await productService.deleteProduct(id);
+    setMyProducts(prev => prev.filter(p => p.id !== id));
+    setProducts(prev => prev.filter(p => p.id !== id));
+  };
+
   const resetCatalog = useCallback(() => {
     productService.reset();
     setProducts(productService.getProducts());
@@ -137,6 +144,7 @@ export const ProductCatalogProvider: React.FC<{ children: React.ReactNode }> = (
         myProducts,
         addProduct,
         updateProduct,
+        deleteProduct,
         refreshProducts,
         refreshMyProducts,
         resetCatalog,

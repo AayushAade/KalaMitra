@@ -131,7 +131,7 @@ export default function ArtisanProfileScreen() {
           onPress: async () => {
             try {
               await authService.logout();
-              router.replace('/(auth)/login' as any);
+              router.replace({ pathname: '/(auth)/login', params: { role: 'artisan' } } as any);
             } catch (e: any) {
               Alert.alert('Error', 'Logout failed: ' + e.message);
             }

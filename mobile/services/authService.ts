@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase';
 import { Artisan } from '../types';
 import { artisanService } from './artisanService';
 import { productService } from './productService';
+import { isEmail, normalizePhoneNumber, isValidPhoneNumber } from '../utils/phone';
 
 export interface AuthResult {
   user: any;
@@ -10,16 +11,44 @@ export interface AuthResult {
   artisan?: Artisan;
 }
 
-let activeRole: 'artisan' | 'buyer' = 'artisan';
+// UI Experience Portal currently active ('artisan' | 'buyer')
+let activePortal: 'artisan' | 'buyer' = 'artisan';
+
+// Authoritative account role loaded from public.users database table
+let databaseRole: 'artisan' | 'buyer' | null = null;
 
 export const authService = {
-  getRole: (): 'artisan' | 'buyer' => activeRole,
-  setRole: (role: 'artisan' | 'buyer') => {
-    activeRole = role;
+  /**
+   * Returns the current UI portal experience ('artisan' | 'buyer').
+   */
+  getPortal: (): 'artisan' | 'buyer' => activePortal,
+
+  /**
+   * Sets the current UI portal experience.
+   */
+  setPortal: (portal: 'artisan' | 'buyer') => {
+    activePortal = portal;
   },
 
   /**
-   * Reads the authoritative user role from public.users table.
+   * Backward-compatible alias for getPortal.
+   */
+  getRole: (): 'artisan' | 'buyer' => activePortal,
+
+  /**
+   * Backward-compatible alias for setPortal.
+   */
+  setRole: (role: 'artisan' | 'buyer') => {
+    activePortal = role;
+  },
+
+  /**
+   * Returns the database role verified from public.users table.
+   */
+  getDatabaseRole: (): 'artisan' | 'buyer' | null => databaseRole,
+
+  /**
+   * Reads the authoritative user role from public.users table without overwriting active portal.
    */
   fetchUserRole: async (userId: string): Promise<'artisan' | 'buyer'> => {
     try {
@@ -30,31 +59,57 @@ export const authService = {
         .single();
 
       if (!error && data?.role && (data.role === 'buyer' || data.role === 'artisan')) {
-        activeRole = data.role;
-        console.log(`[AuthService] Authoritative user role loaded from database: ${activeRole}`);
+        databaseRole = data.role;
+        console.log(`[AuthService] Authoritative user role in database: ${databaseRole}`);
         return data.role;
       }
     } catch (e) {
       console.warn('[AuthService] Could not load user role from database:', e);
     }
-    return activeRole;
+    return databaseRole || 'artisan';
   },
 
   /**
-   * Logs in a user using email and password, verifying their public.users metadata role and loading their profile.
+   * Logs in a user using Email OR Phone number + Password.
+   * Dispatches to the chosen portal without redirect loops.
    */
-  login: async (email: string, password: string, role: 'artisan' | 'buyer'): Promise<boolean> => {
-    activeRole = role;
-    console.log(`[AuthService] Login attempt for: ${email} as role: ${role}`);
+  login: async (
+    identifier: string,
+    password: string,
+    portal: 'artisan' | 'buyer'
+  ): Promise<boolean> => {
+    activePortal = portal;
+    const cleanId = identifier.trim();
+    console.log(`[AuthService] Login attempt for identifier: "${cleanId}" to portal: "${portal}"`);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    let credentials: { email?: string; phone?: string; password: string };
+
+    if (isEmail(cleanId)) {
+      credentials = { email: cleanId, password };
+    } else {
+      const normalized = normalizePhoneNumber(cleanId);
+      if (!isValidPhoneNumber(normalized)) {
+        throw new Error('Please enter a valid email address or phone number (e.g. +91 98765 43210).');
+      }
+      credentials = { phone: normalized, password };
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword(credentials as any);
 
     if (error) {
-      if (error.message.includes('Invalid login credentials')) {
-        throw new Error('Invalid email or password. Please try again.');
+      if (
+        error.message.includes('Invalid login credentials') ||
+        error.message.includes('invalid_grant')
+      ) {
+        throw new Error('Invalid email/phone or password. Please try again.');
+      }
+      if (
+        error.message.includes('phone_provider_disabled') ||
+        error.message.includes('Phone logins are disabled')
+      ) {
+        throw new Error(
+          'Phone login is not enabled in your Supabase project. Please log in with your email or enable the Phone provider in the Supabase Dashboard.'
+        );
       }
       throw new Error(error.message);
     }
@@ -63,30 +118,30 @@ export const authService = {
       throw new Error('No user profile was returned from authentication.');
     }
 
-    // Query public.users metadata to check for role compatibility
-    const { data: userMeta, error: metaError } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', data.user.id)
-      .single();
+    // Query public.users database role
+    const authoritativeRole = await authService.fetchUserRole(data.user.id);
 
-    if (metaError) {
-      console.warn('[AuthService] Metadata load failed for authenticated user:', metaError.message);
-    } else if (userMeta && userMeta.role !== role) {
+    // If an account is strictly registered as a buyer and tries to enter the artisan seller dashboard
+    if (portal === 'artisan' && authoritativeRole === 'buyer') {
       await supabase.auth.signOut();
-      throw new Error(`Account role mismatch. This account is registered as a ${userMeta.role}.`);
+      databaseRole = null;
+      throw new Error('This account is registered as a Buyer. Please sign in via the Buyer portal.');
     }
 
-    // Initialize authenticated user context and fetch real profile from Supabase
+    // Set authenticated user context
     artisanService.setAuthenticatedUser({
       id: data.user.id,
       email: data.user.email || '',
     });
 
-    if (role === 'artisan') {
+    // If the user has artisan profile data, load it into context
+    if (authoritativeRole === 'artisan') {
       await artisanService.fetchProfile(data.user.id);
     }
 
+    console.log(
+      `[AuthService] Login successful! Portal="${activePortal}", DatabaseRole="${authoritativeRole}"`
+    );
     return true;
   },
 
@@ -228,6 +283,7 @@ export const authService = {
    */
   logout: async (): Promise<void> => {
     console.log('[AuthService] Signing out active session and purging cache...');
+    databaseRole = null;
     artisanService.reset();
     productService.reset();
     const { error } = await supabase.auth.signOut();

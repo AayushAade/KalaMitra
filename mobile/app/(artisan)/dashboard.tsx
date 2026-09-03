@@ -19,13 +19,12 @@ import SkeletonCard from '../../components/SkeletonCard';
 import { Ionicons } from '@expo/vector-icons';
 import { artisanService } from '../../services/artisanService';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
-import { supabase } from '../../lib/supabase';
 import { Product } from '../../types';
 
 export default function ArtisanHome() {
   const { colors, isDarkMode } = useTheme();
   const [artisan, setArtisan] = useState(artisanService.getCurrentArtisan());
-  const { myProducts, inquiries, refreshProducts, refreshMyProducts, isLoading } = useProductCatalog();
+  const { myProducts, inquiries, refreshProducts, refreshMyProducts, deleteProduct, isLoading } = useProductCatalog();
   const [refreshing, setRefreshing] = useState(false);
   const [activeMenuProductId, setActiveMenuProductId] = useState<string | null>(null);
 
@@ -79,15 +78,7 @@ export default function ArtisanHome() {
           style: 'destructive',
           onPress: async () => {
             try {
-              const { error } = await supabase
-                .from('products')
-                .delete()
-                .eq('id', product.id);
-
-              if (error) {
-                console.warn('[Dashboard] Supabase delete warning:', error.message);
-              }
-              await refreshMyProducts();
+              await deleteProduct(product.id);
               Alert.alert('Deleted', 'Product has been deleted successfully.');
             } catch (err: any) {
               console.error('[Dashboard] Error deleting product:', err);

@@ -20,11 +20,10 @@ import SkeletonCard from '../../components/SkeletonCard';
 import { Ionicons } from '@expo/vector-icons';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 import { Product } from '../../types';
-import { supabase } from '../../lib/supabase';
 
 export default function ArtisanCatalogueScreen() {
   const { colors, isDarkMode } = useTheme();
-  const { myProducts, refreshMyProducts, isLoading } = useProductCatalog();
+  const { myProducts, refreshMyProducts, deleteProduct, isLoading } = useProductCatalog();
   const [refreshing, setRefreshing] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -66,18 +65,7 @@ export default function ArtisanCatalogueScreen() {
     setIsDeleting(true);
 
     try {
-      // Call Supabase delete using product.id (never by index)
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', deleteTarget.id);
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      // Refresh to reflect removal
-      await refreshMyProducts();
+      await deleteProduct(deleteTarget.id);
       setDeleteTarget(null);
       showToast('Product deleted successfully.', false);
     } catch (err: any) {

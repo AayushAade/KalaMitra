@@ -104,14 +104,14 @@ export default function LoginScreen() {
 
               {/* Input Form Fields */}
               <View style={styles.inputContainer}>
-                <Text style={[styles.label, { color: colors.onBackground }]}>Mobile Number or Email</Text>
+                <Text style={[styles.label, { color: colors.onBackground }]}>Email or Mobile Number</Text>
                 <TextInput
                   style={[styles.input, { backgroundColor: isDarkMode ? '#13171F' : colors.background, color: colors.onBackground, borderColor: colors.borderLight }]}
-                  placeholder="e.g. +91 98765 43210"
+                  placeholder="e.g. artisan@example.com or +91 98765 43210"
                   placeholderTextColor={colors.textMuted}
                   value={identifier}
                   onChangeText={setIdentifier}
-                  keyboardType="email-address"
+                  keyboardType="default"
                   autoCapitalize="none"
                   autoCorrect={false}
                 />

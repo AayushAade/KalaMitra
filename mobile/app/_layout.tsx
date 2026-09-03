@@ -30,15 +30,13 @@ function RootLayoutNav() {
       setIsSessionLoaded(true);
 
       if (session?.user) {
-        const role = await authService.fetchUserRole(session.user.id);
-        if (role === 'artisan') {
-          artisanService.setAuthenticatedUser({
-            id: session.user.id,
-            email: session.user.email || ''
-          });
+        const dbRole = await authService.fetchUserRole(session.user.id);
+        artisanService.setAuthenticatedUser({
+          id: session.user.id,
+          email: session.user.email || '',
+        });
+        if (dbRole === 'artisan') {
           await artisanService.fetchProfile(session.user.id);
-        } else {
-          artisanService.reset();
         }
       } else {
         artisanService.reset();
@@ -53,15 +51,13 @@ function RootLayoutNav() {
         setHasUser(!!user);
         setIsSessionLoaded(true);
         if (user) {
-          const role = await authService.fetchUserRole(user.id);
-          if (role === 'artisan') {
-            artisanService.setAuthenticatedUser({
-              id: user.id,
-              email: user.email || ''
-            });
+          const dbRole = await authService.fetchUserRole(user.id);
+          artisanService.setAuthenticatedUser({
+            id: user.id,
+            email: user.email || '',
+          });
+          if (dbRole === 'artisan') {
             await artisanService.fetchProfile(user.id);
-          } else {
-            artisanService.reset();
           }
         } else {
           artisanService.reset();
@@ -91,10 +87,10 @@ function RootLayoutNav() {
       console.log(`[RouteGuard] Blocking access to ${segments.join('/')}. Redirecting to Login.`);
       router.replace('/(auth)/login' as any);
     } else if (hasUser && inAuthGroup) {
-      const currentRole = authService.getRole();
-      console.log(`[RouteGuard] Authenticated user (${currentRole}) on auth screen. Redirecting.`);
-      if (currentRole === 'buyer') {
-        router.replace('/(buyer)/buyer-home' as any);
+      const activePortal = authService.getPortal();
+      console.log(`[RouteGuard] Authenticated user on auth screen. Navigating to ${activePortal} portal.`);
+      if (activePortal === 'buyer') {
+        router.replace('/(buyer)/marketplace' as any);
       } else {
         router.replace('/(artisan)/dashboard' as any);
       }
