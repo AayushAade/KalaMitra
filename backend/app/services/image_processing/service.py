@@ -275,7 +275,9 @@ class ImageProcessingService:
         fallback_used = False
 
         if not vertex_success or not enhanced_bytes:
-            logger.info("Engaging Local Studio Fallback Engine (reason: %s)", vertex_error)
+            reason_desc = "quota exceeded" if vertex_error_code == "QUOTA_EXCEEDED" else (vertex_error or "engine unavailable")
+            logger.warning("[AI Studio] Gemini unavailable: %s", reason_desc)
+            logger.info("[AI Studio] Falling back to Local Studio Fallback Engine (rembg / U2-Net)")
             fallback_used = True
             active_provider = "LOCAL_FALLBACK"
             pipeline_telemetry["fallback_reason"] = f"{vertex_error_code}: {vertex_error}"
