@@ -62,7 +62,11 @@ export default function PublicStoreScreen() {
               
               <View style={styles.metaRow}>
                 <Text style={[styles.metaText, { color: colors.textMuted }]}>📍 {artisan.location}</Text>
-                <Text style={[styles.metaText, { color: colors.textMuted }]}>⭐ {Number(artisan.rating || 5.0).toFixed(1)} (Verified)</Text>
+                <Text style={[styles.metaText, { color: colors.textMuted }]}>
+                  {artisan.rating !== null && artisan.rating !== undefined && (artisan.reviewsCount || 0) > 0
+                    ? `⭐ ${Number(artisan.rating).toFixed(1)} (${artisan.reviewsCount} reviews)`
+                    : '⭐ No ratings yet'}
+                </Text>
               </View>
 
               <Text style={[styles.bioText, { color: colors.onBackground }]}>{artisan.bio}</Text>

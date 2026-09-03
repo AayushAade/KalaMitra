@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, View, Text, FlatList } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
@@ -7,11 +7,15 @@ import Header from '../../components/Header';
 import ProductCard from '../../components/ProductCard';
 import { useProductCatalog } from '../../context/ProductCatalogContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Review } from '../../types';
+import { reviewService } from '../../services/reviewService';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function BuyerSellerProfileScreen() {
   const { colors, isDarkMode } = useTheme();
   const { artisanId, artisanName } = useLocalSearchParams<{ artisanId?: string; artisanName?: string }>();
   const { products } = useProductCatalog();
+  const [reviews, setReviews] = useState<Review[]>([]);
 
   const sellerProducts = useMemo(() => {
     if (!artisanId && !artisanName) return products;
@@ -20,8 +24,21 @@ export default function BuyerSellerProfileScreen() {
     );
   }, [products, artisanId, artisanName]);
 
+  const targetArtisanId = artisanId || sellerProducts[0]?.artisanId;
   const displayName = artisanName || sellerProducts[0]?.artisanName || 'Artisan Store';
   const displayCraft = sellerProducts[0]?.craft || 'Traditional Handcrafts';
+
+  useEffect(() => {
+    if (targetArtisanId) {
+      reviewService.fetchArtisanReviews(targetArtisanId).then(setReviews);
+    }
+  }, [targetArtisanId]);
+
+  const averageRating = useMemo(() => {
+    if (reviews.length === 0) return null;
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+    return sum / reviews.length;
+  }, [reviews]);
 
   const handleProductPress = (id: string) => {
     router.push({
@@ -63,7 +80,11 @@ export default function BuyerSellerProfileScreen() {
 
               <View style={styles.metaRow}>
                 <Text style={[styles.metaText, { color: colors.textMuted }]}>📍 Verified Heritage Craft</Text>
-                <Text style={[styles.metaText, { color: colors.textMuted }]}>⭐ 5.0 Rating</Text>
+                <Text style={[styles.metaText, { color: colors.primary }]}>
+                  {averageRating !== null
+                    ? `⭐ ${averageRating.toFixed(1)} (${reviews.length} reviews)`
+                    : '⭐ No ratings yet'}
+                </Text>
               </View>
 
               <Text style={[styles.bioText, { color: colors.onBackground }]}>
@@ -75,6 +96,33 @@ export default function BuyerSellerProfileScreen() {
                 <Text style={[styles.tag, { color: colors.primary }]}>Authentic Handcrafted</Text>
               </View>
             </View>
+
+            {/* Customer Reviews Section */}
+            {reviews.length > 0 && (
+              <View style={styles.reviewsSection}>
+                <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>Customer Feedback ({reviews.length})</Text>
+                {reviews.map(r => (
+                  <View key={r.id} style={[styles.reviewCard, { backgroundColor: colors.card, borderColor: colors.borderLight }]}>
+                    <View style={styles.reviewHeader}>
+                      <Text style={[styles.reviewerName, { color: colors.onBackground }]}>{r.buyerName}</Text>
+                      <View style={styles.starRow}>
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <Ionicons
+                            key={star}
+                            name={star <= r.rating ? 'star' : 'star-outline'}
+                            size={14}
+                            color="#F59E0B"
+                          />
+                        ))}
+                      </View>
+                    </View>
+                    {r.reviewText ? (
+                      <Text style={[styles.reviewBody, { color: colors.textMuted }]}>{r.reviewText}</Text>
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+            )}
 
             <Text style={[styles.sectionTitle, { color: colors.onBackground }]}>Artisan Creations ({sellerProducts.length})</Text>
           </View>
@@ -194,5 +242,35 @@ const styles = StyleSheet.create({
     color: Colors.onBackground,
     marginTop: Spacing.lg,
     marginBottom: Spacing.sm,
+  },
+  reviewsSection: {
+    marginTop: Spacing.md,
+  },
+  reviewCard: {
+    borderRadius: BorderRadius.md,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.borderLight,
+    marginBottom: Spacing.sm,
+    ...Shadows.soft,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  reviewerName: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  starRow: {
+    flexDirection: 'row',
+    gap: 2,
+  },
+  reviewBody: {
+    fontSize: 12,
+    lineHeight: 16,
+    marginTop: 2,
   },
 });

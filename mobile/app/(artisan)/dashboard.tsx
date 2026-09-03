@@ -153,12 +153,20 @@ export default function ArtisanHome() {
             style={({ pressed }) => [styles.statBox, { backgroundColor: colors.card, borderColor: colors.borderLight }, pressed && styles.pressedCard]}
           >
             <View style={styles.ratingRow}>
-              <Ionicons name="star" size={14} color="#F59E0B" />
+              <Ionicons
+                name={artisan.rating ? 'star' : 'star-outline'}
+                size={14}
+                color={artisan.rating ? '#F59E0B' : colors.textMuted}
+              />
               <Text style={[styles.statNumber, { color: colors.primary }]}>
-                {Number(artisan.rating || 5.0).toFixed(1)}
+                {artisan.rating !== null && artisan.rating !== undefined && (artisan.reviewsCount || 0) > 0
+                  ? Number(artisan.rating).toFixed(1)
+                  : 'New'}
               </Text>
             </View>
-            <Text style={[styles.statLabel, { color: colors.textMuted }]}>Rating</Text>
+            <Text style={[styles.statLabel, { color: colors.textMuted }]}>
+              {artisan.reviewsCount ? `${artisan.reviewsCount} Reviews` : 'No Ratings'}
+            </Text>
           </Pressable>
         </View>
 

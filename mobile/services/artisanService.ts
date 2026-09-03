@@ -12,7 +12,7 @@ const DEFAULT_EMPTY_ARTISAN: Artisan = {
   language: 'Hindi',
   bio: 'Master artisan digital storefront on KalaMitra.',
   totalProducts: 0,
-  rating: 5.0,
+  rating: null,
   reviewsCount: 0,
   storeVerified: false,
 };
@@ -121,8 +121,8 @@ export const artisanService = {
           bio: data.bio || 'Master artisan digital storefront on KalaMitra.',
           avatar: data.avatar_url || undefined,
           totalProducts: 0,
-          rating: 5.0,
-          reviewsCount: 0,
+          rating: data.rating !== null && data.rating !== undefined ? Number(data.rating) : null,
+          reviewsCount: data.rating_count !== null && data.rating_count !== undefined ? Number(data.rating_count) : 0,
           storeVerified: data.store_verified || false,
         };
 

@@ -17,4 +17,6 @@ export interface Product {
   voiceTranscript?: string;
   tags?: string[];
   createdAt?: string;
+  artisanRating?: number | null;
+  artisanRatingCount?: number;
 }

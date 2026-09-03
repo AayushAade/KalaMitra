@@ -211,7 +211,7 @@ export const authService = {
       language: storeData.language || 'Hindi',
       bio: storeData.bio || 'Master artisan digital storefront registered on KalaMitra.',
       totalProducts: 0,
-      rating: 5.0,
+      rating: null,
       reviewsCount: 0,
       storeVerified: false,
     };

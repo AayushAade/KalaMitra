@@ -51,9 +51,11 @@ export default function ProductCard({ product, onPress }: ProductCardProps) {
         <View style={[styles.categoryBadge, { backgroundColor: isDarkMode ? 'rgba(26,32,42,0.95)' : 'rgba(252,249,246,0.92)', borderColor: colors.borderLight }]}>
           <Text style={[styles.categoryText, { color: colors.primary }]}>{category}</Text>
         </View>
-        <View style={styles.ratingBadge}>
-          <Text style={styles.ratingText}>★ 5.0</Text>
-        </View>
+        {product.artisanRating !== null && product.artisanRating !== undefined && (product.artisanRatingCount || 0) > 0 && (
+          <View style={styles.ratingBadge}>
+            <Text style={styles.ratingText}>★ {product.artisanRating.toFixed(1)}</Text>
+          </View>
+        )}
       </View>
       <View style={styles.info}>
         <Text style={[styles.name, { color: colors.onBackground }]} numberOfLines={2}>

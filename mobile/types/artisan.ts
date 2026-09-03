@@ -9,7 +9,7 @@ export interface Artisan {
   language: string;
   bio: string;
   totalProducts: number;
-  rating: number;
+  rating: number | null;
   reviewsCount: number;
   storeVerified: boolean;
   avatar?: string;

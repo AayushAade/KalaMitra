@@ -18,7 +18,8 @@ const PRODUCT_SELECT_QUERY = `
   created_at,
   artisan_profiles:artisan_id (
     shop_name,
-    owner_name
+    owner_name,
+    rating
   ),
   product_images (
     original_url,
@@ -69,6 +70,8 @@ const mapProductRowToProduct = (row: any): Product => {
     voiceTranscript: enTrans?.voice_transcript || hiTrans?.voice_transcript || undefined,
     tags: row.product_tags?.map((t: any) => t.tag_name) || [],
     createdAt: row.created_at,
+    artisanRating: artisanInfo?.rating !== null && artisanInfo?.rating !== undefined ? Number(artisanInfo.rating) : null,
+    artisanRatingCount: artisanInfo?.rating_count !== null && artisanInfo?.rating_count !== undefined ? Number(artisanInfo.rating_count) : 0,
   };
 };
 
