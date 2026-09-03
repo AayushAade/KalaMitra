@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, View, Text, TextInput, ScrollView, Platform, KeyboardAvoidingView, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Colors, Spacing, BorderRadius, Shadows } from '../../constants/theme';
 import { useTheme } from '../../context/ThemeContext';
@@ -55,6 +55,7 @@ export default function BuyerInquiryScreen() {
       router.replace(`/chat/${createdInquiry.id}` as any);
     } catch (err: any) {
       console.error('[BuyerInquiry] Submission failed:', err);
+      Alert.alert('Inquiry Failed', err.message || 'Unable to submit bulk inquiry. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

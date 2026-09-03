@@ -99,62 +99,75 @@ export const inquiryService = {
     productImage?: string;
     buyerName: string;
     buyerType?: string;
+    buyerLocation?: string;
     quantity?: number;
     expectedDelivery?: string;
     message: string;
   }): Promise<Inquiry> => {
-    console.log(`[InquiryService] Creating new inquiry proposal:`, inquiryData);
-
-    let savedId = `inq-${Date.now()}`;
+    let savedId = '';
     try {
-      const { data: authData } = await supabase.auth.getUser();
+      const { data: authData, error: authErr } = await supabase.auth.getUser();
       const userId = authData?.user?.id;
 
-      if (userId) {
-        // Ensure buyer profile exists
-        await supabase.from('buyer_profiles').upsert({
-          id: userId,
-          company_name: inquiryData.buyerName || 'Verified Buyer',
-          business_type: inquiryData.buyerType || 'Wholesale Buyer',
-          location: 'India'
-        }, { onConflict: 'id' });
+      if (!userId || authErr) {
+        throw new Error('Authentication required to submit a bulk inquiry. Please sign in.');
+      }
 
-        const { data: newRow, error: inqErr } = await supabase
-          .from('inquiries')
+      // 1. Ensure buyer profile exists for this authenticated user ID
+      const { error: bpErr } = await supabase
+        .from('buyer_profiles')
+        .upsert(
+          {
+            id: userId,
+            company_name: inquiryData.buyerName || 'Verified Buyer',
+            business_type: inquiryData.buyerType || 'Wholesale Buyer',
+            location: inquiryData.buyerLocation || 'India',
+          },
+          { onConflict: 'id' }
+        );
+
+      if (bpErr) {
+        console.warn('[InquiryService] Note on buyer_profiles upsert:', bpErr.message);
+      }
+
+      // 2. Insert core inquiry record into public.inquiries
+      const { data: newRow, error: inqErr } = await supabase
+        .from('inquiries')
+        .insert({
+          buyer_id: userId,
+          product_id: inquiryData.productId,
+          quantity: inquiryData.quantity || 1,
+          expected_delivery: inquiryData.expectedDelivery || null,
+          status: 'New',
+        })
+        .select()
+        .single();
+
+      if (inqErr || !newRow) {
+        console.error('[InquiryService] Error inserting inquiry:', inqErr);
+        throw new Error(`Failed to submit inquiry: ${inqErr?.message || 'Database insert error'}`);
+      }
+
+      savedId = newRow.id;
+
+      // 3. Insert initial message into public.messages
+      if (inquiryData.message && inquiryData.message.trim()) {
+        const { error: msgErr } = await supabase
+          .from('messages')
           .insert({
-            buyer_id: userId,
-            product_id: inquiryData.productId,
-            quantity: inquiryData.quantity || 1,
-            expected_delivery: inquiryData.expectedDelivery || null,
-            status: 'New'
-          })
-          .select()
-          .single();
+            inquiry_id: newRow.id,
+            sender_id: userId,
+            sender_role: 'Buyer',
+            text: inquiryData.message.trim(),
+          });
 
-        if (inqErr) {
-          console.error('[InquiryService] Error inserting inquiry:', inqErr.message);
-        } else if (newRow) {
-          savedId = newRow.id;
-
-          // Also insert initial message if present
-          if (inquiryData.message) {
-            const { error: msgErr } = await supabase
-              .from('messages')
-              .insert({
-                inquiry_id: newRow.id,
-                sender_id: userId,
-                sender_role: 'Buyer',
-                text: inquiryData.message
-              });
-
-            if (msgErr) {
-              console.warn('[InquiryService] Failed to insert initial message:', msgErr.message);
-            }
-          }
+        if (msgErr) {
+          console.warn('[InquiryService] Non-fatal error inserting initial chat message:', msgErr.message);
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('[InquiryService] Exception during inquiry creation:', err);
+      throw err;
     }
 
     const newInquiry: Inquiry = {
@@ -164,13 +177,13 @@ export const inquiryService = {
       productPrice: inquiryData.productPrice,
       productImage: inquiryData.productImage,
       buyerName: inquiryData.buyerName,
-      buyerType: inquiryData.buyerType,
-      buyerLocation: 'India',
+      buyerType: inquiryData.buyerType || 'Wholesale Buyer',
+      buyerLocation: inquiryData.buyerLocation || 'India',
       quantity: inquiryData.quantity,
       expectedDelivery: inquiryData.expectedDelivery,
       message: inquiryData.message,
       status: 'New',
-      date: 'Just Now'
+      date: 'Just Now',
     };
 
     inMemoryInquiries = [newInquiry, ...inMemoryInquiries.filter(i => i.id !== newInquiry.id)];

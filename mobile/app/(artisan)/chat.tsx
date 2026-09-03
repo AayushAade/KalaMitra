@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, RefreshControl, Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -15,6 +15,10 @@ export default function ArtisanChatScreen() {
   const { colors, isDarkMode } = useTheme();
   const { inquiries, messagesMap, refreshProducts, isLoading } = useProductCatalog();
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    refreshProducts();
+  }, [refreshProducts]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);

@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { StyleSheet, View, Text, FlatList, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { Colors, Spacing } from '../../constants/theme';
@@ -15,6 +15,10 @@ export default function ArtisanInquiriesScreen() {
   const { colors } = useTheme();
   const { inquiries, refreshProducts, isLoading } = useProductCatalog();
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    refreshProducts();
+  }, [refreshProducts]);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
