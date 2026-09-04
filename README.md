@@ -2,7 +2,7 @@
 
 AI-powered digital business manager for marginalized artisans.
 
-## SIH 2026
+
 
 AI-Driven Market Linkage and Smart Cataloging Mobile Application for Marginalized Artisans.
 
