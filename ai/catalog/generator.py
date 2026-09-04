@@ -15,7 +15,7 @@ class CatalogGenerator:
         if not api_key:
             raise RuntimeError("GEMINI_API_KEY not found.")
 
-        self.client = genai.Client(api_key=api_key)
+        self.client = genai.Client(api_key=api_key, vertexai=False)
 
     def generate(self, transcript: str) -> dict:
 

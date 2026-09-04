@@ -58,7 +58,7 @@ class VoiceService:
     def _get_client(self) -> genai.Client:
         if not self.api_key:
             raise RuntimeError("GEMINI_API_KEY is required for voice transcription and catalog extraction.")
-        return genai.Client(api_key=self.api_key)
+        return genai.Client(api_key=self.api_key, vertexai=False)
 
     def process_audio(self, audio_bytes: bytes, filename: str = "audio.wav") -> VoiceTranscribeResponse:
         """Uploads audio bytes to Gemini and extracts speech transcript + product metadata."""

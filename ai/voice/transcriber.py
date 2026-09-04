@@ -16,7 +16,7 @@ class VoiceTranscriber:
                 "GEMINI_API_KEY not found."
             )
 
-        self.client = genai.Client(api_key=api_key)
+        self.client = genai.Client(api_key=api_key, vertexai=False)
 
     def transcribe(self, audio_path: str) -> str:
 

@@ -51,96 +51,88 @@ export const imageService = {
     console.log(`[ImageService] Target API: /api/v1/studio/enhance`);
     console.log(`[ImageService] ========================================`);
 
-    const formData = new FormData();
+    const createFormData = async (): Promise<FormData> => {
+      const fd = new FormData();
 
-    // 1. Prepare image payload based on URI scheme and platform
-    if (uriScheme === 'remote_http') {
-      // Remote image URL: fetch the image bytes
-      try {
-        console.log(`[ImageService] Downloading remote image asset for enhancement...`);
+      if (uriScheme === 'remote_http') {
         const fetchRes = await fetch(imageUri);
         if (!fetchRes.ok) {
           throw new Error(`Failed to download remote preset image (HTTP ${fetchRes.status})`);
         }
         const blob = await fetchRes.blob();
-        console.log(`[ImageService] Downloaded remote image blob: ${blob.size} bytes, type: ${blob.type}`);
         const mimeType = blob.type || 'image/jpeg';
         const ext = mimeType.includes('png') ? 'png' : mimeType.includes('webp') ? 'webp' : 'jpg';
 
         if (Platform.OS === 'web') {
-          formData.append('image', blob, `product.${ext}`);
+          fd.append('image', blob, `product.${ext}`);
         } else {
-          // Native Android/iOS: convert blob to Data URI so React Native FormData serializes the multipart file correctly
           const dataUri = await blobToDataUri(blob);
-          formData.append('image', {
+          fd.append('image', {
             uri: dataUri,
             name: `product.${ext}`,
             type: mimeType,
           } as any);
         }
-      } catch (err: any) {
-        console.error('[ImageService] Error processing remote image:', err);
-        throw new Error(`Unable to fetch source image: ${err.message || err}`);
-      }
-    } else if (imageUri.startsWith('data:')) {
-      // Data URI
-      const match = /^data:(image\/\w+);base64,/.exec(imageUri);
-      const mimeType = match ? match[1] : 'image/jpeg';
-      const ext = mimeType.includes('png') ? 'png' : 'jpg';
+      } else if (imageUri.startsWith('data:')) {
+        const match = /^data:(image\/\w+);base64,/.exec(imageUri);
+        const mimeType = match ? match[1] : 'image/jpeg';
+        const ext = mimeType.includes('png') ? 'png' : 'jpg';
 
-      if (Platform.OS === 'web') {
-        const fetchRes = await fetch(imageUri);
-        const blob = await fetchRes.blob();
-        formData.append('image', blob, `product.${ext}`);
+        if (Platform.OS === 'web') {
+          const fetchRes = await fetch(imageUri);
+          const blob = await fetchRes.blob();
+          fd.append('image', blob, `product.${ext}`);
+        } else {
+          fd.append('image', {
+            uri: imageUri,
+            name: `product.${ext}`,
+            type: mimeType,
+          } as any);
+        }
       } else {
-        formData.append('image', {
-          uri: imageUri,
-          name: `product.${ext}`,
-          type: mimeType,
-        } as any);
+        const filename = imageUri.split('/').pop() || 'product.jpg';
+        const match = /\.(\w+)$/.exec(filename);
+        const mimeType = match ? `image/${match[1].toLowerCase()}` : 'image/jpeg';
+
+        if (Platform.OS === 'web') {
+          const fetchRes = await fetch(imageUri);
+          const blob = await fetchRes.blob();
+          fd.append('image', blob, filename);
+        } else {
+          fd.append('image', {
+            uri: imageUri,
+            name: filename,
+            type: mimeType,
+          } as any);
+        }
       }
-    } else {
-      // Local device file URI (file://, content://, etc.)
-      const filename = imageUri.split('/').pop() || 'product.jpg';
-      const match = /\.(\w+)$/.exec(filename);
-      const mimeType = match ? `image/${match[1].toLowerCase()}` : 'image/jpeg';
 
-      if (Platform.OS === 'web') {
-        const fetchRes = await fetch(imageUri);
-        const blob = await fetchRes.blob();
-        formData.append('image', blob, filename);
-      } else {
-        formData.append('image', {
-          uri: imageUri,
-          name: filename,
-          type: mimeType,
-        } as any);
+      const category = options?.productCategory || options?.category || 'GENERIC_HANDICRAFT';
+      const style = options?.style || 'CLEAN_ECOMMERCE';
+
+      fd.append('productCategory', category);
+      fd.append('category', category);
+      fd.append('style', style);
+      if (options?.productName) {
+        fd.append('productName', options.productName);
       }
-    }
+      if (options?.productDescription) {
+        fd.append('productDescription', options.productDescription);
+      }
 
-    // 2. Set enhancement parameters matching product studio API
-    const category = options?.productCategory || options?.category || 'GENERIC_HANDICRAFT';
-    const style = options?.style || 'CLEAN_ECOMMERCE';
+      fd.append('preset', options?.preset || 'warm_neutral');
+      fd.append('aspect_ratio', options?.aspect_ratio || 'square_1x1');
+      fd.append('add_shadow', String(options?.add_shadow !== undefined ? options.add_shadow : true));
+      fd.append('quality_mode', options?.quality_mode || 'auto');
+      fd.append('upscale_factor', String(options?.upscale_factor || 2));
 
-    formData.append('productCategory', category);
-    formData.append('category', category);
-    formData.append('style', style);
-    if (options?.productName) {
-      formData.append('productName', options.productName);
-    }
-    if (options?.productDescription) {
-      formData.append('productDescription', options.productDescription);
-    }
+      return fd;
+    };
 
-    formData.append('preset', options?.preset || 'warm_neutral');
-    formData.append('aspect_ratio', options?.aspect_ratio || 'square_1x1');
-    formData.append('add_shadow', String(options?.add_shadow !== undefined ? options.add_shadow : true));
-    formData.append('quality_mode', options?.quality_mode || 'auto');
-    formData.append('upscale_factor', String(options?.upscale_factor || 2));
-
-    // 3. Send request to FastAPI endpoint (/api/products/image-enhance with fallback to /api/v1/studio/enhance)
+    // 2. Send request to FastAPI endpoint (/api/products/image-enhance with fallback to /api/v1/studio/enhance)
     try {
-      const response = await api.post<ProductImageEnhanceResponse>('/api/products/image-enhance', formData);
+      const primaryFormData = await createFormData();
+      const response = await api.post<ProductImageEnhanceResponse>('/api/products/image-enhance', primaryFormData);
       if (response.success && response.imageUrl) {
         return {
           originalUrl: response.originalImageUrl || imageUri,
@@ -156,19 +148,25 @@ export const imageService = {
       }
     } catch (apiErr: any) {
       console.warn('[ImageService] /api/products/image-enhance returned error, attempting /api/v1/studio/enhance fallback:', apiErr);
-      const studioRes = await api.post<StudioEnhanceResponse>('/api/v1/studio/enhance', formData);
-      if (studioRes.success && studioRes.enhanced?.secure_url) {
-        return {
-          originalUrl: studioRes.original?.secure_url || imageUri,
-          enhancedUrl: studioRes.enhanced.secure_url,
-          cutoutUrl: studioRes.cutout?.secure_url,
-          backgroundRemoved: true,
-          lightingAdjusted: true,
-          provider: studioRes.provider,
-          metadata: studioRes.metadata || {},
-        };
+      try {
+        const fallbackFormData = await createFormData();
+        const studioRes = await api.post<StudioEnhanceResponse>('/api/v1/studio/enhance', fallbackFormData);
+        if (studioRes.success && studioRes.enhanced?.secure_url) {
+          return {
+            originalUrl: studioRes.original?.secure_url || imageUri,
+            enhancedUrl: studioRes.enhanced.secure_url,
+            cutoutUrl: studioRes.cutout?.secure_url,
+            backgroundRemoved: true,
+            lightingAdjusted: true,
+            provider: studioRes.provider,
+            metadata: studioRes.metadata || {},
+          };
+        }
+        throw new Error(studioRes.error || apiErr.message || 'AI vision enhancement failed.');
+      } catch (fallbackErr: any) {
+        console.error('[ImageService] Both enhancement endpoints failed:', fallbackErr);
+        throw fallbackErr;
       }
-      throw new Error(studioRes.error || apiErr.message || 'AI vision enhancement failed.');
     }
 
     throw new Error('AI vision enhancement failed to produce an enhanced asset.');

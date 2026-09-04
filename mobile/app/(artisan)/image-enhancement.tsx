@@ -64,8 +64,10 @@ export default function ImageEnhancementScreen() {
 
   const triggerEnhancement = useCallback(
     async (styleToUse?: string) => {
-      if (!productData.image) {
-        setError('No product photo found. Please go back and select a photo.');
+      if (!productData.image || loading) {
+        if (!productData.image) {
+          setError('No product photo found. Please go back and select a photo.');
+        }
         return;
       }
 
