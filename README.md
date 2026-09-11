@@ -458,7 +458,7 @@ Ensure you have the following installed on your development machine:
 
 ```bash
 # Navigate to repository root
-cd DIY-Nest
+cd KalaMitra
 
 # Create and activate a Python virtual environment
 python3 -m venv venv
