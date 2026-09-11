@@ -125,7 +125,7 @@ export default function BuyerProfileScreen() {
           <View style={[styles.divider, { backgroundColor: colors.borderLight }]} />
           <Pressable
             style={({ pressed }) => [styles.settingRow, pressed && styles.rowPressed]}
-            onPress={() => Alert.alert('Buyer Protection', 'All orders placed through DIY-Nest are backed by authentic artisan verification and escrow protection.')}
+            onPress={() => Alert.alert('Buyer Protection', 'All orders placed through KalaMitra are backed by authentic artisan verification and escrow protection.')}
           >
             <Ionicons name="shield-checkmark-outline" size={20} color={colors.textMuted} />
             <Text style={[styles.settingText, { color: colors.onBackground }]}>Buyer Protection & Terms</Text>

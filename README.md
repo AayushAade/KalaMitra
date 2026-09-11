@@ -1,6 +1,6 @@
 # KalaMitra
 
-> **AI-Powered Digital Business Assistant & Fair-Trade Marketplace for Traditional Indian Artisans**
+> **AI-Assisted Digital Marketplace and Business Toolkit for Traditional Indian Artisans**
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=flat-square&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org)
@@ -378,7 +378,7 @@ erDiagram
 - **Zero Hardcoded Secrets**: All credentials, private tokens, and connection strings are managed strictly via environment variables and excluded from version control.
 - **Row Level Security (RLS)**: Enforced directly at the PostgreSQL layer, preventing cross-tenant data leakage even if client queries are tampered with.
 - **Database Role vs. Active UI Portal**:
-  - **Authoritative Database Role (`users.role`)**: Immutable account role (`'artisan'` or `'buyer'`) stored in PostgreSQL, governing all RLS authorization policies and data ownership.
+  - **Authoritative Database Role (`users.role`)**: Primary account role (`'artisan'` or `'buyer'`) stored in PostgreSQL, governing all RLS authorization policies and data ownership.
   - **Client Experience Portal (`activePortal`)**: In-memory navigation state in the mobile application allowing registered artisans to preview the buyer marketplace experience without changing their database role or account security permissions.
 - **API Request Validation**: All backend endpoints validate incoming payloads using strict Pydantic v2 schemas to guard against malformed data.
 - **CORS Restrictions**: Configurable CORS origins preventing unauthorized cross-origin browser requests.
@@ -578,22 +578,6 @@ Run ESLint across the React Native TypeScript codebase:
 cd mobile
 npm run lint
 ```
-
----
-
-## 📸 Screenshots & Product Preview
-
-<!--
-Place screenshots in `docs/screenshots/` and link them here.
--->
-
-| Artisan Dashboard | Voice Cataloging | AI Studio Enhancement | Fair Price Breakdown |
-| :---: | :---: | :---: | :---: |
-| *(Placeholder: Artisan Home & Catalog)* | *(Placeholder: Spoken Audio Intake)* | *(Placeholder: Before & After Studio Staging)* | *(Placeholder: Cost Breakdown & Fair Margin)* |
-
-| Buyer Marketplace | Product Details View | Direct Inquiry Chat | Artisan Profile & Reviews |
-| :---: | :---: | :---: | :---: |
-| *(Placeholder: Marketplace Browse)* | *(Placeholder: Craft Details & Specs)* | *(Placeholder: In-App Inquiry Chat)* | *(Placeholder: Artisan Story & Ratings)* |
 
 ---
 
